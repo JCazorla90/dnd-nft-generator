@@ -1,0 +1,16 @@
+{
+  "name": "@jcazorla90/dnd-nft-generator",
+  "version": "1.0.0",
+  "description": "Generador de personajes D&D con NFT/IPFS",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JCazorla90/dnd-nft-generator.git"
+  },
+  "keywords": ["dnd", "nft", "ipfs", "blockchain", "character-generator"],
+  "author": "JCazorla90",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
+}
