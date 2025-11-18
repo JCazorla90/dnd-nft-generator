@@ -4,14 +4,18 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
+    "test:e2e": "hardhat test test/integration/E2E.test.js",
     "test:gas": "REPORT_GAS=true hardhat test",
+    "dashboard": "node scripts/generate-dashboard.js"
     "coverage": "hardhat coverage",
+    "security": "slither .",
     "deploy:sepolia": "hardhat run scripts/deploy.js --network sepolia",
     "deploy:mumbai": "hardhat run scripts/deploy.js --network mumbai",
     "verify:sepolia": "hardhat run scripts/verify.js --network sepolia",
     "verify:mumbai": "hardhat run scripts/verify.js --network mumbai",
     "test:sepolia": "hardhat run scripts/test-testnet.js --network sepolia",
     "test:mumbai": "hardhat run scripts/test-testnet.js --network mumbai"
+    "full-test": "npm run test && npm run test:e2e && npm run test:gas && npm run dashboard"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^3.0.0",
