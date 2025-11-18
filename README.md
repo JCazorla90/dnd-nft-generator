@@ -1,5 +1,11 @@
 # 🐲 D&D NFT Character Forge 🛡️
 
+
+![Release](https://github.com/JCazorla90/dnd-nft-generator/workflows/Release/badge.svg)
+![Docker](https://github.com/JCazorla90/dnd-nft-generator/workflows/Docker%20Build%20%26%20Push/badge.svg)
+![Version](https://img.shields.io/github/v/release/JCazorla90/dnd-nft-generator?style=flat-square)
+![License](https://img.shields.io/github/license/JCazorla90/dnd-nft-generator?style=flat-square)
+
 ¡Saludos, aventurero!  
 Bienvenido a la **Forja definitiva de Personajes NFT para Dragones y Mazmorras**, donde la fantasía se une a la blockchain y el código es la mejor arma mágica.
 
@@ -55,10 +61,4 @@ NFT Smart Contract ⛓️ ◀─── IPFS (Imágenes + Datos)
 git clone https://github.com/JCazorla90/dnd-nft-generator.git
 cd dnd-nft-generator
 
-# 🐲 D&D NFT Character Forge 🛡️
 
-
-![Release](https://github.com/JCazorla90/dnd-nft-generator/workflows/Release/badge.svg)
-![Docker](https://github.com/JCazorla90/dnd-nft-generator/workflows/Docker%20Build%20%26%20Push/badge.svg)
-![Version](https://img.shields.io/github/v/release/JCazorla90/dnd-nft-generator?style=flat-square)
-![License](https://img.shields.io/github/license/JCazorla90/dnd-nft-generator?style=flat-square)
