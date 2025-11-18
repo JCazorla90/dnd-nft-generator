@@ -6,18 +6,6 @@
 ![Version](https://img.shields.io/github/v/release/JCazorla90/dnd-nft-generator?style=flat-square)
 ![License](https://img.shields.io/github/license/JCazorla90/dnd-nft-generator?style=flat-square)
 
-## 🧪 Testing & Quality
-
-- ✅ Unit tests (100% coverage)
-- ✅ E2E integration tests
-- ✅ Gas cost analysis
-- ✅ Security audits (Slither + Mythril)
-- ✅ Automated testnet deployment
-- ✅ Real-time gas monitoring
-
-## 📊 Metrics
-
-[View Live Gas Dashboard](https://jcazorla90.github.io/dnd-nft-generator/gas-dashboard.html)
 
 ¡Saludos, aventurero!  
 Bienvenido a la **Forja definitiva de Personajes NFT para Dragones y Mazmorras**, donde la fantasía se une a la blockchain y el código es la mejor arma mágica.
@@ -67,6 +55,20 @@ NFT Smart Contract ⛓️ ◀─── IPFS (Imágenes + Datos)
 
 ---
 
+## 🧪 Testing & Quality
+
+- ✅ Unit tests (100% coverage)
+- ✅ E2E integration tests
+- ✅ Gas cost analysis
+- ✅ Security audits (Slither + Mythril)
+- ✅ Automated testnet deployment
+- ✅ Real-time gas monitoring
+
+## 📊 Metrics
+
+[View Live Gas Dashboard](https://jcazorla90.github.io/dnd-nft-generator/gas-dashboard.html)
+
+
 ## 🐉 Despliegue: ¡invoca el poder!
 
 ### 1. Clona la forja digital
@@ -86,5 +88,8 @@ TESTNET_PRIVATE_KEY=tu_private_key_de_testnet
 
 # Opcional
 COINMARKETCAP_API_KEY=para_gas_reporter
+
+
+
 
 
