@@ -1,0 +1,46 @@
+name: Publish Gas Dashboard
+
+on:
+  push:
+    branches: [ main ]
+  workflow_run:
+    workflows: ["Complete CI/CD Pipeline"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  publish-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        working-directory: ./smart-contract
+        run: npm ci
+      
+      - name: Run gas analysis
+        working-directory: ./smart-contract
+        run: |
+          npm run test:gas
+          node scripts/generate-dashboard.js
+      
+      - name: Create public directory
+        run: |
+          mkdir -p public
+          cp smart-contract/gas-dashboard.html public/index.html
+          cp smart-contract/GAS_REPORT.md public/
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
