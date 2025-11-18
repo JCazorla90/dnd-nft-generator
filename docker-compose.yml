@@ -8,6 +8,11 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=production
+      - IPFS_PROJECT_ID=${IPFS_PROJECT_ID}
+      - IPFS_PROJECT_SECRET=${IPFS_PROJECT_SECRET}
+      - REPLICATE_TOKEN=${REPLICATE_TOKEN}
+    env_file:
+      - .env
     networks:
       - dnd-network
 
