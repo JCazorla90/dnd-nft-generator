@@ -6,9 +6,7 @@
 ![Version](https://img.shields.io/github/v/release/JCazorla90/dnd-nft-generator?style=flat-square)
 ![License](https://img.shields.io/github/license/JCazorla90/dnd-nft-generator?style=flat-square)
 
-## 📊 Live Dashboard
 
-**[🔥 View Live Gas Dashboard](https://jcazorla90.github.io/dnd-nft-generator/)** ⬅️ Click aquí
 
 ---
 ¡Saludos, aventurero!  
