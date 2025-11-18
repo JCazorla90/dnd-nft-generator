@@ -55,3 +55,6 @@ NFT Smart Contract ⛓️ ◀─── IPFS (Imágenes + Datos)
 git clone https://github.com/JCazorla90/dnd-nft-generator.git
 cd dnd-nft-generator
 
+![Version](https://img.shields.io/github/v/release/JCazorla90/dnd-nft-generator?style=for-the-badge)
+![License](https://img.shields.io/github/license/JCazorla90/dnd-nft-generator?style=for-the-badge)
+![Docker](https://img.shields.io/badge/docker-ready-blue?style=for-the-badge&logo=docker)
