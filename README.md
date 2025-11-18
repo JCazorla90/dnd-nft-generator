@@ -21,13 +21,14 @@ Imagina lanzar los dados y ver cómo surge ante ti un héroe, pícaro o mago, li
 
 ## 🧙‍♂️ Magia del Código: arquitectura arcana
 
-Jugador 👨‍💻
-│
-▼
-Frontend React 🧝 ────▶ Backend Node.js/Express 🧙
-│ │
-▼ ▼
-NFT Smart Contract ⛓️───◀ IPFS (Imágenes + Datos)
+
+Jugador 👨‍💻  
+ │  
+ ▼  
+Frontend React 🧝 ────▶ Backend Node.js/Express 🧙  
+ │               │  
+ ▼               ▼  
+NFT Smart Contract ⛓️ ◀─── IPFS (Imágenes + Datos)
 
 
 ### Componentes principales
