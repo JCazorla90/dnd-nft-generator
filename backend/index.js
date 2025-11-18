@@ -1,35 +1,62 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { create } = require('ipfs-http-client');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-const ipfs = create({
-  host: 'ipfs.infura.io',
-  port: 5001,
-  protocol: 'https',
-  headers: { authorization: `Basic ${Buffer.from(process.env.IPFS_PROJECT_ID + ":" + process.env.IPFS_PROJECT_SECRET).toString('base64')}` }
+// Datos de D&D
+const races = ["Elfo", "Enano", "Humano", "Orco", "Mediano", "Tiefling"];
+const classes = ["Guerrero", "Mago", "Bardo", "Pícaro", "Clérigo", "Paladín"];
+const backgrounds = ["Noble", "Criminal", "Erudito", "Soldado", "Artista"];
+const alignments = ["Legal Bueno", "Neutral", "Caótico Neutral", "Legal Malvado"];
+
+function randomFromArray(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generateStats() {
+  return {
+    fuerza: Math.floor(Math.random() * 15) + 6,
+    destreza: Math.floor(Math.random() * 15) + 6,
+    constitución: Math.floor(Math.random() * 15) + 6,
+    inteligencia: Math.floor(Math.random() * 15) + 6,
+    sabiduría: Math.floor(Math.random() * 15) + 6,
+    carisma: Math.floor(Math.random() * 15) + 6
+  };
+}
+
+// Endpoint: Generar personaje aleatorio
+app.get('/api/generate-character', (req, res) => {
+  const character = {
+    name: `${randomFromArray(races)} ${randomFromArray(classes)}`,
+    race: randomFromArray(races),
+    class: randomFromArray(classes),
+    background: randomFromArray(backgrounds),
+    alignment: randomFromArray(alignments),
+    level: 1,
+    stats: generateStats(),
+    hp: Math.floor(Math.random() * 10) + 10
+  };
+  res.json(character);
 });
 
-app.post('/api/create-nft', async (req, res) => {
-  try {
-    const character = req.body;
-    const metadata = {
-      name: `${character.race} ${character.class}`,
-      description: "Personaje D&D generado con NFT.",
-      attributes: [
-        { trait_type: "Raza", value: character.race },
-        { trait_type: "Clase", value: character.class },
-      ]
-    };
-    const { path } = await ipfs.add(JSON.stringify(metadata));
-    res.json({ ipfsUrl: `https://ipfs.io/ipfs/${path}` });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+// Endpoint: Crear personaje personalizado
+app.post('/api/create-character', (req, res) => {
+  const { race, class: charClass } = req.body;
+  const character = {
+    name: `${race || randomFromArray(races)} ${charClass || randomFromArray(classes)}`,
+    race: race || randomFromArray(races),
+    class: charClass || randomFromArray(classes),
+    background: randomFromArray(backgrounds),
+    alignment: randomFromArray(alignments),
+    level: 1,
+    stats: generateStats(),
+    hp: Math.floor(Math.random() * 10) + 10
+  };
+  res.json(character);
 });
 
-app.listen(3000, () => console.log("Backend listo en puerto 3000."));
+app.listen(3000, () => {
+  console.log('🧙 Backend D&D listo en puerto 3000');
+});
