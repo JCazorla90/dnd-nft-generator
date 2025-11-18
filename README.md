@@ -55,6 +55,10 @@ NFT Smart Contract ⛓️ ◀─── IPFS (Imágenes + Datos)
 git clone https://github.com/JCazorla90/dnd-nft-generator.git
 cd dnd-nft-generator
 
-![Version](https://img.shields.io/github/v/release/JCazorla90/dnd-nft-generator?style=for-the-badge)
-![License](https://img.shields.io/github/license/JCazorla90/dnd-nft-generator?style=for-the-badge)
-![Docker](https://img.shields.io/badge/docker-ready-blue?style=for-the-badge&logo=docker)
+# 🐲 D&D NFT Character Forge 🛡️
+
+![CI Status](https://github.com/JCazorla90/dnd-nft-generator/workflows/CI%20-%20Test%20%26%20Build/badge.svg)
+![Release](https://github.com/JCazorla90/dnd-nft-generator/workflows/Release/badge.svg)
+![Docker](https://github.com/JCazorla90/dnd-nft-generator/workflows/Docker%20Build%20%26%20Push/badge.svg)
+![Version](https://img.shields.io/github/v/release/JCazorla90/dnd-nft-generator?style=flat-square)
+![License](https://img.shields.io/github/license/JCazorla90/dnd-nft-generator?style=flat-square)
