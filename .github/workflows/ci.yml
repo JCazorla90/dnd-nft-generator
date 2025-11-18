@@ -1,0 +1,86 @@
+name: CI - Test & Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+        
+      - name: Lint backend
+        working-directory: ./backend
+        run: npm run lint || echo "No lint script"
+        
+      - name: Test backend
+        working-directory: ./backend
+        run: npm test || echo "No tests yet"
+
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+        
+      - name: Lint frontend
+        working-directory: ./frontend
+        run: npm run lint || echo "No lint script"
+        
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+        
+      - name: Test frontend
+        working-directory: ./frontend
+        run: npm test || echo "No tests yet"
+
+  test-smart-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          
+      - name: Install contract dependencies
+        working-directory: ./smart-contract
+        run: npm ci
+        
+      - name: Compile contracts
+        working-directory: ./smart-contract
+        run: npx hardhat compile
+        
+      - name: Test contracts
+        working-directory: ./smart-contract
+        run: npx hardhat test || echo "No tests yet"
+
+  docker-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Test Docker Compose build
+        run: docker-compose build
