@@ -1,0 +1,171 @@
+name: Testnet Deploy & Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'smart-contract/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'smart-contract/**'
+  workflow_dispatch:
+    inputs:
+      network:
+        description: 'Network to deploy (sepolia/mumbai/goerli)'
+        required: true
+        default: 'sepolia'
+
+jobs:
+  test-local:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        working-directory: ./smart-contract
+        run: npm ci
+      
+      - name: Compile contracts
+        working-directory: ./smart-contract
+        run: npx hardhat compile
+      
+      - name: Run tests
+        working-directory: ./smart-contract
+        run: npx hardhat test
+      
+      - name: Generate coverage
+        working-directory: ./smart-contract
+        run: npx hardhat coverage
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./smart-contract/coverage/lcov.info
+          flags: smart-contracts
+
+  deploy-sepolia:
+    runs-on: ubuntu-latest
+    needs: test-local
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    environment: sepolia
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        working-directory: ./smart-contract
+        run: npm ci
+      
+      - name: Create .env file
+        working-directory: ./smart-contract
+        run: |
+          echo "SEPOLIA_RPC_URL=${{ secrets.SEPOLIA_RPC_URL }}" >> .env
+          echo "PRIVATE_KEY=${{ secrets.TESTNET_PRIVATE_KEY }}" >> .env
+          echo "ETHERSCAN_API_KEY=${{ secrets.ETHERSCAN_API_KEY }}" >> .env
+      
+      - name: Deploy to Sepolia
+        id: deploy
+        working-directory: ./smart-contract
+        run: |
+          OUTPUT=$(npx hardhat run scripts/deploy.js --network sepolia)
+          echo "$OUTPUT"
+          ADDRESS=$(echo "$OUTPUT" | grep -oP 'CharacterNFT desplegado en: \K0x[a-fA-F0-9]{40}')
+          echo "CONTRACT_ADDRESS=$ADDRESS" >> $GITHUB_OUTPUT
+          echo "CONTRACT_ADDRESS=$ADDRESS" >> .env
+      
+      - name: Wait for block confirmations
+        run: sleep 60
+      
+      - name: Verify contract
+        working-directory: ./smart-contract
+        run: npx hardhat run scripts/verify.js --network sepolia
+        continue-on-error: true
+      
+      - name: Test on Sepolia
+        working-directory: ./smart-contract
+        run: npx hardhat run scripts/test-testnet.js --network sepolia
+      
+      - name: Save deployment info
+        run: |
+          mkdir -p deployments
+          cat > deployments/sepolia.json <<EOF
+          {
+            "network": "sepolia",
+            "contractAddress": "${{ steps.deploy.outputs.CONTRACT_ADDRESS }}",
+            "deployedAt": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "deployer": "$(cd smart-contract && npx hardhat run --network sepolia scripts/get-deployer.js)",
+            "blockExplorer": "https://sepolia.etherscan.io/address/${{ steps.deploy.outputs.CONTRACT_ADDRESS }}"
+          }
+          EOF
+      
+      - name: Upload deployment artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: sepolia-deployment
+          path: deployments/sepolia.json
+      
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## 🎉 Deployment to Sepolia successful!\n\n` +
+                    `**Contract Address:** \`${{ steps.deploy.outputs.CONTRACT_ADDRESS }}\`\n` +
+                    `**Explorer:** https://sepolia.etherscan.io/address/${{ steps.deploy.outputs.CONTRACT_ADDRESS }}\n` +
+                    `**Network:** Sepolia Testnet`
+            })
+
+  deploy-mumbai:
+    runs-on: ubuntu-latest
+    needs: test-local
+    if: github.event.inputs.network == 'mumbai'
+    environment: mumbai
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install dependencies
+        working-directory: ./smart-contract
+        run: npm ci
+      
+      - name: Create .env file
+        working-directory: ./smart-contract
+        run: |
+          echo "MUMBAI_RPC_URL=${{ secrets.MUMBAI_RPC_URL }}" >> .env
+          echo "PRIVATE_KEY=${{ secrets.TESTNET_PRIVATE_KEY }}" >> .env
+          echo "POLYGONSCAN_API_KEY=${{ secrets.POLYGONSCAN_API_KEY }}" >> .env
+      
+      - name: Deploy to Mumbai
+        id: deploy
+        working-directory: ./smart-contract
+        run: |
+          OUTPUT=$(npx hardhat run scripts/deploy.js --network mumbai)
+          echo "$OUTPUT"
+          ADDRESS=$(echo "$OUTPUT" | grep -oP 'CharacterNFT desplegado en: \K0x[a-fA-F0-9]{40}')
+          echo "CONTRACT_ADDRESS=$ADDRESS" >> $GITHUB_OUTPUT
+          echo "CONTRACT_ADDRESS=$ADDRESS" >> .env
+      
+      - name: Verify and test
+        working-directory: ./smart-contract
+        run: |
+          sleep 60
+          npx hardhat run scripts/verify.js --network mumbai || true
+          npx hardhat run scripts/test-testnet.js --network mumbai
