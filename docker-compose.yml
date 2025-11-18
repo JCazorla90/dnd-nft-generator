@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: dnd-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+    networks:
+      - dnd-network
+
+  frontend:
+    build: ./frontend
+    container_name: dnd-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - dnd-network
+
+networks:
+  dnd-network:
+    driver: bridge
