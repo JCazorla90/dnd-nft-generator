@@ -60,5 +60,18 @@ NFT Smart Contract ⛓️ ◀─── IPFS (Imágenes + Datos)
 
 git clone https://github.com/JCazorla90/dnd-nft-generator.git
 cd dnd-nft-generator
+# Sepolia
+SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/TU_INFURA_KEY
+ETHERSCAN_API_KEY=tu_etherscan_api_key
+
+# Mumbai (Polygon)
+MUMBAI_RPC_URL=https://polygon-mumbai.infura.io/v3/TU_INFURA_KEY
+POLYGONSCAN_API_KEY=tu_polygonscan_api_key
+
+# Wallet (usa una wallet SOLO para testnet)
+TESTNET_PRIVATE_KEY=tu_private_key_de_testnet
+
+# Opcional
+COINMARKETCAP_API_KEY=para_gas_reporter
 
 
