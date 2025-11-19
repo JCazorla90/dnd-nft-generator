@@ -858,6 +858,283 @@ async function generatePDF() {
   
   doc.save(`${currentCharacter.name.replace(/\s/g, '_')}.pdf`);
 }
+// ==========================================
+// GENERADOR DE BESTIAS Y ENEMIGOS
+// ==========================================
+let currentCreature = null;
+let currentEncounter = [];
+
+// Obtener criatura aleatoria
+function getRandomCreature(filters = {}) {
+  const creatures = Object.entries(DND_BESTIARY.creatures);
+  let filtered = creatures;
+  
+  if (filters.type) {
+    filtered = filtered.filter(([name, data]) => data.type === filters.type);
+  }
+  
+  if (filters.cr) {
+    filtered = filtered.filter(([name, data]) => data.cr === filters.cr);
+  }
+  
+  if (filters.environment) {
+    filtered = filtered.filter(([name, data]) => 
+      data.environment && data.environment.includes(filters.environment)
+    );
+  }
+  
+  if (filtered.length === 0) return null;
+  
+  const [name, data] = randomFromArray(filtered);
+  return { name, ...data };
+}
+
+// Generar criatura desde API oficial D&D 5e
+async function generateCreatureFromAPI(index = null) {
+  try {
+    // Si no hay índice, obtener uno aleatorio
+    if (!index) {
+      const listRes = await fetch('https://www.dnd5eapi.co/api/monsters');
+      const listData = await listRes.json();
+      const randomMonster = randomFromArray(listData.results);
+      index = randomMonster.index;
+    }
+    
+    // Obtener detalles completos
+    const res = await fetch(`https://www.dnd5eapi.co/api/monsters/${index}`);
+    const data = await res.json();
+    
+    return {
+      name: data.name,
+      type: data.type,
+      cr: data.challenge_rating,
+      size: data.size,
+      hp: `${data.hit_points} (${data.hit_dice})`,
+      ac: data.armor_class[0]?.value || 10,
+      speed: Object.entries(data.speed).map(([k, v]) => `${k} ${v}`).join(', '),
+      str: data.strength,
+      dex: data.dexterity,
+      con: data.constitution,
+      int: data.intelligence,
+      wis: data.wisdom,
+      cha: data.charisma,
+      skills: Object.entries(data.proficiencies)
+        .filter(([k, v]) => k.includes('skill'))
+        .map(([k, v]) => v.proficiency.name),
+      traits: data.special_abilities?.map(a => a.name) || [],
+      actions: data.actions?.map(a => `${a.name}: ${a.desc}`) || [],
+      legendaryActions: data.legendary_actions?.map(a => `${a.name}: ${a.desc}`) || [],
+      immunities: data.damage_immunities || [],
+      resistances: data.damage_resistances || [],
+      vulnerabilities: data.damage_vulnerabilities || [],
+      senses: data.senses,
+      languages: data.languages || "—",
+      xp: DND_BESTIARY.challengeRatings.find(cr => cr.cr == data.challenge_rating)?.xp || 0
+    };
+  } catch (error) {
+    console.error('Error obteniendo criatura de API:', error);
+    return getRandomCreature();
+  }
+}
+
+// Generar imagen IA para criatura
+async function fetchCreatureImage(creatureName, creatureType) {
+  const portraitImg = document.getElementById('creaturePortrait');
+  if (!portraitImg) return;
+  
+  portraitImg.src = "https://placehold.co/280x320/3e2723/ffd700?text=🐉+LOADING";
+  
+  const prompts = {
+    // Aberraciones
+    'Beholder': 'beholder floating eyeball tentacles dnd monster horror art, fantasy illustration',
+    'Mind Flayer': 'mind flayer illithid tentacle face purple robes, dark fantasy dnd',
+    
+    // Dragones
+    'Red Dragon': 'red dragon breathing fire scales wings, epic fantasy art by Todd Lockwood',
+    'Black Dragon': 'black dragon acidic swamp creature, dark fantasy dnd art',
+    'Ancient Dragon': 'ancient dragon enormous powerful majestic, legendary fantasy artwork',
+    
+    // No-muertos
+    'Vampire': 'vampire aristocrat fangs pale skin elegant, gothic fantasy art dnd',
+    'Lich': 'lich undead sorcerer phylactery glowing eyes, dark magic fantasy',
+    'Skeleton': 'skeleton warrior undead bones armor sword, fantasy dnd monster',
+    'Zombie': 'zombie undead rotting flesh horror, dark fantasy creature',
+    
+    // Demonios
+    'Balor': 'balor demon fire wings whip sword enormous, abyssal fantasy art',
+    'Demon': 'demon abyssal creature horns claws fire, dark fantasy dnd',
+    
+    // Gigantes
+    'Ogre': 'ogre brutal giant club primitive, fantasy monster art dnd',
+    'Troll': 'troll regenerating monster claws green skin, forest fantasy creature',
+    'Giant': 'giant enormous humanoid powerful, epic fantasy artwork',
+    
+    // Bestias
+    'Wolf': 'dire wolf predator fangs fur fierce, realistic fantasy beast',
+    'Bear': 'dire bear massive claws powerful, nature fantasy creature',
+    
+    // Humanoides
+    'Goblin': 'goblin sneaky green skin pointed ears, fantasy dnd monster',
+    'Orc': 'orc warrior tusks brutal armor, savage fantasy art',
+    
+    // Monstruosidades
+    'Hydra': 'hydra multiple heads serpent water, epic fantasy monster dnd',
+    'Chimera': 'chimera lion goat dragon hybrid, mythical fantasy creature'
+  };
+  
+  // Buscar prompt específico o genérico
+  let prompt = prompts[creatureName];
+  if (!prompt) {
+    const typePrompts = {
+      'Aberración': 'aberration horror creature tentacles eyes',
+      'Bestia': 'beast animal predator wild',
+      'Celestial': 'celestial angel divine wings light',
+      'Constructo': 'construct golem magical animated',
+      'Dragón': 'dragon scales wings fire breathing',
+      'Elemental': 'elemental magic fire water earth air',
+      'Feérico': 'fey fairy magical forest creature',
+      'Demonio': 'fiend demon devil horns',
+      'Gigante': 'giant enormous humanoid powerful',
+      'Humanoide': 'humanoid warrior tribal',
+      'Monstruosidad': 'monstrosity monster hybrid creature',
+      'Cieno': 'ooze slime amorphous blob',
+      'Planta': 'plant creature vine animated',
+      'No-muerto': 'undead zombie skeleton horror'
+    };
+    prompt = `${creatureName} ${typePrompts[creatureType] || 'fantasy monster'} dungeons and dragons art`;
+  }
+  
+  prompt += ' fantasy dnd monster manual art professional illustration';
+  
+  try {
+    const res = await fetch(`https://lexica.art/api/v1/search?q=${encodeURIComponent(prompt)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.images && data.images.length > 0) {
+        const idx = Math.floor(Math.random() * Math.min(data.images.length, 10));
+        portraitImg.src = data.images[idx].src;
+        console.log(`✅ Imagen de ${creatureName} cargada`);
+        return;
+      }
+    }
+  } catch(e) {
+    console.warn('Error cargando imagen de criatura');
+  }
+  
+  // Fallback
+  const monsterEmojis = {
+    'Dragón': '🐉',
+    'No-muerto': '💀',
+    'Demonio': '😈',
+    'Bestia': '🐺',
+    'Aberración': '👁️',
+    'Gigante': '🗿'
+  };
+  
+  const emoji = monsterEmojis[creatureType] || '👹';
+  portraitImg.src = `https://placehold.co/280x320/3e2723/ffd700?text=${encodeURIComponent(emoji + ' ' + creatureName)}`;
+}
+
+// Mostrar criatura en UI
+function displayCreature(creature) {
+  currentCreature = creature;
+  
+  document.getElementById('creatureName').textContent = creature.name;
+  document.getElementById('creatureType').textContent = `${creature.size} ${creature.type}`;
+  document.getElementById('creatureCR').textContent = `CR ${creature.cr}`;
+  document.getElementById('creatureXP').textContent = `${creature.xp || '—'} XP`;
+  
+  // Stats de combate
+  document.getElementById('creatureAC').textContent = creature.ac;
+  document.getElementById('creatureHP').textContent = creature.hp;
+  document.getElementById('creatureSpeed').textContent = creature.speed;
+  
+  // Características
+  document.getElementById('creatureStr').textContent = `${creature.str} (${calculateModifier(creature.str) >= 0 ? '+' : ''}${calculateModifier(creature.str)})`;
+  document.getElementById('creatureDex').textContent = `${creature.dex} (${calculateModifier(creature.dex) >= 0 ? '+' : ''}${calculateModifier(creature.dex)})`;
+  document.getElementById('creatureCon').textContent = `${creature.con} (${calculateModifier(creature.con) >= 0 ? '+' : ''}${calculateModifier(creature.con)})`;
+  document.getElementById('creatureInt').textContent = `${creature.int} (${calculateModifier(creature.int) >= 0 ? '+' : ''}${calculateModifier(creature.int)})`;
+  document.getElementById('creatureWis').textContent = `${creature.wis} (${calculateModifier(creature.wis) >= 0 ? '+' : ''}${calculateModifier(creature.wis)})`;
+  document.getElementById('creatureCha').textContent = `${creature.cha} (${calculateModifier(creature.cha) >= 0 ? '+' : ''}${calculateModifier(creature.cha)})`;
+  
+  // Habilidades y rasgos
+  document.getElementById('creatureSkills').innerHTML = (creature.skills || [])
+    .map(skill => `<li>• ${skill}</li>`).join('') || '<li>Ninguna</li>';
+  
+  document.getElementById('creatureTraits').innerHTML = (creature.traits || [])
+    .map(trait => `<li>• ${trait}</li>`).join('') || '<li>Ninguno</li>';
+  
+  document.getElementById('creatureActions').innerHTML = (creature.actions || [])
+    .map(action => `<li>• ${action}</li>`).join('') || '<li>Ninguna</li>';
+  
+  if (creature.legendaryActions && creature.legendaryActions.length > 0) {
+    document.getElementById('creatureLegendaryActions').innerHTML = creature.legendaryActions
+      .map(action => `<li>• ${action}</li>`).join('');
+    document.getElementById('legendarySection').classList.remove('hidden');
+  } else {
+    document.getElementById('legendarySection').classList.add('hidden');
+  }
+  
+  // Resistencias/Inmunidades
+  const defensesHtml = [];
+  if (creature.immunities && creature.immunities.length > 0) {
+    defensesHtml.push(`<strong>Inmunidades:</strong> ${creature.immunities.join(', ')}`);
+  }
+  if (creature.resistances && creature.resistances.length > 0) {
+    defensesHtml.push(`<strong>Resistencias:</strong> ${creature.resistances.join(', ')}`);
+  }
+  if (creature.vulnerabilities && creature.vulnerabilities.length > 0) {
+    defensesHtml.push(`<strong>Vulnerabilidades:</strong> ${creature.vulnerabilities.join(', ')}`);
+  }
+  document.getElementById('creatureDefenses').innerHTML = defensesHtml.join('<br>') || 'Ninguna';
+  
+  // Ambiente
+  if (creature.environment) {
+    document.getElementById('creatureEnvironment').textContent = creature.environment.join(', ');
+  }
+  
+  // Generar imagen
+  fetchCreatureImage(creature.name, creature.type);
+  
+  // Mostrar panel
+  document.getElementById('creatureSheet').classList.remove('hidden');
+  document.getElementById('creatureSheet').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Generar encuentro balanceado
+function generateEncounter(partyLevel, partySize = 4) {
+  const targetXP = partyLevel * partySize * 200; // XP aproximado por nivel
+  let currentXP = 0;
+  const encounter = [];
+  
+  while (currentXP < targetXP * 0.8) {
+    const creature = getRandomCreature();
+    if (!creature) break;
+    
+    const creatureXP = DND_BESTIARY.challengeRatings.find(cr => cr.cr == creature.cr)?.xp || 100;
+    
+    if (currentXP + creatureXP <= targetXP * 1.2) {
+      encounter.push(creature);
+      currentXP += creatureXP;
+    }
+  }
+  
+  currentEncounter = encounter;
+  displayEncounter(encounter, currentXP);
+}
+
+function displayEncounter(encounter, totalXP) {
+  const encounterList = document.getElementById('encounterList');
+  encounterList.innerHTML = encounter.map((creature, idx) => `
+    <div class="encounter-creature" onclick="displayCreature(currentEncounter[${idx}])">
+      <h4>${creature.name}</h4>
+      <p>${creature.type} - CR ${creature.cr}</p>
+    </div>
+  `).join('');
+  
+  document.getElementById('encounterXP').textContent = `${totalXP} XP total`;
+  document.getElementById('encounterPanel').classList.remove('hidden');
+}
 
 // ==========================================
 // EVENT LISTENERS
