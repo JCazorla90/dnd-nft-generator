@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐲 D&D Character Forge </title>
+  <title>🐲 D&D Character Forge - NFT Edition</title>
   <link rel="stylesheet" href="dnd-sheet.css">
   <link href="https://fonts.googleapis.com/css?family=UnifrakturCook:700|Crimson+Pro:400,700|IM+Fell+English+SC:400&display=swap" rel="stylesheet">
 </head>
@@ -12,7 +12,7 @@
     <header>
       <div class="dnd-banner">
         <svg width="46" height="46" viewBox="0 0 64 64"><text x="0" y="44" font-size="50" font-family="'UnifrakturCook',cursive" fill="#a43c13">D</text></svg>
-        <h1>Character Forge</h1>
+        <h1>Character Forge <span class="beta-badge">NFT Beta</span></h1>
         <select id="editionSelect" title="Selecciona edición">
           <option value="5e">D&D 5e</option>
           <option value="3.5e">D&D 3.5e</option>
@@ -20,23 +20,25 @@
         <button id="toggleTheme" title="Modo oscuro/pergamino">🌓</button>
       </div>
       <nav class="sheet-toolbar">
-       <button id="btnRandom" title="Generar personaje aleatorio">🎲 Aleatorio</button>
-  <button id="btnExportPDF" title="Exportar PDF">📥 PDF</button>
-  <button id="btnExportJSON" title="Exportar ficha en JSON">⬇️ JSON</button>
-  <input id="fileImport" type="file" accept=".json" style="display:none">
-  <button id="btnImportJSON" title="Importar ficha">⬆️ JSON</button>
-  <button id="btnMarkdown" title="Copiar Markdown">📋 Markdown</button>
-  <button id="btnHistory" title="Historial">🗂️ Historial</button>
-</nav>
+        <button id="btnRandom" title="Generar personaje aleatorio">🎲 Aleatorio</button>
+        <button id="btnMintNFT" title="Mintear NFT GRATIS">🪙 NFT Gratis</button>
+        <button id="btnExportPDF" title="Exportar PDF">📄 PDF</button>
+        <button id="btnExportJSON" title="Exportar ficha en JSON">⬇️ JSON</button>
+        <input id="fileImport" type="file" accept=".json" style="display:none">
+        <button id="btnImportJSON" title="Importar ficha">⬆️ JSON</button>
+        <button id="btnMarkdown" title="Copiar Markdown">📋 Markdown</button>
+        <button id="btnHistory" title="Historial">🗂️ Historial</button>
+      </nav>
     </header>
     
     <div id="powerbar" class="power-bar"><span id="powerLevel">⭐⭐⭐ Novato</span></div>
     <main id="mainSheet"></main>
     <footer class="dnd-footer">
-      <span>Hecho con ❤️ y dado cargado | <a href="https://github.com/JCazorla90/dnd-nft-generator">GitHub</a></span>
+      <span>Hecho con ❤️ y dados trucados | <a href="https://github.com/JCazorla90/dnd-nft-generator">GitHub</a></span>
     </footer>
     <div class="history-modal" id="historyModal" style="display:none"></div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="dnd-sheet.js"></script>
 </body>
