@@ -1,4 +1,3 @@
-// ---- CORE SHEET ----
 const SHEETS = {
   "5e": renderSheet5e,
   "3.5e": renderSheet35e
@@ -13,9 +12,19 @@ const btnMarkdown = document.getElementById('btnMarkdown');
 const btnHistory = document.getElementById('btnHistory');
 const btnExportPDF = document.getElementById('btnExportPDF');
 const btnToggleTheme = document.getElementById('toggleTheme');
+const btnRandom = document.getElementById('btnRandom');
 const powerBar = document.getElementById('powerbar');
 const historyModal = document.getElementById("historyModal");
 const storageKey = "dnd_sheet_history";
+
+// Datos para generar aleatorio
+const DATA_5E = {
+  names: ["Arannis", "Thorin", "Miriel", "Kara", "Ulfgar", "Lia", "Draven", "Soren", "Valen", "Leena", "Grym", "Jax"],
+  races: ["Humano","Enano","Elfo","Orco","Mediano","Dracónido","Tiefling"],
+  classes: ["Guerrero","Mago","Pícaro","Clérigo","Paladín","Bardo","Bárbaro","Druida","Monje","Explorador","Hechicero","Brujo"],
+  backgrounds: ["Noble","Soldado","Erudito","Acólito","Héroe popular","Marinero"],
+  alignments: ["Legal Bueno","Neutral Bueno","Caótico Bueno","Legal Neutral","Neutral","Caótico Neutral","Legal Malvado","Neutral Malvado","Caótico Malvado"]
+};
 
 // Inicial
 SHEETS[select.value]();
@@ -28,13 +37,13 @@ btnToggleTheme.addEventListener('click', () => {
   if(historyModal)historyModal.classList.toggle('dark');
 });
 
-// ---- Renderizadores -----
+// --------- RENDER 5e
 function renderSheet5e() {
   main.innerHTML = `
 <div class="avatar-block"><svg id="charAvatar" width="96" height="96"></svg></div>
 <div class="fantasy-img-block">
-  <img id="aiPortraitImg" src="" alt="Retrato IA" style="display:none;">
-  <button id="reloadAIPortrait" class="btn btn-secondary" style="display:none;">🔄 Cambiar retrato IA</button>
+  <img id="aiPortraitImg" src="" alt="Retrato IA" style="display:block;">
+  <button id="reloadAIPortrait" class="btn btn-secondary">🔄 Cambiar retrato IA</button>
 </div>
     <form class="sheet5e" id="form5e" autocomplete="off">
       <div class="stats-panel">
@@ -77,35 +86,15 @@ function renderSheet5e() {
   `;
   renderSkillsAndSaves();
 
-  // Avatar SVG
-  updateAvatar();
-  document.getElementById("cName").addEventListener("input",updateAvatar);
-  document.getElementById("cRace").addEventListener("input",updateAvatar);
-  document.getElementById("cClassLevel").addEventListener("input",updateAvatar);
-
-  // Retrato IA
-  document.getElementById("aiPortraitImg").style.display="block";
-  document.getElementById("reloadAIPortrait").style.display="inline-block";
-  fetchFantasyPortrait();
-  document.getElementById("reloadAIPortrait").onclick = fetchFantasyPortrait;
-
-  // Stats
-  for(let stat of ["FUE","DES","CON","INT","SAB","CAR"]) {
-    document.getElementById(`stat${stat}`).addEventListener('input', (e) => {
-      let val = parseInt(e.target.value)||10;
-      document.getElementById(`val${stat}`).textContent = val;
-      let mod = Math.floor((val-10)/2);
-      let dom = document.getElementById(`mod${stat}`);
-      dom.textContent = (mod>=0?'+':'')+mod;
-      dom.style.color = mod>=0 ? "#267654" : "#a31e1e";
-      updatePowerLevel();
-    });
-  }
-  updatePowerLevel();
+  // Bind
+  bindFields5e();
 }
+
+// -----
 function renderSheet35e() {
   main.innerHTML = `<div style="padding:2em;font-size:1.3em;text-align:center;color:#b4653d;">Hoja 3.5 en construcción.<br>¿Quieres colaborar? 😄</div>`;
 }
+
 function renderSkillsAndSaves() {
   const skills = [
     "Acrobacias (Dex)","Arcanos (Int)","Atletismo (Fue)","Engaño (Car)",
@@ -122,7 +111,7 @@ function renderSkillsAndSaves() {
     .map(sv=>`<div class="save-item"><input type="checkbox">${sv}</div>`).join('');
 }
 
-// SVG Avatar
+// ---- AVATAR SVG y Retrato IA
 function updateAvatar() {
   const name = document.getElementById("cName")?.value || "Aventurero";
   const race = document.getElementById("cRace")?.value || "Humano";
@@ -147,16 +136,61 @@ function drawAvatar(name, race, clazz) {
     <text x="48" y="92" text-anchor="middle" font-size="15" fill="#7a3913">${race[0]}</text>`;
   document.getElementById('charAvatar').innerHTML = svg;
 }
-// AI Portrait via Lexica API
 async function fetchFantasyPortrait() {
   const race = document.getElementById("cRace")?.value || "Human";
   const clazz = (document.getElementById("cClassLevel")?.value||"Warrior").split(' ')[0];
   const prompt = encodeURIComponent([race, clazz, "fantasy dnd portrait"].filter(Boolean).join(" "));
+  document.getElementById("aiPortraitImg").src = "https://placehold.co/170x210/fbf0e6/7a3a13?text=Loading...";
   const res = await fetch(`https://lexica.art/api/v1/search?q=${prompt}`);
   const data = await res.json();
   const img = data.images && data.images.length ? data.images[Math.floor(Math.random()*data.images.length)].srcSmall : null;
   document.getElementById("aiPortraitImg").src = img || "https://placehold.co/170x210/edd8cc/7a3a13?text=No+portrait";
 }
+
+// Generador ALEATORIO
+function random5e() {
+  function randAr(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+  function stat() {
+    const rolls=[...Array(4)].map(()=>1+Math.floor(Math.random()*6)).sort((a,b)=>a-b);
+    return rolls[1]+rolls[2]+rolls[3];
+  }
+  document.getElementById("cName").value = randAr(DATA_5E.names)+" "+Math.floor(Math.random()*99);
+  document.getElementById("cClassLevel").value = randAr(DATA_5E.classes)+" "+(1+Math.floor(Math.random()*4));
+  document.getElementById("cRace").value = randAr(DATA_5E.races);
+  document.getElementById("cBg").value = randAr(DATA_5E.backgrounds);
+  document.getElementById("cAlign").value = randAr(DATA_5E.alignments);
+  document.getElementById("cXP").value = Math.pow(2,6+Math.floor(Math.random()*6));
+  ["FUE","DES","CON","INT","SAB","CAR"].forEach(s=>{
+    document.getElementById("stat"+s).value = stat();
+    document.getElementById("stat"+s).dispatchEvent(new Event('input'));
+  });
+  // Equipo/notas aleatorio
+  document.getElementById("equipNotes").value = "Espada corta, Pócima de curación, Ropas de viaje";
+  // Limpia/aleatoria habilidades
+  [...document.querySelectorAll("#skillList5e input")].forEach(inpt=>inpt.checked = Math.random()>0.7);
+  [...document.querySelectorAll("#saveList5e input")].forEach(inpt=>inpt.checked = Math.random()>0.8);
+  updateAvatar(); fetchFantasyPortrait();
+  updatePowerLevel();
+}
+
+function bindFields5e() {
+  // Hooks de inputs para actualizar avatar, IA...
+  ["cName","cRace","cClassLevel"].forEach(id=>{
+    document.getElementById(id).addEventListener("input",()=>{
+      updateAvatar(); fetchFantasyPortrait();
+    });
+  });
+  // Stats power bar
+  for(let stat of ["FUE","DES","CON","INT","SAB","CAR"]) {
+    document.getElementById(`stat${stat}`).addEventListener('input',updatePowerLevel);
+  }
+  document.getElementById("aiPortraitImg").style.display="block";
+  document.getElementById("reloadAIPortrait").style.display="inline-block";
+  document.getElementById("reloadAIPortrait").onclick = fetchFantasyPortrait;
+  // Al abrir, render avatar y retrato IA
+  updateAvatar(); fetchFantasyPortrait();
+}
+
 // Power Bar
 function updatePowerLevel() {
   const stats = ["FUE","DES","CON","INT","SAB","CAR"].map(s=>parseInt(document.getElementById(`stat${s}`)?.value||10));
@@ -170,8 +204,8 @@ function updatePowerLevel() {
   powerLvl.textContent=lvl;
 }
 
-// ---- Funcionalidad común (historial, json, markdown, pdf) ----
-btnExportPDF.onclick = ()=>alert("Exportación PDF demo: integra jsPDF según tus necesidades.");
+// ---- Funcional común (historial, json, markdown, pdf) ----
+btnExportPDF.onclick = ()=>alert("Exportación PDF demo: integra jsPDF según ficha visual.");
 btnExportJSON.onclick=()=>{
   const form = document.querySelector('.sheet5e');
   if(!form){alert("No hay ficha cargada");return;}
@@ -191,14 +225,11 @@ btnMarkdown.onclick=()=>{
 };
 btnImportJSON.onclick = ()=>fileImport.click();
 fileImport.addEventListener('change', (e)=>{
-  const file = e.target.files;
-  if(!file) return;
+  const file = e.target.files; if(!file) return;
   const reader = new FileReader();
-  reader.onload = ev => {
-    const d = JSON.parse(ev.target.result); fillFormFromData(d);
+  reader.onload = ev => { const d = JSON.parse(ev.target.result); fillFormFromData(d);
     alert("Ficha importada del archivo JSON :)");
-    fileImport.value = "";
-  };
+    fileImport.value = ""; };
   reader.readAsText(file);
 });
 function fillFormFromData(d){
@@ -206,6 +237,8 @@ function fillFormFromData(d){
     if(d[f.id]!==undefined) f.value=d[f.id];
     if(f.type==="number"||f.type==="text") f.dispatchEvent(new Event('input'));
   });
+  updateAvatar(); fetchFantasyPortrait();
+  updatePowerLevel();
 }
 btnHistory.onclick = ()=>showHistoryModal();
 function saveHistory(data){
@@ -226,12 +259,11 @@ window.loadHist = function(i){
 };
 window.closeHist = function(){historyModal.style.display="none";};
 
-// Powers!
+// Powers: atajos teclado y "🎲 Aleatorio"
 document.addEventListener('keydown',e=>{
   if(e.key==="d"&&e.ctrlKey)btnToggleTheme.click();
-  if(e.key==="r"&&e.ctrlKey){
-    const sheet=document.querySelector('.sheet5e');
-    if(sheet)sheet.querySelectorAll('input[type="number"]').forEach(input=>input.value=6+Math.floor(12*Math.random()));
-    updatePowerLevel();
-  }
+  if(e.key==="r"&&e.ctrlKey){ random5e(); }
 });
+if(btnRandom){
+  btnRandom.onclick = ()=> random5e();
+}
