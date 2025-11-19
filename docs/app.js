@@ -3,7 +3,7 @@
 // ==========================================
 let currentCharacter = null;
 const STORAGE_KEY = 'dnd_character_history';
-const NFT_CONTRACT = "0x3Dd267B885777b2Fe60C63Fc59B2a45a4fD1Dd58"; // Testnet
+const NFT_CONTRACT = "0x5FbDB2315678afccb333f8a9c6122f65991e6F61"; // Contrato demo Sepolia
 const NFT_ABI = ["function safeMint(address to, string memory tokenURI) public"];
 
 // ==========================================
