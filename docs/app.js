@@ -1145,6 +1145,48 @@ document.addEventListener('DOMContentLoaded', () => {
   if(localStorage.getItem('darkMode') === 'true') {
     document.body.classList.add('dark-mode');
   }
+
+  // Event listeners del bestiario
+document.getElementById('generateCreatureBtn').addEventListener('click', () => {
+  const filters = {
+    type: document.getElementById('creatureTypeFilter').value,
+    cr: document.getElementById('crFilter').value,
+    environment: document.getElementById('environmentFilter').value
+  };
+  
+  const creature = getRandomCreature(filters);
+  if (creature) {
+    displayCreature(creature);
+  } else {
+    alert('No se encontraron criaturas con esos filtros');
+  }
+});
+
+document.getElementById('generateFromAPIBtn').addEventListener('click', async () => {
+  alert('⏳ Obteniendo criatura de la API oficial D&D 5e...');
+  const creature = await generateCreatureFromAPI();
+  if (creature) {
+    displayCreature(creature);
+  }
+});
+
+document.getElementById('generateEncounterBtn').addEventListener('click', () => {
+  const level = parseInt(document.getElementById('partyLevel').value);
+  const size = parseInt(document.getElementById('partySize').value);
+  generateEncounter(level, size);
+});
+
+document.getElementById('regenCreaturePortrait').addEventListener('click', () => {
+  if (currentCreature) {
+    fetchCreatureImage(currentCreature.name, currentCreature.type);
+  }
+});
+
+document.getElementById('newCreatureBtn').addEventListener('click', () => {
+  document.getElementById('creatureSheet').classList.add('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
   
   // Selector de edición
   const editionSelect = document.getElementById('editionSelect');
