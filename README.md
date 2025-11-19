@@ -40,6 +40,25 @@ Frontend React 🧝 ────▶ Backend Node.js/Express 🧙
 NFT Smart Contract ⛓️ ◀─── IPFS (Imágenes + Datos)
 
 
+## 🎮 **[¡PRUEBA EL GENERADOR AHORA!](https://jcazorla90.github.io/dnd-nft-generator/)** ⬅️ Click aquí
+
+Generador de personajes completo de Dragones y Mazmorras funcionando 100% en tu navegador.
+
+### ✨ Características:
+- 🎲 Generación aleatoria completa
+- ✏️ Personalización total (raza, clase, trasfondo, alineamiento)
+- 💪 Sistema de características (4d6 drop lowest)
+- ❤️ Cálculo automático de HP, AC e iniciativa
+- 📥 Descarga tu ficha en formato texto
+- 🔗 Comparte tus personajes
+- 📱 100% responsive (móvil y desktop)
+
+### 🚀 Tecnologías:
+- HTML5, CSS3, JavaScript vanilla
+- Sin dependencias externas
+- Funciona completamente offline
+- Datos del SRD 5e
+
 ### Componentes principales
 
 - **Frontend (React + Vite):**
