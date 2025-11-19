@@ -3,18 +3,29 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐲 D&D Character Forge - Generador de Personajes</title>
+  <title>🐲 D&D Character Forge - NFT Edition</title>
   <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css?family=UnifrakturCook:700|Crimson+Pro:400,700&display=swap" rel="stylesheet">
 </head>
 <body>
   <div class="container">
     <header>
       <h1>🐲 D&D Character Forge 🛡️</h1>
-      <p class="subtitle">Generador de Personajes para Dragones y Mazmorras</p>
-      <a href="https://github.com/JCazorla90/dnd-nft-generator" class="github-link" target="_blank">
-        ⭐ Ver en GitHub
-      </a>
+      <p class="subtitle">Generador de Personajes para Dragones y Mazmorras - NFT Edition</p>
+      <div class="header-controls">
+        <select id="editionSelect" class="edition-select">
+          <option value="5e">D&D 5e</option>
+          <option value="3.5e">D&D 3.5e (próximamente)</option>
+        </select>
+        <button id="toggleTheme" class="theme-toggle" title="Cambiar tema">🌓</button>
+        <a href="https://github.com/JCazorla90/dnd-nft-generator" class="github-link" target="_blank">⭐ Ver en GitHub</a>
+      </div>
     </header>
+
+    <!-- Power Bar -->
+    <div id="powerBar" class="power-bar">
+      <span id="powerLevel">⭐⭐⭐ Novato</span>
+    </div>
 
     <div class="main-content">
       <!-- Panel de generación -->
@@ -64,6 +75,23 @@
           <h2 id="charTitle">Personaje Generado</h2>
           <div class="header-buttons">
             <button id="downloadBtn" class="btn btn-success">📥 Descargar PDF</button>
+            <button id="mintNFTBtn" class="btn btn-nft">🪙 Mintear NFT</button>
+            <button id="exportJSONBtn" class="btn btn-secondary">⬇️ Exportar JSON</button>
+            <button id="importJSONBtn" class="btn btn-secondary">⬆️ Importar JSON</button>
+            <input type="file" id="fileImport" accept=".json" style="display:none">
+          </div>
+        </div>
+
+        <!-- Avatar y Retrato AI -->
+        <div class="character-visuals">
+          <div class="avatar-container">
+            <h3>Avatar</h3>
+            <svg id="charAvatar" width="120" height="120" class="character-avatar"></svg>
+          </div>
+          <div class="portrait-container">
+            <h3>Retrato AI</h3>
+            <img id="aiPortrait" src="" alt="Retrato generado por IA" class="ai-portrait">
+            <button id="regenPortrait" class="btn btn-small">🔄 Regenerar</button>
           </div>
         </div>
 
@@ -208,10 +236,19 @@
         </div>
 
         <div class="actions">
-          <button id="mintNFTBtn" class="btn btn-success" style="display:none;">🔗 Crear NFT</button>
           <button id="newCharBtn" class="btn btn-primary">🔄 Nuevo Personaje</button>
           <button id="shareBtn" class="btn btn-secondary">📤 Compartir</button>
+          <button id="historyBtn" class="btn btn-secondary">🗂️ Historial</button>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal de Historial -->
+    <div id="historyModal" class="modal hidden">
+      <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>📜 Historial de Personajes</h2>
+        <div id="historyList"></div>
       </div>
     </div>
 
@@ -222,6 +259,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.6.2/dist/ethers.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="data/dnd-data.js"></script>
   <script src="app.js"></script>
