@@ -127,62 +127,286 @@ function formatProficiencies(prof) {
   return parts;
 }
 
-// ==========================================
-// AVATAR SVG ÉPICO D&D
+/// ==========================================
+// AVATAR SVG ÉPICO D&D PROFESIONAL
 // ==========================================
 function drawAvatar(name, race, charClass) {
   const avatarSvg = document.getElementById('charAvatar');
   if (!avatarSvg) return;
-  
-  // Paletas de colores épicas por raza (tonos medievales)
-  const racePalettes = {
-    'Humano': { skin: '#d4a574', outline: '#8b6f47', hair: '#3d2817', armor: '#4a4a4a' },
-    'Elfo': { skin: '#c8b5a0', outline: '#6b5b4e', hair: '#d4af37', armor: '#2d5a3d' },
-    'Alto Elfo': { skin: '#c8b5a0', outline: '#6b5b4e', hair: '#d4af37', armor: '#1a3a52' },
-    'Elfo Oscuro (Drow)': { skin: '#5a4a6a', outline: '#2a1a3a', hair: '#e8e8e8', armor: '#8b008b' },
-    'Elfo de los Bosques': { skin: '#b8a080', outline: '#6b5a42', hair: '#8b6914', armor: '#2d5a2d' },
-    'Enano': { skin: '#a8926a', outline: '#6b5a42', hair: '#654321', armor: '#696969' },
-    'Enano de las Montañas': { skin: '#a8926a', outline: '#6b5a42', hair: '#8b4513', armor: '#404040' },
-    'Enano de las Colinas': { skin: '#a8926a', outline: '#6b5a42', hair: '#d2691e', armor: '#8b7355' },
-    'Mediano': { skin: '#e8d4b8', outline: '#b8926a', hair: '#8b4513', armor: '#3d3d3d' },
-    'Mediano Piesligeros': { skin: '#e8d4b8', outline: '#b8926a', hair: '#d2691e', armor: '#2d2d2d' },
-    'Mediano Fornido': { skin: '#d8b8a8', outline: '#9b7f5f', hair: '#8b6f47', armor: '#4a4a4a' },
-    'Orco': { skin: '#7a9a5a', outline: '#3a501e', hair: '#1a3a1a', armor: '#8b4513' },
-    'Semiorco': { skin: '#8aaa7a', outline: '#4a6a2a', hair: '#2d5a2d', armor: '#8b6f47' },
-    'Tiefling': { skin: '#d4a8c8', outline: '#8b3a6b', hair: '#4b0082', armor: '#8b008b' },
-    'Dracónido': { skin: '#d4c747', outline: '#aa8a21', hair: '#b8860b', armor: '#cd5c5c' },
-    'Gnomo': { skin: '#e8c4a0', outline: '#c49060', hair: '#ff6347', armor: '#3d5a3d' },
-    'Gnomo de las Rocas': { skin: '#e8c4a0', outline: '#c49060', hair: '#ff4500', armor: '#696969' },
-    'Gnomo de los Bosques': { skin: '#d8b8a0', outline: '#a89878', hair: '#8b6914', armor: '#4a7c4e' },
-    'Semielfo': { skin: '#d8c4a8', outline: '#9b8868', hair: '#b8860b', armor: '#2d4a52' }
+
+  // Estilos por CLASE (armaduras, armas, atuendos épicos)
+  const classVisuals = {
+    'Guerrero': {
+      armor: `
+        <g id="armor-guerrero">
+          <!-- Casco medieval -->
+          <ellipse cx="60" cy="32" rx="24" ry="20" fill="#696969" stroke="#2f2f2f" stroke-width="2"/>
+          <rect x="48" y="40" width="24" height="6" fill="#696969" stroke="#2f2f2f" stroke-width="1"/>
+          <!-- Visera -->
+          <rect x="52" y="35" width="16" height="4" fill="#4a4a4a"/>
+          <!-- Cuernos/Adornos -->
+          <path d="M 48,32 L 42,25 L 45,30" fill="#c0c0c0" stroke="#696969" stroke-width="1"/>
+          <path d="M 72,32 L 78,25 L 75,30" fill="#c0c0c0" stroke="#696969" stroke-width="1"/>
+          <!-- Pecho de acero -->
+          <path d="M 40,50 L 60,48 L 80,50 L 80,85 L 40,85 Z" fill="#8b8b8b" stroke="#4a4a4a" stroke-width="2"/>
+          <!-- Cruz del pecho -->
+          <line x1="60" y1="55" x2="60" y2="75" stroke="#c0c0c0" stroke-width="2"/>
+          <line x1="50" y1="65" x2="70" y2="65" stroke="#c0c0c0" stroke-width="2"/>
+        </g>
+      `,
+      weapon: '<line x1="80" y1="70" x2="95" y2="50" stroke="#8b4513" stroke-width="4" stroke-linecap="round"/>'
+    },
+    'Mago': {
+      armor: `
+        <g id="armor-mago">
+          <!-- Sombrero de mago cónico -->
+          <path d="M 60,15 L 50,35 L 70,35 Z" fill="#4169e1" stroke="#2d4d9e" stroke-width="2"/>
+          <ellipse cx="60" cy="35" rx="12" ry="4" fill="#4169e1" stroke="#2d4d9e" stroke-width="1"/>
+          <!-- Robe azul arcana -->
+          <ellipse cx="60" cy="55" rx="28" ry="32" fill="#4169e1" stroke="#2d4d9e" stroke-width="2" opacity="0.9"/>
+          <!-- Símbolos arcanos en robe -->
+          <circle cx="50" cy="60" r="2" fill="#ffd700" opacity="0.7"/>
+          <circle cx="70" cy="65" r="2" fill="#ffd700" opacity="0.7"/>
+          <circle cx="60" cy="75" r="2" fill="#ffd700" opacity="0.7"/>
+          <!-- Staff -->
+          <line x1="75" y1="50" x2="85" y2="30" stroke="#8b4513" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="85" cy="28" r="5" fill="#ffd700" stroke="#c0c0c0" stroke-width="1"/>
+        </g>
+      `,
+      weapon: '<circle cx="85" cy="28" r="5" fill="#ffd700" stroke="#c0c0c0" stroke-width="2"/>'
+    },
+    'Pícaro': {
+      armor: `
+        <g id="armor-picaro">
+          <!-- Hood/Capucha oscura -->
+          <ellipse cx="60" cy="35" rx="22" ry="24" fill="#1a1a1a" stroke="#0a0a0a" stroke-width="2"/>
+          <!-- Ojos en sombra -->
+          <circle cx="52" cy="32" r="3" fill="#ff6b35"/>
+          <circle cx="68" cy="32" r="3" fill="#ff6b35"/>
+          <!-- Armadura de cuero -->
+          <path d="M 38,50 L 60,48 L 82,50 L 82,80 L 38,80 Z" fill="#2d2d2d" stroke="#1a1a1a" stroke-width="2"/>
+          <!-- Hebillas de cuero -->
+          <rect x="55" y="55" width="3" height="3" fill="#c0c0c0"/>
+          <rect x="60" y="60" width="3" height="3" fill="#c0c0c0"/>
+          <rect x="55" y="68" width="3" height="3" fill="#c0c0c0"/>
+          <!-- Capas/Capa -->
+          <path d="M 45,50 Q 35,70 40,85" fill="none" stroke="#1a1a1a" stroke-width="3" opacity="0.6"/>
+          <path d="M 75,50 Q 85,70 80,85" fill="none" stroke="#1a1a1a" stroke-width="3" opacity="0.6"/>
+        </g>
+      `,
+      weapon: '<path d="M 80,65 L 95,55" stroke="#c0c0c0" stroke-width="3" stroke-linecap="round"/>'
+    },
+    'Clérigo': {
+      armor: `
+        <g id="armor-clerigo">
+          <!-- Mitra/Corona sagrada -->
+          <path d="M 55,18 L 60,10 L 65,18" fill="#daa520" stroke="#b8860b" stroke-width="2"/>
+          <ellipse cx="60" cy="20" rx="8" ry="5" fill="#daa520" stroke="#b8860b" stroke-width="1"/>
+          <!-- Ropa sagrada blanca -->
+          <path d="M 35,45 L 60,40 L 85,45 L 85,85 L 35,85 Z" fill="#f5f5dc" stroke="#daa520" stroke-width="2"/>
+          <!-- Cruz dorada del pecho -->
+          <g transform="translate(60,65)">
+            <line x1="0" y1="-8" x2="0" y2="8" stroke="#daa520" stroke-width="3" stroke-linecap="round"/>
+            <line x1="-6" y1="0" x2="6" y2="0" stroke="#daa520" stroke-width="3" stroke-linecap="round"/>
+          </g>
+          <!-- Símbolo divino -->
+          <circle cx="60" cy="50" r="4" fill="#daa520" opacity="0.6"/>
+        </g>
+      `,
+      weapon: '<path d="M 75,70 L 90,40" stroke="#daa520" stroke-width="2" stroke-linecap="round"/>'
+    },
+    'Paladín': {
+      armor: `
+        <g id="armor-paladin">
+          <!-- Casco de oro reluciente -->
+          <ellipse cx="60" cy="32" rx="24" ry="22" fill="#ffd700" stroke="#b8860b" stroke-width="2"/>
+          <circle cx="60" cy="25" r="6" fill="#ffed4e" opacity="0.7"/>
+          <!-- Armadura dorada completa -->
+          <path d="M 38,48 L 60,45 L 82,48 L 82,85 L 38,85 Z" fill="#ffd700" stroke="#b8860b" stroke-width="2"/>
+          <!-- Escudo del pecho -->
+          <path d="M 50,60 L 60,52 L 70,60 L 70,75 L 50,75 Z" fill="#ff6b35" stroke="#b8860b" stroke-width="1"/>
+          <!-- Aura sagrada -->
+          <circle cx="60" cy="60" r="35" fill="none" stroke="#ffed4e" stroke-width="1" stroke-dasharray="5,5" opacity="0.4"/>
+        </g>
+      `,
+      weapon: '<path d="M 75,65 L 98,30" stroke="#ffd700" stroke-width="3" stroke-linecap="round"/>'
+    },
+    'Bárbaro': {
+      armor: `
+        <g id="armor-barbaro">
+          <!-- Cabello/Barba salvaje -->
+          <ellipse cx="60" cy="30" rx="26" ry="22" fill="#654321" stroke="#3d2817" stroke-width="2"/>
+          <path d="M 50,40 Q 45,50 48,60" fill="none" stroke="#654321" stroke-width="2" opacity="0.7"/>
+          <path d="M 70,40 Q 75,50 72,60" fill="none" stroke="#654321" stroke-width="2" opacity="0.7"/>
+          <!-- Pecho desnudo/Tatuajes -->
+          <ellipse cx="60" cy="70" rx="26" ry="18" fill="#d4a574" stroke="#8b6f47" stroke-width="2"/>
+          <!-- Tatuajes tribales -->
+          <path d="M 45,70 Q 50,65 55,70" fill="none" stroke="#dc143c" stroke-width="2" opacity="0.6"/>
+          <path d="M 65,70 Q 70,65 75,70" fill="none" stroke="#dc143c" stroke-width="2" opacity="0.6"/>
+          <!-- Pieles/Armadura primitiva -->
+          <path d="M 35,65 L 40,85 M 80,65 L 85,85" stroke="#8b4513" stroke-width="3" opacity="0.5"/>
+        </g>
+      `,
+      weapon: '<path d="M 80,75 L 105,50" stroke="#8b4513" stroke-width="5" stroke-linecap="round"/>'
+    },
+    'Druida': {
+      armor: `
+        <g id="armor-druida">
+          <!-- Cabello/Hojas naturales -->
+          <ellipse cx="60" cy="32" rx="24" ry="22" fill="#228b22" stroke="#1a6b1a" stroke-width="2"/>
+          <path d="M 45,30 Q 42,25 45,20" fill="#7cb342" stroke="#558b2f" stroke-width="1"/>
+          <path d="M 75,30 Q 78,25 75,20" fill="#7cb342" stroke="#558b2f" stroke-width="1"/>
+          <!-- Ropa natural de lino/cuero -->
+          <path d="M 38,48 L 60,45 L 82,48 L 82,85 L 38,85 Z" fill="#8b7355" stroke="#654321" stroke-width="2"/>
+          <!-- Símbolos naturales -->
+          <circle cx="50" cy="60" r="3" fill="#7cb342"/>
+          <circle cx="70" cy="60" r="3" fill="#7cb342"/>
+          <circle cx="60" cy="72" r="3" fill="#7cb342"/>
+          <!-- Animal companion (pequeño) -->
+          <circle cx="75" cy="50" r="4" fill="#8b4513" stroke="#654321" stroke-width="1"/>
+          <path d="M 77,48 L 80,45" stroke="#654321" stroke-width="1" stroke-linecap="round"/>
+        </g>
+      `,
+      weapon: '<path d="M 75,50 L 90,30" stroke="#8b7355" stroke-width="2" stroke-linecap="round"/>'
+    },
+    'Explorador': {
+      armor: `
+        <g id="armor-explorador">
+          <!-- Capucha/Capucha de cazador -->
+          <ellipse cx="60" cy="32" rx="24" ry="23" fill="#8b6f47" stroke="#6b5437" stroke-width="2"/>
+          <!-- Armadura de cuero reforzada -->
+          <path d="M 38,48 L 60,45 L 82,48 L 82,85 L 38,85 Z" fill="#a0826d" stroke="#6b5437" stroke-width="2"/>
+          <!-- Correas y bolsas -->
+          <rect x="45" y="60" width="3" height="20" fill="#654321"/>
+          <rect x="72" y="60" width="3" height="20" fill="#654321"/>
+          <!-- Arco (pequeño) -->
+          <path d="M 75,55 Q 85,65 75,75" fill="none" stroke="#8b6f47" stroke-width="2"/>
+          <line x1="80" y1="60" x2="80" y2="70" stroke="#ffd700" stroke-width="1" opacity="0.7"/>
+        </g>
+      `,
+      weapon: '<path d="M 80,70 L 100,50" stroke="#8b6f47" stroke-width="2" stroke-linecap="round"/>'
+    },
+    'Bardo': {
+      armor: `
+        <g id="armor-bardo">
+          <!-- Cabello elegante -->
+          <ellipse cx="60" cy="32" rx="24" ry="22" fill="#d4af37" stroke="#b8860b" stroke-width="2"/>
+          <!-- Ropa elegante/Ropas nobles -->
+          <path d="M 35,48 L 60,42 L 85,48 L 85,85 L 35,85 Z" fill="#8b3a8b" stroke="#5a246b" stroke-width="2"/>
+          <!-- Capa -->
+          <path d="M 40,55 Q 30,70 35,85" fill="none" stroke="#8b3a8b" stroke-width="3" opacity="0.7"/>
+          <path d="M 80,55 Q 90,70 85,85" fill="none" stroke="#8b3a8b" stroke-width="3" opacity="0.7"/>
+          <!-- Instrumento musical (pequeño) -->
+          <ellipse cx="75" cy="65" rx="5" ry="8" fill="#d4af37" stroke="#b8860b" stroke-width="1"/>
+        </g>
+      `,
+      weapon: '<circle cx="75" cy="65" r="5" fill="#d4af37" stroke="#b8860b" stroke-width="1"/>'
+    },
+    'Monje': {
+      armor: `
+        <g id="armor-monje">
+          <!-- Cabeza rapada/Monje -->
+          <circle cx="60" cy="30" r="22" fill="#d4a574" stroke="#8b6f47" stroke-width="2"/>
+          <!-- Ropa de monje -->
+          <path d="M 35,50 L 60,45 L 85,50 L 85,85 L 35,85 Z" fill="#8b6914" stroke="#654321" stroke-width="2"/>
+          <!-- Símbolo espiritual -->
+          <circle cx="60" cy="65" r="6" fill="none" stroke="#ffd700" stroke-width="1"/>
+          <line x1="60" y1="59" x2="60" y2="71" stroke="#ffd700" stroke-width="1"/>
+          <line x1="54" y1="65" x2="66" y2="65" stroke="#ffd700" stroke-width="1"/>
+          <!-- Banda del cinturón -->
+          <rect x="50" y="68" width="20" height="3" fill="#654321" stroke="#3d2817" stroke-width="1"/>
+        </g>
+      `,
+      weapon: ''
+    },
+    'Brujo': {
+      armor: `
+        <g id="armor-brujo">
+          <!-- Cabello oscuro misterioso -->
+          <ellipse cx="60" cy="32" rx="24" ry="22" fill="#1a0033" stroke="#0a0019" stroke-width="2"/>
+          <!-- Ropa oscura mágica -->
+          <path d="M 35,48 L 60,42 L 85,48 L 85,85 L 35,85 Z" fill="#2d0a4e" stroke="#1a0033" stroke-width="2"/>
+          <!-- Símbolos arcanos -->
+          <circle cx="50" cy="65" r="2" fill="#9370db" opacity="0.8"/>
+          <circle cx="70" cy="60" r="2" fill="#9370db" opacity="0.8"/>
+          <circle cx="60" cy="75" r="2" fill="#9370db" opacity="0.8"/>
+          <!-- Aura oscura -->
+          <circle cx="60" cy="60" r="32" fill="none" stroke="#8b008b" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>
+        </g>
+      `,
+      weapon: '<path d="M 75,65 L 95,40" stroke="#9370db" stroke-width="2" stroke-linecap="round"/>'
+    },
+    'Hechicero': {
+      armor: `
+        <g id="armor-hechicero">
+          <!-- Cabello con energía -->
+          <ellipse cx="60" cy="32" rx="24" ry="22" fill="#4b0082" stroke="#2d0052" stroke-width="2"/>
+          <path d="M 45,25 Q 50,15 50,25" fill="#9370db" opacity="0.5"/>
+          <path d="M 75,25 Q 70,15 70,25" fill="#9370db" opacity="0.5"/>
+          <!-- Ropa mágica -->
+          <path d="M 38,48 L 60,42 L 82,48 L 82,85 L 38,85 Z" fill="#663399" stroke="#4b0082" stroke-width="2"/>
+          <!-- Energía mágica que brota -->
+          <circle cx="40" cy="55" r="2" fill="#9370db" opacity="0.7"/>
+          <circle cx="80" cy="55" r="2" fill="#9370db" opacity="0.7"/>
+          <circle cx="60" cy="72" r="2" fill="#9370db" opacity="0.7"/>
+          <!-- Aura de poder -->
+          <circle cx="60" cy="60" r="34" fill="none" stroke="#9370db" stroke-width="1" opacity="0.6"/>
+        </g>
+      `,
+      weapon: '<circle cx="60" cy="60" r="34" fill="none" stroke="#9370db" stroke-width="1" opacity="0.8"/>'
+    }
   };
-  
-  // Símbolos y colores por clase
-  const classStyles = {
-    'Guerrero': { crest: '⚔️', color: '#8b4513', badge: '🛡️' },
-    'Mago': { crest: '✨', color: '#4169e1', badge: '📜' },
-    'Pícaro': { crest: '🗡️', color: '#2d5a2d', badge: '🗝️' },
-    'Clérigo': { crest: '✞', color: '#daa520', badge: '⛪' },
-    'Paladín': { crest: '✦', color: '#ffd700', badge: '⚡' },
-    'Bardo': { crest: '🎵', color: '#8b3a8b', badge: '🎸' },
-    'Bárbaro': { crest: '🔥', color: '#dc143c', badge: '💥' },
-    'Druida': { crest: '🌿', color: '#228b22', badge: '🍃' },
-    'Monje': { crest: '☯️', color: '#ff8c00', badge: '🤝' },
-    'Explorador': { crest: '🏹', color: '#8fbc8f', badge: '🦌' },
-    'Hechicero': { crest: '⚡', color: '#9370db', badge: '🔮' },
-    'Brujo': { crest: '🌙', color: '#8b008b', badge: '👁️' }
+
+  // Paletas de piel por RAZA
+  const raceSkins = {
+    'Humano': { skin: '#d4a574', outline: '#8b6f47' },
+    'Elfo': { skin: '#c8b5a0', outline: '#6b5b4e' },
+    'Enano': { skin: '#a8926a', outline: '#6b5a42' },
+    'Mediano': { skin: '#e8d4b8', outline: '#b8926a' },
+    'Orco': { skin: '#7a9a5a', outline: '#3a501e' },
+    'Tiefling': { skin: '#d4a8c8', outline: '#8b3a6b' },
+    'Dracónido': { skin: '#d4c747', outline: '#aa8a21' },
+    'Gnomo': { skin: '#e8c4a0', outline: '#c49060' },
+    'Semielfo': { skin: '#d8c4a8', outline: '#9b8868' },
+    'Semiorco': { skin: '#8aaa7a', outline: '#4a6a2a' }
   };
-  
-  const palette = racePalettes[race] || racePalettes['Humano'];
-  const classStyle = classStyles[charClass] || { crest: '⚔️', color: '#696969', badge: '🎯' };
-  
-  // Hash para consistencia
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = ((hash << 5) - hash) + name.charCodeAt(i);
-    hash = hash & hash;
-  }
-  hash = Math.abs(hash) % 100;
+
+  const classStyle = classVisuals[charClass] || classVisuals['Guerrero'];
+  const raceSkin = raceSkins[race] || raceSkins['Humano'];
+
+  const svg = `
+    <defs>
+      <filter id="shadow-d">
+        <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.5"/>
+      </filter>
+      <linearGradient id="metal-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:#f5f5f5;stop-opacity:1" />
+        <stop offset="50%" style="stop-color:#c0c0c0;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#808080;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+
+    <!-- Fondo circulo personaje -->
+    <circle cx="60" cy="60" r="58" fill="#f8f5ee" stroke="#b8860b" stroke-width="2" opacity="0.3"/>
+
+    <!-- Cara base (bajo armadura) -->
+    <ellipse cx="60" cy="60" rx="20" ry="22" fill="${raceSkin.skin}" stroke="${raceSkin.outline}" stroke-width="1" opacity="0.6"/>
+
+    <!-- ARMADURA/CLASE VISUAL -->
+    ${classStyle.armor}
+
+    <!-- ARMA -->
+    ${classStyle.weapon}
+
+    <!-- Nombre/Raza (etiqueta inferior) -->
+    <rect x="20" y="98" width="80" height="16" rx="4" fill="${raceSkin.outline}" opacity="0.15" stroke="${raceSkin.outline}" stroke-width="1"/>
+    <text x="60" y="110" text-anchor="middle" font-size="10" font-weight="bold" fill="${raceSkin.outline}" font-family="Arial">${charClass.substring(0,10)}</text>
+  `;
+
+  avatarSvg.innerHTML = svg;
+  avatarSvg.setAttribute('viewBox', '0 0 120 120');
+}
+
   
   // SVG Épico
   const svg = `
@@ -258,33 +482,96 @@ function drawAvatar(name, race, charClass) {
 }
 
 // ==========================================
-// RETRATO AI FANTASY D&D MEJORADO
+// RETRATO IA D&D PROFESIONAL
 // ==========================================
 async function fetchAIPortrait(race, charClass) {
   const portraitImg = document.getElementById('aiPortrait');
   if (!portraitImg) return;
-  
-  portraitImg.src = "https://placehold.co/180x220/667eea/ffffff?text=Generando...";
-  portraitImg.alt = "Generando retrato...";
-  
-  // Prompts específicos por combinación raza/clase
-  const specificPrompts = {
-    'Mago-Humano': 'human wizard with blue robes magical aura fantasy dnd art',
-    'Mago-Elfo': 'elven mage with arcane symbols long hair fantasy dnd',
-    'Guerrero-Humano': 'human knight with armor and sword medieval fantasy dnd',
-    'Guerrero-Enano': 'dwarf warrior with axe and beard fantasy dnd art',
-    'Pícaro-Mediano': 'halfling rogue with daggers sneaky expression dnd fantasy',
-    'Pícaro-Elfo': 'elven rogue with bow dark leather armor fantasy dnd',
-    'Clérigo-Humano': 'human priest with holy symbol divine aura dnd fantasy',
-    'Paladín-Humano': 'human paladin with golden armor holy sword dnd art',
-    'Bárbaro-Orco': 'orc barbarian with massive axe fierce dnd fantasy',
-    'Druida-Elfo': 'elven druid with animal companion mystical dnd art',
-    'Tiefling-Brujo': 'tiefling warlock with dark magic red skin dnd fantasy'
+
+  portraitImg.src = "https://placehold.co/180x220/667eea/ffffff?text=⚔️+D&D";
+  portraitImg.alt = "Generando...";
+
+  // Prompts PROFESIONALES con estilos artísticos D&D
+  const prompts = {
+    // GUERREROS
+    'Guerrero-Humano': 'human knight with full plate armor sword shield, oil painting style like Greg Staley, fantasy medieval',
+    'Guerrero-Enano': 'dwarf warrior axe beard ornate armor, realistic painting, forgotten realms d&d art style',
+    'Guerrero-Elfo': 'elven warrior elegant armor longsword, fine art fantasy illustration',
+    
+    // MAGOS
+    'Mago-Humano': 'human wizard blue robes staff glowing arcane symbols, magic aura, fantasy art like Luis Royo',
+    'Mago-Elfo': 'elven mage long hair robes spell casting, mystical fantasy illustration',
+    'Mago-Gnomo': 'gnome wizard spectacles robes magic wand, fantasy character art',
+    
+    // PÍCAROS
+    'Pícaro-Mediano': 'halfling rogue daggers leather armor sneaking shadow, dark fantasy art',
+    'Pícaro-Elfo': 'elven rogue bow dark armor mysterious, fantasy illustration',
+    
+    // CLÉRIGOS
+    'Clérigo-Humano': 'human cleric holy symbol divine light armor, religious fantasy art like Keith Parkinson',
+    'Clérigo-Enano': 'dwarf cleric mace shield gold armor holy, fantasy medieval painting',
+    
+    // PALADINES
+    'Paladín-Humano': 'human paladin golden full plate armor holy sword glowing, epic fantasy art',
+    'Paladín-Elfo': 'elven paladin celestial armor divine power, fantasy illustration',
+    
+    // BÁRBAROS
+    'Bárbaro-Humano': 'human barbarian muscular axes furs rage expression, gritty fantasy art',
+    'Bárbaro-Orco': 'orc barbarian tusks massive axe tribal tattoos fierce, dark fantasy',
+    
+    // DRUIDAS
+    'Druida-Humano': 'human druid nature magic green aura animal companion, mystical fantasy art',
+    'Druida-Elfo': 'elven druid forest communion wild shape, organic fantasy illustration',
+    
+    // BARDOS
+    'Bardo-Humano': 'human bard lute magical performance charismatic, colorful fantasy art',
+    'Bardo-Mediano': 'halfling bard musical instrument stage presence, fantasy character',
+    
+    // MONJES
+    'Monje-Humano': 'human monk martial arts robes meditation calm, spiritual fantasy art',
+    
+    // EXPLORADORES
+    'Explorador-Humano': 'human ranger wilderness bow animal companion tracking, fantasy art',
+    'Explorador-Elfo': 'elven ranger bow beast companion hunting, nature fantasy illustration',
+    
+    // HECHICEROS
+    'Hechicero-Humano': 'human sorcerer wild magic draconic power chaos aura, dark fantasy art',
+    'Hechicero-Tiefling': 'tiefling sorcerer red skin horns arcane power, demonic fantasy',
+    
+    // BRUJOS
+    'Brujo-Humano': 'human warlock eldritch power dark magic mysterious, gothic fantasy art',
+    'Brujo-Tiefling': 'tiefling warlock dark pact sinister power, dark fantasy illustration'
   };
-  
-  const promptKey = `${charClass}-${race}`;
-  const prompt = specificPrompts[promptKey] || 
-                 `${race} ${charClass} fantasy dungeons and dragons character portrait detailed epic art`;
+
+  const key = `${charClass}-${race}`;
+  const prompt = prompts[key] || `${race} ${charClass} fantasy d&d character portrait, professional fantasy art`;
+
+  // Intentar Lexica primero
+  try {
+    const res = await fetch(`https://lexica.art/api/v1/search?q=${encodeURIComponent(prompt)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.images && data.images.length > 0) {
+        const idx = Math.floor(Math.random() * Math.min(data.images.length, 15));
+        portraitImg.src = data.images[idx].src;
+        portraitImg.alt = `${race} ${charClass}`;
+        console.log('✅ Retrato profesional D&D cargado');
+        return;
+      }
+    }
+  } catch(e) {
+    console.warn('Lexica falló');
+  }
+
+  // Fallback: DiceBear adventure style
+  try {
+    const url = `https://api.dicebear.com/7.x/adventurer/svg?seed=${encodeURIComponent(race+charClass)}&backgroundColor=667eea`;
+    portraitImg.src = url;
+    console.log('✅ Avatar D&D generado');
+  } catch(e) {
+    portraitImg.src = "https://placehold.co/180x220/8b4513/ffd700?text=D&D+Portrait";
+  }
+}
   
   // API 1: Lexica.art con prompt mejorado
   try {
