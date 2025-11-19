@@ -62,7 +62,9 @@
       <div id="characterSheet" class="card character-sheet hidden">
         <div class="sheet-header">
           <h2 id="charTitle">Personaje Generado</h2>
-          <button id="downloadBtn" class="btn btn-success">📥 Descargar Ficha</button>
+          <div class="header-buttons">
+            <button id="downloadBtn" class="btn btn-success">📥 Descargar PDF</button>
+          </div>
         </div>
 
         <div class="character-info">
@@ -155,19 +157,60 @@
           </div>
 
           <div class="info-section">
-            <h3>🎒 Rasgos Raciales</h3>
+            <h3>🛡️ Salvaciones y Habilidades</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Salvaciones:</span>
+                <span id="displaySavingThrows" class="value">-</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Habilidades:</span>
+                <span id="displaySkills" class="value">-</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>🎒 Equipo Inicial</h3>
+            <ul id="equipment" class="traits-list"></ul>
+          </div>
+
+          <div class="info-section">
+            <h3>💼 Trasfondo: <span id="backgroundName"></span></h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Habilidades:</span>
+                <span id="backgroundSkills" class="value">-</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Rasgo:</span>
+                <span id="backgroundFeature" class="value">-</span>
+              </div>
+            </div>
+            <h4 style="margin-top: 15px; color: #667eea;">Equipo de trasfondo:</h4>
+            <ul id="backgroundEquipment" class="traits-list"></ul>
+          </div>
+
+          <div class="info-section">
+            <h3>🎭 Rasgos Raciales</h3>
             <ul id="racialTraits" class="traits-list"></ul>
           </div>
 
           <div class="info-section">
-            <h3>⚔️ Competencias de Clase</h3>
+            <h3>⚔️ Competencias y Rasgos de Clase</h3>
             <ul id="classProficiencies" class="traits-list"></ul>
+          </div>
+
+          <div class="info-section">
+            <h3>✨ Características de Clase</h3>
+            <ul id="classFeatures" class="traits-list"></ul>
           </div>
         </div>
 
         <div class="actions">
+          <button id="mintNFTBtn" class="btn btn-success" style="display:none;">🔗 Crear NFT</button>
           <button id="newCharBtn" class="btn btn-primary">🔄 Nuevo Personaje</button>
-          <button id="shareBtn" class="btn btn-secondary">🔗 Compartir</button>
+          <button id="shareBtn" class="btn btn-secondary">📤 Compartir</button>
         </div>
       </div>
     </div>
@@ -178,9 +221,8 @@
     </footer>
   </div>
 
-  <script src="data/dnd-data.js"></script>
-  <script src="app.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="data/dnd-data.js"></script>
   <script src="app.js"></script>
 </body>
