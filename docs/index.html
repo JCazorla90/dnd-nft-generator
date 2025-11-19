@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐲 D&D Character Forge - Multiversión</title>
+  <title>🐲 D&D Character Forge </title>
   <link rel="stylesheet" href="dnd-sheet.css">
   <link href="https://fonts.googleapis.com/css?family=UnifrakturCook:700|Crimson+Pro:400,700|IM+Fell+English+SC:400&display=swap" rel="stylesheet">
 </head>
@@ -16,7 +16,6 @@
         <select id="editionSelect" title="Selecciona edición">
           <option value="5e">D&D 5e</option>
           <option value="3.5e">D&D 3.5e</option>
-          <option value="retro">Old School</option>
         </select>
         <button id="toggleTheme" title="Modo oscuro/pergamino">🌓</button>
       </div>
@@ -30,15 +29,13 @@
       </nav>
     </header>
     
-    <div id="powerbar" title="Nivel de Poder" class="power-bar"><span id="powerLevel">⭐⭐⭐ Novato</span></div>
-    <div class="history-modal" id="historyModal" style="display:none"></div>
-    
+    <div id="powerbar" class="power-bar"><span id="powerLevel">⭐⭐⭐ Novato</span></div>
     <main id="mainSheet"></main>
     <footer class="dnd-footer">
-      <span>Hecho por aventureros | <a href="https://github.com/JCazorla90/dnd-nft-generator">GitHub</a></span>
+      <span>Hecho con ❤️ y dado cargado | <a href="https://github.com/JCazorla90/dnd-nft-generator">GitHub</a></span>
     </footer>
+    <div class="history-modal" id="historyModal" style="display:none"></div>
   </div>
-  <!-- jsPDF para exportar PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="dnd-sheet.js"></script>
 </body>
