@@ -584,7 +584,7 @@ function importJSON() {
 }
 
 // ==========================================
-// MINTEAR NFT
+// MINTEAR NFT (VERSIÓN MEJORADA)
 // ==========================================
 async function mintNFT() {
   if(!currentCharacter) {
@@ -598,43 +598,132 @@ async function mintNFT() {
   }
   
   try {
+    // 1. Verificar que estamos en testnet
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const network = await provider.getNetwork();
+    
+    // Redes soportadas
+    const supportedNetworks = {
+      11155111: { name: 'Sepolia', rpc: 'https://sepolia.infura.io/v3/' },
+      80002: { name: 'Polygon Amoy', rpc: 'https://rpc-amoy.polygon.technology/' },
+      1: { name: 'Ethereum Mainnet', rpc: 'https://eth-mainnet.g.alchemy.com/v2/' }
+    };
+    
+    if (!supportedNetworks[network.chainId]) {
+      alert(`⚠️ Red no soportada (Chain ID: ${network.chainId})\n\nUsa Sepolia (11155111) o Polygon Amoy (80002)`);
+      return;
+    }
+    
+    console.log(`✅ Conectado a ${supportedNetworks[network.chainId].name}`);
+    
+    // 2. Seleccionar contrato según la red
+    let nftContract, nftAbi;
+    
+    if (network.chainId === 11155111) {
+      // Sepolia
+      nftContract = "0x5FbDB2315678afccb333f8a9c6122f65991e6F61";
+      nftAbi = [
+        "function safeMint(address to, string memory tokenURI) public",
+        "function balanceOf(address owner) public view returns (uint256)"
+      ];
+    } else if (network.chainId === 80002) {
+      // Polygon Amoy
+      nftContract = "0x2279B7A0a67DB372996c5d4401fFFd7a6f19b0c1";
+      nftAbi = [
+        "function safeMint(address to, string memory tokenURI) public",
+        "function balanceOf(address owner) public view returns (uint256)"
+      ];
+    } else {
+      alert('Red no soportada para minteo');
+      return;
+    }
+    
+    // 3. Validar dirección del contrato
+    if (!ethers.isAddress(nftContract)) {
+      console.error('❌ Dirección del contrato inválida:', nftContract);
+      alert('Error: Dirección del contrato no válida');
+      return;
+    }
+    
+    // 4. Generar metadata y URI
     const svgData = document.getElementById("charAvatar").outerHTML;
     const svg64 = btoa(unescape(encodeURIComponent(svgData)));
     const image = `data:image/svg+xml;base64,${svg64}`;
     
     const metadata = {
       name: currentCharacter.name,
-      description: `Personaje D&D: ${currentCharacter.race} ${currentCharacter.class}`,
+      description: `Personaje D&D: ${currentCharacter.race} ${currentCharacter.class} Nivel ${currentCharacter.level}`,
       image,
+      external_url: "https://jcazorla90.github.io/dnd-nft-generator/",
       attributes: [
         { trait_type: "Raza", value: currentCharacter.race },
         { trait_type: "Clase", value: currentCharacter.class },
-        { trait_type: "Nivel", value: currentCharacter.level },
-        { trait_type: "Fuerza", value: currentCharacter.stats.strength },
-        { trait_type: "Destreza", value: currentCharacter.stats.dexterity },
-        { trait_type: "Constitución", value: currentCharacter.stats.constitution },
-        { trait_type: "Inteligencia", value: currentCharacter.stats.intelligence },
-        { trait_type: "Sabiduría", value: currentCharacter.stats.wisdom },
-        { trait_type: "Carisma", value: currentCharacter.stats.charisma }
+        { trait_type: "Nivel", value: currentCharacter.level.toString() },
+        { trait_type: "Fuerza", value: currentCharacter.stats.strength.toString() },
+        { trait_type: "Destreza", value: currentCharacter.stats.dexterity.toString() },
+        { trait_type: "Constitución", value: currentCharacter.stats.constitution.toString() },
+        { trait_type: "Inteligencia", value: currentCharacter.stats.intelligence.toString() },
+        { trait_type: "Sabiduría", value: currentCharacter.stats.wisdom.toString() },
+        { trait_type: "Carisma", value: currentCharacter.stats.charisma.toString() },
+        { trait_type: "CA", value: currentCharacter.ac.toString() },
+        { trait_type: "HP", value: currentCharacter.hp.toString() }
       ]
     };
     
     const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(metadata))));
     const tokenURI = `data:application/json;base64,${jsonB64}`;
     
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    // 5. Conectar billetera
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const signer = await provider.getSigner();
-    const contract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer);
+    const address = await signer.getAddress();
     
-    const tx = await contract.safeMint(await signer.getAddress(), tokenURI);
-    alert(`NFT minteado en testnet!\n\nHash: ${tx.hash}\n\nPuedes verlo en testnets.opensea.io`);
+    console.log(`✅ Billetera conectada: ${address}`);
+    
+    // 6. Crear instancia del contrato
+    const contract = new ethers.Contract(nftContract, nftAbi, signer);
+    
+    // 7. Mintear NFT
+    console.log('🔄 Minteando NFT...');
+    const tx = await contract.safeMint(address, tokenURI);
+    
+    console.log(`✅ Transacción enviada: ${tx.hash}`);
+    
+    // 8. Esperar confirmación
+    const receipt = await tx.wait();
+    console.log(`✅ NFT minteado exitosamente en bloque ${receipt.blockNumber}`);
+    
+    // 9. Mostrar éxito
+    const explorerUrl = network.chainId === 11155111 
+      ? `https://sepolia.etherscan.io/tx/${tx.hash}`
+      : `https://amoy.polygonscan.com/tx/${tx.hash}`;
+    
+    alert(
+      `🎉 ¡NFT MINTEADO EXITOSAMENTE!\n\n` +
+      `Personaje: ${currentCharacter.name}\n` +
+      `Red: ${supportedNetworks[network.chainId].name}\n` +
+      `Hash: ${tx.hash}\n\n` +
+      `Ver en explorer: ${explorerUrl}`
+    );
     
   } catch(err) {
-    console.error(err);
-    alert('Error al mintear NFT: ' + (err.message || err));
+    console.error('❌ Error completo:', err);
+    
+    // Mensajes de error más específicos
+    if (err.code === 'ACTION_REJECTED') {
+      alert('❌ Transacción cancelada por el usuario');
+    } else if (err.message.includes('insufficient funds')) {
+      alert('❌ Fondos insuficientes para pagar gas\n\nObtén testnet ETH/MATIC en un faucet');
+    } else if (err.message.includes('bad address checksum')) {
+      alert('❌ Error de checksum en la dirección del contrato\n\nContacta al desarrollador');
+    } else if (err.message.includes('network')) {
+      alert('❌ Error de conexión de red\n\nVerifica tu conexión y que estés en testnet');
+    } else {
+      alert('❌ Error al mintear NFT:\n\n' + (err.message || err.toString()));
+    }
   }
 }
+
 
 // ==========================================
 // MODO OSCURO
