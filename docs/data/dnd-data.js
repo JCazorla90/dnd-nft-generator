@@ -1,810 +1,665 @@
+// ==========================================
+// 🎲 D&D 5E - DATOS COMPLETOS CON PROGRESIÓN
+// Sistema de habilidades desbloqueables por nivel
+// ==========================================
+
 const DND_DATA = {
   version: "5e",
   
+  // ===== RAZAS =====
   races: {
     "Humano": {
-      abilityBonuses: { all: 1 }, // +1 a todas
-      traits: [
-        "Versatilidad: +1 a todas las características",
-        "Idioma adicional a elección",
-        "Competencia adicional en una habilidad a elección"
-      ],
       speed: 30,
-      size: "Medium",
-      languages: ["Común", "1 adicional a elección"],
-      vision: "Normal"
+      traits: [
+        "Versátil: +1 a todas las características",
+        "Idioma adicional de tu elección",
+        "Dote adicional en nivel 1"
+      ]
     },
-    
     "Elfo": {
+      speed: 30,
+      traits: [
+        "Visión en la oscuridad (60 ft)",
+        "Ventaja contra encantamiento",
+        "Inmune a sueño mágico",
+        "Percepción competente"
+      ],
       subraces: {
-        "Alto Elfo": {
-          abilityBonuses: { dexterity: 2, intelligence: 1 },
+        "Alto": {
           traits: [
-            "Visión en la oscuridad (60 ft)",
-            "Sentidos agudos: Competencia en Percepción",
-            "Trance élfico: 4 horas de meditación = descanso largo",
-            "Ancestro feérico: Ventaja contra encantamiento, inmune a dormir",
-            "Entrenamiento élfico con armas: Competencia espada larga, corta, arco largo y corto",
-            "Truco de mago: Conoces 1 truco de la lista de mago"
-          ],
-          cantrip: "1 truco de Mago"
-        },
-        "Elfo Oscuro (Drow)": {
-          abilityBonuses: { dexterity: 2, charisma: 1 },
-          traits: [
-            "Visión en la oscuridad superior (120 ft)",
-            "Sensibilidad a la luz solar: Desventaja en ataques y Percepción con luz solar",
-            "Magia drow: Conoces Luces danzantes. En nivel 3: Fuego feérico 1/día. En nivel 5: Oscuridad 1/día",
-            "Entrenamiento drow con armas: Competencia estoques, espadas cortas, ballestas de mano"
+            "+2 Destreza, +1 Inteligencia",
+            "Truco de mago a elección",
+            "Armas élficas competente"
           ]
         },
-        "Elfo de los Bosques": {
-          abilityBonuses: { dexterity: 2, wisdom: 1 },
+        "Bosque": {
           traits: [
-            "Visión en la oscuridad (60 ft)",
-            "Pies ligeros: Velocidad base 35 ft",
-            "Máscara de lo salvaje: Puedes esconderte incluso con cobertura ligera de follaje, lluvia, nieve, niebla",
-            "Entrenamiento élfico con armas: Competencia espada larga, corta, arco largo y corto"
+            "+2 Destreza, +1 Sabiduría",
+            "Velocidad 35 ft",
+            "Puedes esconderte en follaje ligero"
           ]
         }
-      },
-      speed: 30,
-      size: "Medium",
-      languages: ["Común", "Élfico"],
-      vision: "Visión en la oscuridad (60 ft)"
+      }
     },
-    
     "Enano": {
+      speed: 25,
+      traits: [
+        "Visión en la oscuridad (60 ft)",
+        "Ventaja contra veneno",
+        "Competente con herramientas de artesano",
+        "Conocimiento de piedra"
+      ],
       subraces: {
-        "Enano de las Montañas": {
-          abilityBonuses: { constitution: 2, strength: 2 },
+        "Montaña": {
           traits: [
-            "Visión en la oscuridad (60 ft)",
-            "Resistencia enana: Ventaja contra veneno, resistencia al daño de veneno",
-            "Entrenamiento enano de combate: Competencia hacha de batalla, hacha de mano, martillo ligero, martillo de guerra",
-            "Competencia en herramientas: Competencia en herramientas de artesano a elección",
-            "Conocimiento de la piedra: +2 a Historia relacionada con piedra",
-            "Armadura enana: Competencia en armaduras ligeras y medianas"
+            "+2 Constitución, +2 Fuerza",
+            "Competente con armaduras ligeras y medias"
           ]
         },
-        "Enano de las Colinas": {
-          abilityBonuses: { constitution: 2, wisdom: 1 },
+        "Colina": {
           traits: [
-            "Visión en la oscuridad (60 ft)",
-            "Resistencia enana: Ventaja contra veneno, resistencia al daño de veneno",
-            "Dureza enana: Máximo de puntos de golpe aumenta en 1 por nivel",
-            "Entrenamiento enano de combate: Competencia hacha de batalla, hacha de mano, martillo ligero, martillo de guerra",
-            "Competencia en herramientas: Competencia en herramientas de artesano a elección"
+            "+2 Constitución, +1 Sabiduría",
+            "+1 HP por nivel"
           ]
         }
-      },
-      speed: 25,
-      size: "Medium",
-      languages: ["Común", "Enano"],
-      vision: "Visión en la oscuridad (60 ft)",
-      special: "La velocidad no se reduce por llevar armadura pesada"
+      }
     },
-    
     "Mediano": {
-      subraces: {
-        "Mediano Piesligeros": {
-          abilityBonuses: { dexterity: 2, charisma: 1 },
-          traits: [
-            "Afortunado: Cuando saques 1 natural, puedes volver a tirar",
-            "Valiente: Ventaja contra estar asustado",
-            "Agilidad de mediano: Puedes moverte a través del espacio de criaturas más grandes",
-            "Sigiloso por naturaleza: Puedes esconderte detrás de criaturas más grandes"
-          ]
-        },
-        "Mediano Fornido": {
-          abilityBonuses: { dexterity: 2, constitution: 1 },
-          traits: [
-            "Afortunado: Cuando saques 1 natural, puedes volver a tirar",
-            "Valiente: Ventaja contra estar asustado",
-            "Resistencia de fornido: Ventaja contra veneno, resistencia al daño de veneno",
-            "Agilidad de mediano: Puedes moverte a través del espacio de criaturas más grandes"
-          ]
-        }
-      },
       speed: 25,
-      size: "Small",
-      languages: ["Común", "Mediano"],
-      vision: "Normal"
+      traits: [
+        "+2 Destreza",
+        "Afortunado: repite 1s en dados",
+        "Valiente: ventaja contra miedo",
+        "Agilidad mediana: atraviesar criaturas grandes"
+      ]
     },
-    
     "Orco": {
-      abilityBonuses: { strength: 2, constitution: 1 },
-      traits: [
-        "Visión en la oscuridad (60 ft)",
-        "Agresivo: Como acción bonus, puedes hacer Dash hacia un enemigo que veas",
-        "Amenazador: Competencia en Intimidación",
-        "Resistencia implacable: 1 vez por descanso largo, cuando quedas a 0 HP puedes quedar con 1 HP"
-      ],
       speed: 30,
-      size: "Medium",
-      languages: ["Común", "Orco"],
-      vision: "Visión en la oscuridad (60 ft)"
+      traits: [
+        "+2 Fuerza, +1 Constitución",
+        "Visión en la oscuridad (60 ft)",
+        "Agresivo: bonus action para moverse",
+        "Amenazador: competente en Intimidación"
+      ]
     },
-    
     "Tiefling": {
-      abilityBonuses: { charisma: 2, intelligence: 1 },
-      traits: [
-        "Visión en la oscuridad (60 ft)",
-        "Resistencia infernal: Resistencia al daño de fuego",
-        "Legado infernal: Conoces el truco Taumaturgia. Al nivel 3: Reprensión infernal 1/día. Al nivel 5: Oscuridad 1/día (CAR es tu característica)"
-      ],
       speed: 30,
-      size: "Medium",
-      languages: ["Común", "Infernal"],
-      vision: "Visión en la oscuridad (60 ft)"
+      traits: [
+        "+2 Carisma, +1 Inteligencia",
+        "Visión en la oscuridad (60 ft)",
+        "Resistencia infernal: resistencia a fuego",
+        "Legado infernal: magia innata (Taumaturgia, Reprender infernal, Oscuridad)"
+      ]
     },
-    
     "Dracónido": {
-      abilityBonuses: { strength: 2, charisma: 1 },
-      draconicAncestry: {
-        "Rojo": { damageType: "Fuego", breathWeapon: "Cono de 15 ft" },
-        "Azul": { damageType: "Relámpago", breathWeapon: "Línea de 5x30 ft" },
-        "Verde": { damageType: "Veneno", breathWeapon: "Cono de 15 ft" },
-        "Negro": { damageType: "Ácido", breathWeapon: "Línea de 5x30 ft" },
-        "Blanco": { damageType: "Frío", breathWeapon: "Cono de 15 ft" },
-        "Bronce": { damageType: "Relámpago", breathWeapon: "Línea de 5x30 ft" },
-        "Cobre": { damageType: "Ácido", breathWeapon: "Línea de 5x30 ft" },
-        "Oro": { damageType: "Fuego", breathWeapon: "Cono de 15 ft" },
-        "Plata": { damageType: "Frío", breathWeapon: "Cono de 15 ft" },
-        "Latón": { damageType: "Fuego", breathWeapon: "Línea de 5x30 ft" }
-      },
-      traits: [
-        "Ancestro dracónico: Elige un tipo de dragón (determina resistencia y arma de aliento)",
-        "Arma de aliento: Acción, 2d6 de daño (CD 8 + CON + bonif. competencia), recupera tras descanso corto/largo",
-        "Resistencia al daño: Resistencia al tipo de daño de tu ancestro dracónico"
-      ],
       speed: 30,
-      size: "Medium",
-      languages: ["Común", "Dracónico"],
-      vision: "Normal"
+      traits: [
+        "+2 Fuerza, +1 Carisma",
+        "Ancestro dracónico: resistencia elemental",
+        "Arma de aliento (1 uso, recarga descanso corto)",
+        "Daño del aliento: 2d6 (mejora por nivel)"
+      ]
     },
-    
     "Gnomo": {
-      subraces: {
-        "Gnomo de las Rocas": {
-          abilityBonuses: { intelligence: 2, constitution: 1 },
-          traits: [
-            "Visión en la oscuridad (60 ft)",
-            "Astucia gnómica: Ventaja en salvaciones INT, SAB y CAR contra magia",
-            "Conocimiento de artífice: Competencia en Historia (Arcanos) relacionada con objetos mágicos, alquímicos y tecnológicos. Puedes añadir el doble de tu bonificador",
-            "Manitas: Competencia en herramientas de artesano (juguetes mecánicos)"
-          ]
-        },
-        "Gnomo de los Bosques": {
-          abilityBonuses: { intelligence: 2, dexterity: 1 },
-          traits: [
-            "Visión en la oscuridad (60 ft)",
-            "Astucia gnómica: Ventaja en salvaciones INT, SAB y CAR contra magia",
-            "Ilusionista nato: Conoces el truco Ilusión menor (INT)",
-            "Hablar con bestias pequeñas: Puedes comunicarte de forma simple con bestias Pequeñas o menores"
-          ]
-        }
-      },
       speed: 25,
-      size: "Small",
-      languages: ["Común", "Gnómico"],
-      vision: "Visión en la oscuridad (60 ft)"
+      traits: [
+        "+2 Inteligencia",
+        "Visión en la oscuridad (60 ft)",
+        "Astucia gnómica: ventaja vs magia INT/SAB/CAR",
+        "Pequeño pero valiente"
+      ]
     },
-    
     "Semielfo": {
-      abilityBonuses: { charisma: 2, choice: 2 }, // +2 a dos características a elección
-      traits: [
-        "Visión en la oscuridad (60 ft)",
-        "Ancestro feérico: Ventaja contra encantamiento, inmune a dormir",
-        "Versatilidad de habilidad: Competencia en 2 habilidades a elección",
-        "+2 a dos características a elección (además del +2 CAR)"
-      ],
       speed: 30,
-      size: "Medium",
-      languages: ["Común", "Élfico", "1 adicional a elección"],
-      vision: "Visión en la oscuridad (60 ft)"
+      traits: [
+        "+2 Carisma, +1 a otras dos características",
+        "Visión en la oscuridad (60 ft)",
+        "Ventaja contra encantamiento",
+        "Dos habilidades adicionales competentes"
+      ]
     },
-    
     "Semiorco": {
-      abilityBonuses: { strength: 2, constitution: 1 },
-      traits: [
-        "Visión en la oscuridad (60 ft)",
-        "Amenazador: Competencia en Intimidación",
-        "Resistencia implacable: 1 vez por descanso largo, cuando quedas a 0 HP puedes quedar con 1 HP",
-        "Ataques salvajes: Cuando hagas crítico con arma cuerpo a cuerpo, tira un dado de daño adicional"
-      ],
       speed: 30,
-      size: "Medium",
-      languages: ["Común", "Orco"],
-      vision: "Visión en la oscuridad (60 ft)"
+      traits: [
+        "+2 Fuerza, +1 Constitución",
+        "Visión en la oscuridad (60 ft)",
+        "Amenazador: competente en Intimidación",
+        "Resistencia implacable: quedar con 1 HP en vez de 0 (1/día)"
+      ]
     }
   },
-  
+
+  // ===== CLASES CON PROGRESIÓN =====
   classes: {
     "Guerrero": {
       hitDie: 10,
-      primaryAbility: ["Fuerza", "Destreza"],
       proficiencies: {
         armor: ["Todas las armaduras", "Escudos"],
         weapons: ["Armas simples", "Armas marciales"],
-        tools: [],
-        savingThrows: ["Fuerza", "Constitución"]
+        savingThrows: ["Fuerza", "Constitución"],
+        tools: []
       },
       skills: {
         choose: 2,
         from: ["Acrobacias", "Trato con animales", "Atletismo", "Historia", "Perspicacia", "Intimidación", "Percepción", "Supervivencia"]
       },
-      features: [
-        "Estilo de combate (nivel 1): Elige uno - Arquería, Defensa, Duelo, Armas grandes, Protección, Combate con dos armas",
-        "Recuperación (nivel 1): 1 vez por descanso corto, recupera 1d10 + nivel de guerrero HP",
-        "Oleada de acción (nivel 2): 1 vez por descanso corto, acción adicional en tu turno"
-      ],
-      subclasses: {
-        "Campeón": "Críticos mejorados (19-20), Atleta notable, Crítico superior (18-20)",
-        "Maestro de batalla": "Maniobras de combate, Dados de superioridad, Conoce tu enemigo",
-        "Caballero arcano": "Lanzamiento de conjuros, Vínculo con arma, Golpe de guerra"
-      },
       equipment: [
-        "Opción A: Cota de mallas + Escudo",
-        "Opción B: Armadura de cuero, Arco largo + 20 flechas",
-        "Arma marcial + escudo O 2 armas marciales",
-        "Ballesta ligera + 20 virotes O 2 hachas de mano",
-        "Equipo de explorador O Equipo de mazmorreo"
+        "Cota de mallas",
+        "Espada larga y escudo",
+        "Dos hachas de mano",
+        "Ballesta ligera y 20 virotes",
+        "Mochila de explorador"
       ],
-      spellcasting: false
+      // 🆕 PROGRESIÓN POR NIVEL
+      progression: {
+        1: {
+          features: [
+            "Segundo aliento (recuperar 1d10 + nivel HP como acción bonus, 1/descanso corto)",
+            "Estilo de lucha (elige uno: Defensa +1 AC, Duelista +2 daño, Gran arma, Lucha con dos armas, Protección, Arquería +2 ataque)"
+          ]
+        },
+        2: {
+          features: [
+            "Oleada de acción (acción adicional, 1/descanso corto)",
+            "2 usos de Segundo aliento"
+          ]
+        },
+        3: {
+          features: [
+            "Arquetipo marcial (Campeón, Maestro de batalla, Caballero arcano)",
+            "Mejora crítica (19-20) si Campeón"
+          ]
+        },
+        4: {
+          features: ["Mejora de característica (+2 total o dote)"]
+        },
+        5: {
+          features: [
+            "Ataque extra (2 ataques por acción)",
+            "Competencia adicional"
+          ]
+        },
+        6: {
+          features: ["Mejora de característica"]
+        },
+        7: {
+          features: ["Característica de arquetipo"]
+        },
+        9: {
+          features: ["Indomable (repetir salvación fallida, 1/día)"]
+        },
+        10: {
+          features: ["Característica de arquetipo"]
+        },
+        11: {
+          features: ["Ataque extra (3 ataques)"]
+        },
+        15: {
+          features: ["Característica de arquetipo"]
+        },
+        17: {
+          features: ["Oleada de acción (2 usos)", "Indomable (2 usos)"]
+        },
+        18: {
+          features: ["Característica de arquetipo"]
+        },
+        20: {
+          features: ["Ataque extra (4 ataques)"]
+        }
+      }
     },
-    
+
     "Mago": {
       hitDie: 6,
-      primaryAbility: ["Inteligencia"],
       proficiencies: {
         armor: [],
         weapons: ["Dagas", "Dardos", "Hondas", "Bastones", "Ballestas ligeras"],
-        tools: [],
-        savingThrows: ["Inteligencia", "Sabiduría"]
+        savingThrows: ["Inteligencia", "Sabiduría"],
+        tools: []
       },
       skills: {
         choose: 2,
-        from: ["Arcanos", "Historia", "Perspicacia", "Investigación", "Medicina", "Religión"]
-      },
-      features: [
-        "Lanzamiento de conjuros (INT)",
-        "Recuperación arcana (nivel 1): Recupera espacios de conjuro (total nivel igual a la mitad de tu nivel de mago)",
-        "Tradición arcana (nivel 2): Escuela de Abjuración, Adivinación, Encantamiento, Evocación, Ilusión, Invocación, Nigromancia, Transmutación"
-      ],
-      subclasses: {
-        "Escuela de Evocación": "Esculpir conjuros, Truco potente, Evocación potenciada",
-        "Escuela de Abjuración": "Guardián abjurador, Conjuración proyectada, Abjuración mejorada",
-        "Escuela de Ilusión": "Ilusión mejorada menor, Ilusiones maleables, Yo ilusorio"
-      },
-      spellcasting: {
-        ability: "Inteligencia",
-        level1Spells: 6,
-        cantrips: 3,
-        preparedSpells: "INT + nivel"
-      },
-      startingSpells: {
-        cantrips: ["Rayo de escarcha", "Mano de mago", "Luces danzantes"],
-        level1: ["Armadura de mago", "Proyectil mágico", "Escudo", "Detectar magia", "Comprensión de idiomas", "Alarma"]
+        from: ["Arcana", "Historia", "Perspicacia", "Investigación", "Medicina", "Religión"]
       },
       equipment: [
-        "Bastón arcano O Daga",
-        "Bolsa de componentes O Foco arcano",
-        "Equipo de erudito O Equipo de explorador",
-        "Libro de conjuros"
-      ]
+        "Bastón o daga",
+        "Bolsa de componentes",
+        "Libro de conjuros",
+        "Mochila de erudito"
+      ],
+      progression: {
+        1: {
+          features: [
+            "Lanzamiento de conjuros (Inteligencia)",
+            "Libro de conjuros (6 conjuros nivel 1)",
+            "Preparar INT mod + nivel conjuros",
+            "Recuperación arcana (recuperar espacios de conjuro 1/día)"
+          ],
+          spellSlots: { 1: 2 },
+          cantrips: 3
+        },
+        2: {
+          features: ["Tradición arcana (Abjuración, Conjuración, Adivinación, Encantamiento, Evocación, Ilusión, Nigromancia, Transmutación)"],
+          spellSlots: { 1: 3 }
+        },
+        3: {
+          features: ["Conjuros de nivel 2"],
+          spellSlots: { 1: 4, 2: 2 },
+          cantrips: 3
+        },
+        4: {
+          features: ["Mejora de característica"],
+          spellSlots: { 1: 4, 2: 3 },
+          cantrips: 4
+        },
+        5: {
+          features: ["Conjuros de nivel 3"],
+          spellSlots: { 1: 4, 2: 3, 3: 2 },
+          cantrips: 4
+        },
+        6: {
+          features: ["Característica de tradición arcana"],
+          spellSlots: { 1: 4, 2: 3, 3: 3 },
+          cantrips: 4
+        },
+        9: {
+          features: ["Conjuros de nivel 5"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 1 },
+          cantrips: 5
+        },
+        10: {
+          features: ["Característica de tradición arcana"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 2 },
+          cantrips: 5
+        },
+        11: {
+          features: ["Conjuros de nivel 6"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 2, 6: 1 },
+          cantrips: 5
+        },
+        13: {
+          features: ["Conjuros de nivel 7"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 2, 6: 1, 7: 1 },
+          cantrips: 5
+        },
+        17: {
+          features: ["Conjuros de nivel 9", "Maestría de conjuros (2 conjuros nivel 1-2 a voluntad)"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 1, 7: 1, 8: 1, 9: 1 },
+          cantrips: 5
+        },
+        18: {
+          features: ["Maestría de hechizos (1 conjuro nivel 3 a voluntad)"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 1, 7: 1, 8: 1, 9: 1 },
+          cantrips: 5
+        },
+        20: {
+          features: ["Mejora de firma (2 conjuros nivel 3 sin gastar espacios)"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 2, 7: 2, 8: 1, 9: 1 },
+          cantrips: 5
+        }
+      }
     },
-    
+
     "Pícaro": {
       hitDie: 8,
-      primaryAbility: ["Destreza"],
       proficiencies: {
-        armor: ["Armaduras ligeras"],
-        weapons: ["Armas simples", "Ballestas de mano", "Espadas cortas", "Espadas largas", "Estoques"],
-        tools: ["Herramientas de ladrón"],
-        savingThrows: ["Destreza", "Inteligencia"]
+        armor: ["Armadura ligera"],
+        weapons: ["Armas simples", "Ballestas de mano", "Espadas largas", "Estoques", "Espadas cortas"],
+        savingThrows: ["Destreza", "Inteligencia"],
+        tools: ["Herramientas de ladrón"]
       },
       skills: {
         choose: 4,
         from: ["Acrobacias", "Atletismo", "Engaño", "Perspicacia", "Intimidación", "Investigación", "Percepción", "Interpretación", "Persuasión", "Juego de manos", "Sigilo"]
       },
-      features: [
-        "Pericia (nivel 1): Dobla bonificador de competencia en 2 habilidades que elijas",
-        "Ataque furtivo (nivel 1): 1d6 daño extra (escala con nivel)",
-        "Jerga de ladrones (nivel 1): Idioma secreto + señales",
-        "Acción astuta (nivel 2): Dash, Desenganche o Esconderse como acción bonus",
-        "Esquiva asombrosa (nivel 5): No puedes ser sorprendido si no estás incapacitado"
-      ],
-      subclasses: {
-        "Ladrón": "Manos rápidas, Trabajo de segunda historia, Reflejos supremos",
-        "Asesino": "Bonificador de asesino, Infiltración experta, Impostor",
-        "Embaucador arcano": "Lanzamiento de conjuros, Truco de mano de mago, Emboscada mágica"
-      },
       equipment: [
-        "Estoque O Espada corta",
-        "Arco corto + 20 flechas O Espada corta",
-        "Pack de ladrón O Pack de explorador O Pack de mazmorreo",
-        "Armadura de cuero + 2 dagas + Herramientas de ladrón"
+        "Estoques",
+        "Arco corto y carcaj con 20 flechas",
+        "Herramientas de ladrón",
+        "Armadura de cuero",
+        "Dos dagas",
+        "Mochila de asaltante"
       ],
-      spellcasting: false
+      progression: {
+        1: {
+          features: [
+            "Pericia (doble bonificador en 2 habilidades)",
+            "Ataque furtivo (+1d6 daño extra con ventaja o aliado cerca)",
+            "Argot de ladrones"
+          ]
+        },
+        2: {
+          features: ["Acción astuta (Bonus action: Dash, Disengage, Hide)"]
+        },
+        3: {
+          features: [
+            "Arquetipo de pícaro (Ladrón, Asesino, Embaucador arcano, Inquisidor)",
+            "Ladrón: Manos rápidas, Pies ligeros",
+            "Asesino: Asesinar (+2d6 vs sorprendido)"
+          ]
+        },
+        5: {
+          features: ["Esquiva asombrosa (ataque con ventaja contra ti no tiene ventaja)", "Ataque furtivo +3d6"]
+        },
+        7: {
+          features: ["Evasión (salvación DES exitosa = 0 daño, fallida = mitad)"]
+        },
+        9: {
+          features: ["Característica de arquetipo", "Ataque furtivo +5d6"]
+        },
+        11: {
+          features: ["Talento confiable (habilidades competentes mínimo 10)", "Ataque furtivo +6d6"]
+        },
+        13: {
+          features: ["Característica de arquetipo", "Ataque furtivo +7d6"]
+        },
+        15: {
+          features: ["Mente resbaladiza (ventaja vs encantamiento)", "Ataque furtivo +8d6"]
+        },
+        17: {
+          features: ["Característica de arquetipo", "Ataque furtivo +9d6"]
+        },
+        18: {
+          features: ["Escurridizo (atacantes sin ventaja vs ti)"]
+        },
+        20: {
+          features: ["Golpe de suerte (convertir fallo en éxito, 1/descanso corto)", "Ataque furtivo +10d6"]
+        }
+      }
     },
-    
+
     "Clérigo": {
       hitDie: 8,
-      primaryAbility: ["Sabiduría"],
       proficiencies: {
-        armor: ["Armaduras ligeras", "Armaduras medianas", "Escudos"],
+        armor: ["Armadura ligera", "Armadura media", "Escudos"],
         weapons: ["Armas simples"],
-        tools: [],
-        savingThrows: ["Sabiduría", "Carisma"]
+        savingThrows: ["Sabiduría", "Carisma"],
+        tools: []
       },
       skills: {
         choose: 2,
         from: ["Historia", "Perspicacia", "Medicina", "Persuasión", "Religión"]
       },
-      features: [
-        "Lanzamiento de conjuros (SAB)",
-        "Dominio divino (nivel 1): Conocimiento, Guerra, Engaño, Luz, Naturaleza, Tempestad, Vida",
-        "Canalizar divinidad (nivel 2): 1/descanso corto. Opciones según dominio + Expulsar muertos vivientes"
+      equipment: [
+        "Maza",
+        "Cota de escamas o armadura de cuero",
+        "Ballesta ligera y 20 virotes",
+        "Símbolo sagrado",
+        "Mochila de sacerdote"
       ],
-      subclasses: {
-        "Dominio de Vida": "Discípulo de la vida, Canalizar: Preservar vida, Sanador bendecido",
-        "Dominio de Luz": "Truco adicional (Luz), Canalizar: Resplandor del alba, Llamarada protectora",
-        "Dominio de Guerra": "Competencia armas y armaduras, Canalizar: Golpe guiado, Ataque de guerra"
-      },
-      spellcasting: {
-        ability: "Sabiduría",
-        cantrips: 3,
-        preparedSpells: "SAB + nivel",
-        domainSpells: "Siempre preparados según dominio"
-      },
-      startingSpells: {
-        cantrips: ["Llama sagrada", "Orientación", "Taumaturgia"],
-        domainExamples: {
-          Vida: ["Bendición", "Curar heridas"],
-          Luz: ["Manos ardientes", "Hada de fuego"]
+      progression: {
+        1: {
+          features: [
+            "Lanzamiento de conjuros divinos (Sabiduría)",
+            "Dominio divino (Vida, Luz, Conocimiento, Naturaleza, Tempestad, Engaño, Guerra)",
+            "Canalizar divinidad (1/descanso corto)"
+          ],
+          spellSlots: { 1: 2 },
+          cantrips: 3
+        },
+        2: {
+          features: [
+            "Canalizar divinidad: Expulsar muertos (30 ft, SAB CD)",
+            "Característica de dominio"
+          ],
+          spellSlots: { 1: 3 },
+          cantrips: 3
+        },
+        5: {
+          features: ["Destruir muertos (CR 1/2 o menos)"],
+          spellSlots: { 1: 4, 2: 3, 3: 2 },
+          cantrips: 3
+        },
+        8: {
+          features: ["Destruir muertos (CR 1)", "Golpe divino (+1d8 radiante en arma)"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 2 },
+          cantrips: 4
+        },
+        10: {
+          features: ["Intervención divina (SAB% de éxito, ayuda directa de deidad)"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 2 },
+          cantrips: 5
+        },
+        17: {
+          features: ["Destruir muertos (CR 4)", "Característica de dominio"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 1, 7: 1, 8: 1, 9: 1 },
+          cantrips: 5
+        },
+        20: {
+          features: ["Intervención divina garantizada"],
+          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 2, 7: 2, 8: 1, 9: 1 },
+          cantrips: 5
         }
-      },
-      equipment: [
-        "Maza O Martillo de guerra (con competencia)",
-        "Armadura de escamas O Armadura de cuero O Cota de mallas (con competencia)",
-        "Ballesta ligera + 20 virotes O Arma simple",
-        "Pack de sacerdote O Pack de explorador",
-        "Escudo + Símbolo sagrado"
-      ]
+      }
     },
-    
-    "Bárbaro": {
-      hitDie: 12,
-      primaryAbility: ["Fuerza"],
-      proficiencies: {
-        armor: ["Armaduras ligeras", "Armaduras medianas", "Escudos"],
-        weapons: ["Armas simples", "Armas marciales"],
-        tools: [],
-        savingThrows: ["Fuerza", "Constitución"]
-      },
-      skills: {
-        choose: 2,
-        from: ["Trato con animales", "Atletismo", "Intimidación", "Naturaleza", "Percepción", "Supervivencia"]
-      },
-      features: [
-        "Ira (nivel 1): 2/descanso largo. +2 daño cuerpo a cuerpo, ventaja en FUE y tiradas de salvación FUE, resistencia daño contundente/cortante/perforante",
-        "Defensa sin armadura (nivel 1): CA = 10 + DES + CON (sin armadura)",
-        "Ataque temerario (nivel 2): Ventaja en ataques, enemigos tienen ventaja contra ti",
-        "Sentido del peligro (nivel 2): Ventaja en DES contra efectos que veas",
-        "Camino primario (nivel 3): Senda del Berserker, Senda del Luchador totémico"
-      ],
-      subclasses: {
-        "Senda del Berserker": "Frenesí (ataque bonus durante Ira), Ira sin sentido, Presencia intimidante",
-        "Senda del Luchador totémico": "Espíritu tótem (Oso/Águila/Lobo), Aspecto de la bestia, Sintonía con espíritus"
-      },
-      equipment: [
-        "Hacha de batalla O Cualquier arma marcial cuerpo a cuerpo",
-        "2 hachas de mano O Cualquier arma simple",
-        "Pack de explorador + 4 jabalinas"
-      ],
-      spellcasting: false
-    },
-    
+
+    // 🆕 RESTO DE CLASES CON PROGRESIÓN (resumen)
     "Paladín": {
       hitDie: 10,
-      primaryAbility: ["Fuerza", "Carisma"],
       proficiencies: {
         armor: ["Todas las armaduras", "Escudos"],
         weapons: ["Armas simples", "Armas marciales"],
-        tools: [],
-        savingThrows: ["Sabiduría", "Carisma"]
+        savingThrows: ["Sabiduría", "Carisma"],
+        tools: []
       },
-      skills: {
-        choose: 2,
-        from: ["Atletismo", "Perspicacia", "Intimidación", "Medicina", "Persuasión", "Religión"]
-      },
-      features: [
-        "Sentido divino (nivel 1): Detectar celestiales/demonios/muertos vivientes 60 ft",
-        "Imposición de manos (nivel 1): 5 x nivel HP de curación como acción",
-        "Estilo de combate (nivel 2)",
-        "Lanzamiento de conjuros (nivel 2, CAR)",
-        "Castigo divino (nivel 2): Gasta espacio de conjuro, +2d8 radiante por nivel",
-        "Juramento sagrado (nivel 3): Devoción, Antiguos, Venganza"
-      ],
-      subclasses: {
-        "Juramento de Devoción": "Arma sagrada, Expulsar lo profano, Aura de devoción",
-        "Juramento de los Antiguos": "Ira de la naturaleza, Expulsar lo infiel, Aura de guardián",
-        "Juramento de Venganza": "Abjurar enemigo, Voto de enemistad, Vengador implacable"
-      },
-      spellcasting: {
-        ability: "Carisma",
-        preparedSpells: "CAR/2 + nivel paladín",
-        oathSpells: "Siempre preparados según juramento"
-      },
-      equipment: [
-        "Arma marcial + escudo O 2 armas marciales",
-        "5 jabalinas O Arma simple cuerpo a cuerpo",
-        "Pack de sacerdote O Pack de explorador",
-        "Cota de mallas + Símbolo sagrado"
-      ]
+      skills: { choose: 2, from: ["Atletismo", "Perspicacia", "Intimidación", "Medicina", "Persuasión", "Religión"] },
+      equipment: ["Armadura completa", "Espada larga", "Escudo", "5 jabalinas", "Símbolo sagrado"],
+      features: ["Sentido divino", "Imposición de manos", "Juramento sagrado (nivel 3)", "Golpe divino", "Aura protectora"],
+      progression: {
+        1: { features: ["Sentido divino (detectar celestial/demonio/no-muerto 60 ft)", "Imposición de manos (curar nivel×5 HP/día)"] },
+        2: { features: ["Estilo de lucha", "Lanzamiento de conjuros (Carisma)"], spellSlots: { 1: 2 } },
+        3: { features: ["Juramento sagrado (Devoción, Antiguos, Venganza)", "Salud divina (inmune a enfermedad)"] },
+        5: { features: ["Ataque extra"] },
+        6: { features: ["Aura de protección (+CAR mod a salvaciones aliados 10 ft)"] },
+        11: { features: ["Golpe divino mejorado (2d8 extra)"] },
+        20: { features: ["Transformación sagrada (avatar divino)"] }
+      }
     },
-    
-    "Explorador": {
-      hitDie: 10,
-      primaryAbility: ["Destreza", "Sabiduría"],
+
+    "Bárbaro": {
+      hitDie: 12,
       proficiencies: {
-        armor: ["Armaduras ligeras", "Armaduras medianas", "Escudos"],
+        armor: ["Armadura ligera", "Armadura media", "Escudos"],
         weapons: ["Armas simples", "Armas marciales"],
-        tools: [],
-        savingThrows: ["Fuerza", "Destreza"]
+        savingThrows: ["Fuerza", "Constitución"],
+        tools: []
       },
-      skills: {
-        choose: 3,
-        from: ["Trato con animales", "Atletismo", "Perspicacia", "Investigación", "Naturaleza", "Percepción", "Sigilo", "Supervivencia"]
-      },
-      features: [
-        "Enemigo predilecto (nivel 1): Ventaja en rastrear + conocimiento adicional sobre un tipo de criatura",
-        "Explorador nato (nivel 1): Beneficios en terreno favorito",
-        "Estilo de combate (nivel 2)",
-        "Lanzamiento de conjuros (nivel 2, SAB)",
-        "Arquetipo de explorador (nivel 3): Cazador, Maestro de bestias, Acechador sombrío"
-      ],
-      subclasses: {
-        "Cazador": "Presa del cazador, Tácticas defensivas, Ataque múltiple mejorado",
-        "Maestro de bestias": "Compañero del explorador, Entrenamiento excepcional, Furia de la bestia",
-        "Acechador sombrío": "Magia del acechador, Esquiva de las sombras, Emboscada"
-      },
-      spellcasting: {
-        ability: "Sabiduría",
-        preparedSpells: "Todos los conjuros conocidos"
-      },
-      equipment: [
-        "Armadura de escamas O Armadura de cuero",
-        "2 espadas cortas O 2 armas simples cuerpo a cuerpo",
-        "Pack de explorador O Pack de mazmorreo",
-        "Arco largo + Carcaj con 20 flechas"
-      ]
+      skills: { choose: 2, from: ["Trato con animales", "Atletismo", "Intimidación", "Naturaleza", "Percepción", "Supervivencia"] },
+      equipment: ["Hacha grande", "Dos hachas de mano", "4 jabalinas", "Mochila de explorador"],
+      features: ["Furia", "Defensa sin armadura", "Ataque temerario", "Sentido del peligro"],
+      progression: {
+        1: { features: ["Furia (2/día, +2 daño, ventaja FUE, resistencia físico)", "Defensa sin armadura (AC = 10 + DES + CON)"] },
+        2: { features: ["Ataque temerario (ventaja en ataque, enemigos ventaja vs ti)", "Sentido del peligro (ventaja vs trampas)"] },
+        3: { features: ["Senda primaria (Berserker, Tótem, Ancestral)"] },
+        5: { features: ["Ataque extra", "Movimiento rápido (+10 ft sin armadura pesada)"] },
+        9: { features: ["Crítico brutal (+1 dado de arma en crítico)"] },
+        11: { features: ["Furia implacable (si furia cae a 0 HP, quedar con 1 HP una vez)"] },
+        20: { features: ["Campeón primitivo (FUE y CON +4, máximo 24)"] }
+      }
     },
-    
-    "Bardo": {
-      hitDie: 8,
-      primaryAbility: ["Carisma"],
-      proficiencies: {
-        armor: ["Armaduras ligeras"],
-        weapons: ["Armas simples", "Ballestas de mano", "Espadas largas", "Estoques", "Espadas cortas"],
-        tools: ["3 instrumentos musicales a elección"],
-        savingThrows: ["Destreza", "Carisma"]
-      },
-      skills: {
-        choose: 3,
-        from: "Cualquier habilidad"
-      },
-      features: [
-        "Lanzamiento de conjuros (CAR)",
-        "Inspiración bárdica (nivel 1): d6, número de veces igual a CAR por descanso largo",
-        "Multicompetente (nivel 2): Mitad de bonif. competencia en habilidades sin competencia",
-        "Canción de descanso (nivel 2): Aliados recuperan 1d6 extra HP en descanso corto",
-        "Colegio bárdico (nivel 3): Saber, Valor, Glamour"
-      ],
-      subclasses: {
-        "Colegio del Saber": "Competencias bonus, Palabras cortantes, Secretos mágicos adicionales",
-        "Colegio del Valor": "Competencias armas y armaduras medianas, Inspiración en combate, Ataque extra",
-        "Colegio del Glamour": "Presencia cautivadora, Manto de inspiración, Performance fascinante"
-      },
-      spellcasting: {
-        ability: "Carisma",
-        cantrips: 2,
-        knownSpells: "Tabla de bardo",
-        ritual: false
-      },
-      equipment: [
-        "Estoque O Espada larga O Arma simple",
-        "Pack de diplomático O Pack de artista",
-        "Laúd O Cualquier otro instrumento musical",
-        "Armadura de cuero + Daga"
-      ]
-    },
-    
+
     "Druida": {
       hitDie: 8,
-      primaryAbility: ["Sabiduría"],
       proficiencies: {
-        armor: ["Armaduras ligeras (no metal)", "Armaduras medianas (no metal)", "Escudos (no metal)"],
-        weapons: ["Clavas", "Dagas", "Dardos", "Jabalinas", "Mazas", "Bastones", "Cimitarras", "Hondas", "Lanzas"],
-        tools: ["Kit de herbolario"],
-        savingThrows: ["Inteligencia", "Sabiduría"]
+        armor: ["Armadura ligera (no metal)", "Armadura media (no metal)", "Escudos (no metal)"],
+        weapons: ["Garrotes", "Dagas", "Dardos", "Jabalinas", "Mazas", "Bastones", "Cimitarras", "Hoces", "Hondas", "Lanzas"],
+        savingThrows: ["Inteligencia", "Sabiduría"],
+        tools: ["Kit de herbolario"]
       },
-      skills: {
-        choose: 2,
-        from: ["Arcanos", "Trato con animales", "Perspicacia", "Medicina", "Naturaleza", "Percepción", "Religión", "Supervivencia"]
-      },
-      features: [
-        "Druídico (nivel 1): Idioma secreto",
-        "Lanzamiento de conjuros (nivel 1, SAB)",
-        "Forma salvaje (nivel 2): 2 usos/descanso corto, transforma en bestia (CR basado en nivel)",
-        "Círculo druídico (nivel 2): Tierra, Luna, Esporas"
-      ],
-      subclasses: {
-        "Círculo de la Tierra": "Recuperación natural, Conjuros de círculo, Paso de la tierra",
-        "Círculo de la Luna": "Forma salvaje de combate, Formas circulares, Golpe primario",
-        "Círculo de las Esporas": "Halo de esporas, Cuerpo simbiótico, Propagación de esporas"
-      },
-      spellcasting: {
-        ability: "Sabiduría",
-        cantrips: 2,
-        preparedSpells: "SAB + nivel",
-        ritual: true
-      },
-      equipment: [
-        "Escudo de madera O Arma simple",
-        "Cimitarra O Arma simple cuerpo a cuerpo",
-        "Armadura de cuero + Pack de explorador + Foco druídico"
-      ]
+      skills: { choose: 2, from: ["Arcana", "Trato con animales", "Perspicacia", "Medicina", "Naturaleza", "Percepción", "Religión", "Supervivencia"] },
+      equipment: ["Escudo de madera", "Cimitarra", "Armadura de cuero", "Mochila de explorador", "Foco druídico"],
+      features: ["Druídico (lenguaje secreto)", "Lanzamiento de conjuros"],
+      progression: {
+        1: { features: ["Druídico", "Lanzamiento de conjuros (Sabiduría)"], spellSlots: { 1: 2 }, cantrips: 2 },
+        2: { features: ["Forma salvaje (2/descanso corto, CR 1/4)", "Círculo druídico (Luna, Tierra, Sueños)"] },
+        4: { features: ["Forma salvaje (CR 1/2, nadar)"] },
+        8: { features: ["Forma salvaje (CR 1, volar)"] },
+        18: { features: ["Cuerpo atemporal (1 año = 10 años)", "Conjuros bestia"] },
+        20: { features: ["Archidruida (Forma salvaje ilimitada)"] }
+      }
     },
-    
+
+    "Bardo": {
+      hitDie: 8,
+      proficiencies: {
+        armor: ["Armadura ligera"],
+        weapons: ["Armas simples", "Ballestas de mano", "Espadas largas", "Estoques", "Espadas cortas"],
+        savingThrows: ["Destreza", "Carisma"],
+        tools: ["Tres instrumentos musicales"]
+      },
+      skills: { choose: 3, from: ["Todas"] },
+      equipment: ["Estoques", "Mochila de diplomático", "Laúd", "Armadura de cuero", "Daga"],
+      features: ["Lanzamiento de conjuros", "Inspiración bárdica"],
+      progression: {
+        1: { features: ["Lanzamiento de conjuros (Carisma)", "Inspiración bárdica (d6, CAR mod veces/día)"], spellSlots: { 1: 2 }, cantrips: 2 },
+        2: { features: ["Canción de descanso (aliados recuperan +d6 HP en descanso corto)", "Aprendiz de todo (+1/2 bonus competencia sin competencia)"] },
+        3: { features: ["Colegio de bardos (Tradición, Valor, Glamour)", "Pericia (2 habilidades doble bonus)"] },
+        5: { features: ["Inspiración bárdica (d8)", "Fuente de inspiración (descanso corto)"] },
+        6: { features: ["Contrahechizo (reacción, gastar inspiración para interrumpir conjuro)"] },
+        10: { features: ["Inspiración bárdica (d10)", "Secretos mágicos (2 conjuros de cualquier clase)"] },
+        20: { features: ["Inspiración superior (d12, regenera si tiene 0)"] }
+      }
+    },
+
     "Monje": {
       hitDie: 8,
-      primaryAbility: ["Destreza", "Sabiduría"],
       proficiencies: {
         armor: [],
         weapons: ["Armas simples", "Espadas cortas"],
-        tools: ["1 tipo de herramienta de artesano o instrumento musical"],
-        savingThrows: ["Fuerza", "Destreza"]
+        savingThrows: ["Fuerza", "Destreza"],
+        tools: ["Herramienta de artesano o instrumento musical"]
       },
-      skills: {
-        choose: 2,
-        from: ["Acrobacias", "Atletismo", "Historia", "Perspicacia", "Religión", "Sigilo"]
-      },
-      features: [
-        "Defensa sin armadura (nivel 1): CA = 10 + DES + SAB (sin armadura ni escudo)",
-        "Artes marciales (nivel 1): 1d4 daño desarmado/armas monje, DES para ataques, ataque desarmado como bonus",
-        "Ki (nivel 2): 2 puntos. Ráfaga de golpes, Defensa paciente, Paso del viento",
-        "Movimiento sin armadura (nivel 2): +10 ft velocidad",
-        "Deflectar proyectiles (nivel 3): Reacción, reduce daño 1d10 + DES + nivel",
-        "Tradición monástica (nivel 3): Mano abierta, Sombra, Cuatro elementos"
-      ],
-      subclasses: {
-        "Camino de la Mano abierta": "Técnica de la mano abierta, Tranquilidad total, Vibración sofocante",
-        "Camino de la Sombra": "Artes de las sombras, Paso de sombra, Manto de sombras",
-        "Camino de los Cuatro elementos": "Discípulo de los elementos, Disciplinas elementales"
-      },
-      equipment: [
-        "Espada corta O Arma simple",
-        "Pack de mazmorreo O Pack de explorador",
-        "10 dardos"
-      ],
-      spellcasting: false
+      skills: { choose: 2, from: ["Acrobacias", "Atletismo", "Historia", "Perspicacia", "Religión", "Sigilo"] },
+      equipment: ["Espada corta", "10 dardos", "Mochila de explorador"],
+      features: ["Defensa sin armadura", "Artes marciales", "Ki"],
+      progression: {
+        1: { features: ["Defensa sin armadura (AC = 10 + DES + SAB)", "Artes marciales (d4 desarmado)"] },
+        2: { features: ["Ki (2 puntos, recupera en descanso corto)", "Ráfaga de golpes", "Defensa paciente", "Paso del viento", "Movimiento sin armadura (+10 ft)"] },
+        3: { features: ["Tradición monástica (Mano abierta, Sombra, Elementos, Kensei)"] },
+        5: { features: ["Ataque extra", "Golpe aturdidor (gastar 1 Ki, CON CD o aturdido)"] },
+        6: { features: ["Golpes potenciados con Ki (superan resistencia)"] },
+        7: { features: ["Evasión", "Quietud mental (bonus action fin encanto/miedo)"] },
+        9: { features: ["Mejora de movimiento sin armadura (+15 ft total)"] },
+        10: { features: ["Pureza de cuerpo (inmune a enfermedad y veneno)"] },
+        14: { features: ["Alma de diamante (competente en todas las salvaciones)"] },
+        18: { features: ["Cuerpo vacío (invisible, resistencia vs todos excepto fuerza)"] },
+        20: { features: ["Autoperfección (inicio turno sin Ki = 4 Ki)"] }
+      }
     },
-    
+
+    "Explorador": {
+      hitDie: 10,
+      proficiencies: {
+        armor: ["Armadura ligera", "Armadura media", "Escudos"],
+        weapons: ["Armas simples", "Armas marciales"],
+        savingThrows: ["Fuerza", "Destreza"],
+        tools: []
+      },
+      skills: { choose: 3, from: ["Trato con animales", "Atletismo", "Perspicacia", "Investigación", "Naturaleza", "Percepción", "Sigilo", "Supervivencia"] },
+      equipment: ["Cota de escamas", "Dos espadas cortas", "Arco largo y 20 flechas", "Mochila de explorador"],
+      features: ["Enemigo predilecto", "Explorador nato"],
+      progression: {
+        1: { features: ["Enemigo predilecto (+2 daño, ventaja seguir)", "Explorador nato (terreno favorito, ventaja supervivencia)"] },
+        2: { features: ["Estilo de lucha", "Lanzamiento de conjuros (Sabiduría)"], spellSlots: { 1: 2 } },
+        3: { features: ["Arquetipo (Cazador, Maestro bestias, Acechador sombrío)"] },
+        5: { features: ["Ataque extra"] },
+        8: { features: ["Paso firme (terreno difícil no cuesta extra)", "Caminar sobre tierra"] },
+        10: { features: ["Ocultarse a plena vista (bonus action esconderse si no te mueves)"] },
+        14: { features: ["Desvanecerse (bonus action invisible hasta atacar)"] },
+        20: { features: ["Asesino de enemigos (1 ataque automático crítico vs enemigo predilecto/día)"] }
+      }
+    },
+
     "Hechicero": {
       hitDie: 6,
-      primaryAbility: ["Carisma"],
       proficiencies: {
         armor: [],
         weapons: ["Dagas", "Dardos", "Hondas", "Bastones", "Ballestas ligeras"],
-        tools: [],
-        savingThrows: ["Constitución", "Carisma"]
+        savingThrows: ["Constitución", "Carisma"],
+        tools: []
       },
-      skills: {
-        choose: 2,
-        from: ["Arcanos", "Engaño", "Perspicacia", "Intimidación", "Persuasión", "Religión"]
-      },
-      features: [
-        "Lanzamiento de conjuros (CAR)",
-        "Origen de hechicería (nivel 1): Alma dracónica, Magia salvaje, Magia de las sombras",
-        "Fuente de magia (nivel 2): Puntos de hechicería = nivel",
-        "Metamagia (nivel 3): 2 opciones - Conjuro acelerado, cuidadoso, distante, potenciado, prolongado, sutil, mellizo"
-      ],
-      subclasses: {
-        "Alma dracónica": "Ancestro de dragón, Resistencia dracónica, Afinidad elemental",
-        "Magia salvaje": "Oleada de magia salvaje, Mareas del caos, Suerte controlada",
-        "Magia de las sombras": "Fuerza de la tumba, Sabueso de maldad, Caminar en las sombras"
-      },
-      spellcasting: {
-        ability: "Carisma",
-        cantrips: 4,
-        knownSpells: "Tabla de hechicero"
-      },
-      equipment: [
-        "Ballesta ligera + 20 virotes O Arma simple",
-        "Bolsa de componentes O Foco arcano",
-        "Pack de mazmorreo O Pack de explorador",
-        "2 dagas"
-      ]
+      skills: { choose: 2, from: ["Arcana", "Engaño", "Perspicacia", "Intimidación", "Persuasión", "Religión"] },
+      equipment: ["Ballesta ligera y 20 virotes", "Bolsa de componentes", "Daga", "Mochila de explorador"],
+      features: ["Lanzamiento de conjuros", "Origen hechicero"],
+      progression: {
+        1: { features: ["Lanzamiento de conjuros (Carisma)", "Origen hechicero (Dracónico, Magia salvaje, Divino, Sombra)"], spellSlots: { 1: 2 }, cantrips: 4 },
+        2: { features: ["Fuente de magia (Puntos hechicería = nivel)", "Metamagia (2 opciones: Gemelo, Potenciado, Acelerado, Sutil, etc)"] },
+        3: { features: ["Metamagia mejora"], spellSlots: { 1: 4, 2: 2 } },
+        6: { features: ["Característica de origen"] },
+        17: { features: ["Metamagia (3 opciones)"] },
+        20: { features: ["Restauración hechicera (recuperar 4 puntos si 0 en turno)"] }
+      }
     },
-    
+
     "Brujo": {
       hitDie: 8,
-      primaryAbility: ["Carisma"],
       proficiencies: {
-        armor: ["Armaduras ligeras"],
+        armor: ["Armadura ligera"],
         weapons: ["Armas simples"],
-        tools: [],
-        savingThrows: ["Sabiduría", "Carisma"]
+        savingThrows: ["Sabiduría", "Carisma"],
+        tools: []
       },
-      skills: {
-        choose: 2,
-        from: ["Arcanos", "Engaño", "Historia", "Intimidación", "Investigación", "Naturaleza", "Religión"]
-      },
-      features: [
-        "Patrón de otro mundo (nivel 1): Arcano, Celestial, Demonio, Gran Antiguo",
-        "Magia de pacto (nivel 1): Espacios de conjuro se recuperan en descanso corto",
-        "Invocaciones sobrenaturales (nivel 2): 2 opciones, más con niveles",
-        "Don del pacto (nivel 3): Pacto de la cadena, Hoja, Tomo"
-      ],
-      subclasses: {
-        "El Arcano": "Lista de conjuros expandida (mago), Iniciado arcano",
-        "El Demonio": "Bendición del Oscuro, Suerte del Oscuro, Resistencia del Demonio",
-        "El Gran Antiguo": "Mente despierta, Pensamientos entrópicos, Crear esclavo"
-      },
-      spellcasting: {
-        ability: "Carisma",
-        cantrips: 2,
-        knownSpells: "Tabla de brujo",
-        pactMagic: "Espacios se recuperan en descanso corto"
-      },
-      equipment: [
-        "Ballesta ligera + 20 virotes O Arma simple",
-        "Bolsa de componentes O Foco arcano",
-        "Pack de erudito O Pack de mazmorreo",
-        "Armadura de cuero + Arma simple + 2 dagas"
-      ]
+      skills: { choose: 2, from: ["Arcana", "Engaño", "Historia", "Intimidación", "Investigación", "Naturaleza", "Religión"] },
+      equipment: ["Ballesta ligera y 20 virotes", "Bolsa de componentes", "Armadura de cuero", "Daga", "Mochila de erudito"],
+      features: ["Pacto de otro mundo", "Lanzamiento de conjuros"],
+      progression: {
+        1: { features: ["Pacto de otro mundo (Archifey, Demonio, Gran Antiguo, Celestial, Hexblade)", "Lanzamiento de conjuros (Carisma, espacios recuperan descanso corto)"], spellSlots: { 1: 1 }, cantrips: 2 },
+        2: { features: ["Invocaciones arcanas (2 opciones)"], spellSlots: { 1: 2 } },
+        3: { features: ["Dádiva del pacto (Tomo, Hoja, Cadena)"], spellSlots: { 2: 2 } },
+        11: { features: ["Arcanum místico (1 conjuro nivel 6 gratis/día)"] },
+        17: { features: ["Arcanum místico mejorado (nivel 7-9)"] },
+        20: { features: ["Maestro arcano (recuperar 1 espacio con acción)"] }
+      }
     }
   },
-  
+
+  // ===== TRASFONDOS =====
   backgrounds: {
-    "Noble": {
-      skills: ["Historia", "Persuasión"],
-      languages: 1,
-      equipment: ["Ropas finas", "Anillo de sello", "Pergamino de linaje", "Bolsa con 25 po"],
-      feature: "Posición de privilegio",
-      featureDescription: "Eres bienvenido en alta sociedad, la gente asume que tienes derecho a estar donde estás. Puedes asegurar audiencia con nobles locales."
-    },
-    
-    "Criminal": {
-      skills: ["Engaño", "Sigilo"],
-      tools: ["Herramientas de ladrón", "1 tipo de juego"],
-      equipment: ["Palanca", "Ropas oscuras con capucha", "Bolsa con 15 po"],
-      feature: "Contacto criminal",
-      featureDescription: "Tienes un contacto confiable que actúa como enlace con una red de otros criminales. Puedes enviar y recibir mensajes a través de esta red."
-    },
-    
-    "Erudito": {
-      skills: ["Arcanos", "Historia"],
-      languages: 2,
-      equipment: ["Tinta y pluma", "Cuchillo pequeño", "Carta de colega muerto", "Ropas de estudiante", "Bolsa con 10 po"],
-      feature: "Investigador",
-      featureDescription: "Cuando intentas aprender algo, sabes dónde y de quién obtener información. Normalmente de bibliotecas, archivos, universidades o sabios."
-    },
-    
-    "Soldado": {
-      skills: ["Atletismo", "Intimidación"],
-      tools: ["1 tipo de juego", "Vehículos (tierra)"],
-      equipment: ["Insignia de rango", "Trofeo de enemigo caído", "Juego de dados", "Ropas comunes", "Bolsa con 10 po"],
-      feature: "Rango militar",
-      featureDescription: "Tienes un rango militar de tu carrera como soldado. Los soldados leales a tu antigua organización aún reconocen tu autoridad."
-    },
-    
     "Acólito": {
       skills: ["Perspicacia", "Religión"],
-      languages: 2,
-      equipment: ["Símbolo sagrado", "Libro de plegarias", "5 varitas de incienso", "Vestimentas", "Ropas comunes", "Bolsa con 15 po"],
-      feature: "Refugio de los fieles",
-      featureDescription: "Tú y tus compañeros podéis recibir curación y cuidados gratuitos en templos de tu fe. Quienes comparten tu religión te apoyarán."
+      feature: "Refugio de los fieles: Apoyo de templos de tu fe",
+      equipment: ["Símbolo sagrado", "Libro de plegarias", "5 varitas de incienso", "Ropa de ceremonia", "15 po"]
     },
-    
-    "Artista": {
-      skills: ["Acrobacias", "Interpretación"],
-      tools: ["Kit de disfraz", "1 instrumento musical"],
-      equipment: ["Instrumento musical", "Regalo de admirador", "Disfraz", "Bolsa con 15 po"],
-      feature: "A petición del público",
-      featureDescription: "Puedes actuar en posadas, tabernas, circos, etc. y recibir alojamiento y comida modestos gratis. Tu actuación te hace localmente famoso."
+    "Criminal": {
+      skills: ["Engaño", "Sigilo"],
+      feature: "Contacto criminal: Conexión con red de criminales",
+      equipment: ["Palanca", "Ropa oscura con capucha", "15 po"]
     },
-    
-    "Charlatán": {
-      skills: ["Engaño", "Juego de manos"],
-      tools: ["Kit de disfraz", "Kit de falsificación"],
-      equipment: ["Ropas finas", "Kit de disfraz", "Herramientas de estafador", "Bolsa con 15 po"],
-      feature: "Identidad falsa",
-      featureDescription: "Has creado una segunda identidad con documentación, contactos y disfraces. Puedes falsificar documentos oficiales."
-    },
-    
-    "Ermitaño": {
-      skills: ["Medicina", "Religión"],
-      tools: ["Kit de herbolario"],
-      languages: 1,
-      equipment: ["Estuche de pergaminos lleno de notas", "Manta de invierno", "Ropas comunes", "Kit de herbolario", "5 po"],
-      feature: "Descubrimiento",
-      featureDescription: "El aislamiento te dio acceso a un descubrimiento único y poderoso (naturaleza determinada con DM)."
-    },
-    
     "Héroe popular": {
       skills: ["Trato con animales", "Supervivencia"],
-      tools: ["Herramientas de artesano", "Vehículos (tierra)"],
-      equipment: ["Herramientas de artesano", "Pala", "Olla de hierro", "Ropas comunes", "Bolsa con 10 po"],
-      feature: "Hospitalidad rústica",
-      featureDescription: "La gente común te da alojamiento y comida. Te esconden de la ley o cualquiera que te busque (excepto si es obvio que eres peligroso)."
+      feature: "Hospitalidad rústica: Refugio gratis entre gente común",
+      equipment: ["Herramientas de artesano", "Pala", "Olla de hierro", "10 po"]
     },
-    
-    "Marinero": {
-      skills: ["Atletismo", "Percepción"],
-      tools: ["Herramientas de navegante", "Vehículos (agua)"],
-      equipment: ["Garfio de abordaje", "50 ft de cuerda de seda", "Amuleto de la suerte", "Ropas comunes", "Bolsa con 10 po"],
-      feature: "Paso de barco",
-      featureDescription: "Puedes asegurar paso gratis en velero para ti y compañeros. Viajas en las condiciones comparables a las de la tripulación."
+    "Noble": {
+      skills: ["Historia", "Persuasión"],
+      feature: "Posición de privilegio: Acceso a alta sociedad",
+      equipment: ["Ropa fina", "Anillo con sello", "Pergamino de linaje", "25 po"]
     },
-    
-    "Forastero": {
-      skills: ["Atletismo", "Supervivencia"],
-      tools: ["1 instrumento musical"],
-      languages: 1,
-      equipment: ["Bastón", "Trampa de caza", "Trofeo de animal", "Ropas de viajero", "Bolsa con 10 po"],
-      feature: "Vagabundo",
-      featureDescription: "Excelente memoria para mapas y geografía. Siempre puedes recordar el diseño de terreno, asentamientos y características alrededor."
-    },
-    
     "Sabio": {
-      skills: ["Arcanos", "Historia"],
-      languages: 2,
-      equipment: ["Tinta y pluma", "Cuchillo pequeño", "Carta con pregunta sin responder", "Ropas comunes", "Bolsa con 10 po"],
-      feature: "Investigador",
-      featureDescription: "Sabes cómo y dónde encontrar información. Puedes acceder a bibliotecas, archivos, universidades o sabios dispuestos a compartir conocimiento."
+      skills: ["Arcana", "Historia"],
+      feature: "Investigador: Sabes dónde encontrar información",
+      equipment: ["Tinta y pluma", "Carta de mentor", "Ropa común", "10 po"]
     },
-    
-    "Huérfano": {
-      skills: ["Sigilo", "Juego de manos"],
-      tools: ["Kit de disfraz", "Herramientas de ladrón"],
-      equipment: ["Cuchillo pequeño", "Mapa de ciudad natal", "Ratón mascota", "Baratija de padres", "Ropas comunes", "Bolsa con 10 po"],
-      feature: "Secretos de la ciudad",
-      featureDescription: "Conoces los patrones secretos de calles y puedes encontrar pasajes que otros pasarían por alto. Cuando no estás en combate, tú y compañeros viajan el doble."
+    "Soldado": {
+      skills: ["Atletismo", "Intimidación"],
+      feature: "Rango militar: Autoridad sobre soldados de tu ejército",
+      equipment: ["Insignia de rango", "Trofeo de guerra", "Dados", "10 po"]
     }
   },
-  
+
+  // ===== ALINEAMIENTOS =====
   alignments: [
-    "Legal Bueno (LB)", "Neutral Bueno (NB)", "Caótico Bueno (CB)",
-    "Legal Neutral (LN)", "Neutral (N)", "Caótico Neutral (CN)",
-    "Legal Malvado (LM)", "Neutral Malvado (NM)", "Caótico Malvado (CM)"
-  ],
-  
-  skills: [
-    { name: "Acrobacias", ability: "DES" },
-    { name: "Trato con animales", ability: "SAB" },
-    { name: "Arcanos", ability: "INT" },
-    { name: "Atletismo", ability: "FUE" },
-    { name: "Engaño", ability: "CAR" },
-    { name: "Historia", ability: "INT" },
-    { name: "Perspicacia", ability: "SAB" },
-    { name: "Intimidación", ability: "CAR" },
-    { name: "Investigación", ability: "INT" },
-    { name: "Medicina", ability: "SAB" },
-    { name: "Naturaleza", ability: "INT" },
-    { name: "Percepción", ability: "SAB" },
-    { name: "Interpretación", ability: "CAR" },
-    { name: "Persuasión", ability: "CAR" },
-    { name: "Religión", ability: "INT" },
-    { name: "Juego de manos", ability: "DES" },
-    { name: "Sigilo", ability: "DES" },
-    { name: "Supervivencia", ability: "SAB" }
+    "Legal bueno",
+    "Neutral bueno",
+    "Caótico bueno",
+    "Legal neutral",
+    "Neutral",
+    "Caótico neutral",
+    "Legal malvado",
+    "Neutral malvado",
+    "Caótico malvado"
   ]
 };
 
-// Exportar para uso
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = DND_DATA;
-}
+// Exportar globalmente
+window.DND_DATA = DND_DATA;
