@@ -800,7 +800,7 @@ function toggleDarkMode() {
 }
 
 // ==========================================
-// GENERAR PDF
+// GENERAR PDF ARTÍSTICO ESTILO FICHA D&D
 // ==========================================
 async function generatePDF() {
   if (!currentCharacter) {
@@ -809,30 +809,55 @@ async function generatePDF() {
   }
   
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4'
+  });
   
-  let y = 20;
+  const pageWidth = 210;
+  const pageHeight = 297;
   
-  doc.setFontSize(22);
-  doc.setTextColor(102, 126, 234);
-  doc.text(currentCharacter.name, 105, y, { align: 'center' });
+  // ===== FONDO PERGAMINO =====
+  doc.setFillColor(244, 233, 216);
+  doc.rect(0, 0, pageWidth, pageHeight, 'F');
   
-  y += 10;
-  doc.setFontSize(12);
-  doc.setTextColor(118, 75, 162);
-  doc.text(`${currentCharacter.race} ${currentCharacter.class} - Nivel ${currentCharacter.level}`, 105, y, { align: 'center' });
-  
-  y += 15;
+  // Borde ornamental
+  doc.setDrawColor(42, 26, 15);
+  doc.setLineWidth(2);
+  doc.rect(5, 5, 200, 287);
   doc.setLineWidth(0.5);
-  doc.setDrawColor(102, 126, 234);
-  doc.line(20, y, 190, y);
+  doc.rect(8, 8, 194, 281);
   
-  y += 15;
+  // ===== HEADER CON CALAVERAS =====
+  doc.setFontSize(10);
+  doc.text('💀', 15, 20);
+  doc.text('💀', 190, 20);
+  
+  doc.setFontSize(32);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(139, 0, 0);
+  doc.text(currentCharacter.name, pageWidth / 2, 25, { align: 'center' });
+  
   doc.setFontSize(14);
-  doc.setTextColor(0, 0, 0);
-  doc.text('CARACTERÍSTICAS', 20, y);
+  doc.setTextColor(93, 64, 55);
+  doc.text(`${currentCharacter.race} ${currentCharacter.class} - Nivel ${currentCharacter.level}`, 
+    pageWidth / 2, 35, { align: 'center' });
   
-  y += 10;
+  // Línea decorativa
+  doc.setDrawColor(139, 0, 0);
+  doc.setLineWidth(1);
+  doc.line(20, 40, 190, 40);
+  
+  let y = 50;
+  
+  // ===== CARACTERÍSTICAS EN ESCUDOS =====
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(139, 0, 0);
+  doc.text('⚔️ CARACTERÍSTICAS', 15, y);
+  y += 8;
+  
   const stats = [
     ['FUE', currentCharacter.stats.strength],
     ['DES', currentCharacter.stats.dexterity],
@@ -842,22 +867,147 @@ async function generatePDF() {
     ['CAR', currentCharacter.stats.charisma]
   ];
   
-  let x = 20;
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(42, 26, 15);
+  
+  let x = 15;
   stats.forEach(([name, value]) => {
     const mod = calculateModifier(value);
-    doc.text(`${name}: ${value} (${mod >= 0 ? '+' : ''}${mod})`, x, y);
-    x += 30;
+    
+    // Escudo hexagonal
+    doc.setFillColor(212, 196, 168);
+    doc.setDrawColor(42, 26, 15);
+    doc.circle(x + 12, y + 10, 10, 'FD');
+    
+    // Nombre stat
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'bold');
+    doc.text(name, x + 12, y + 8, { align: 'center' });
+    
+    // Valor
+    doc.setFontSize(14);
+    doc.text(value.toString(), x + 12, y + 13, { align: 'center' });
+    
+    // Modificador
+    doc.setFontSize(10);
+    doc.setTextColor(45, 80, 22);
+    doc.text(`${mod >= 0 ? '+' : ''}${mod}`, x + 12, y + 18, { align: 'center' });
+    
+    doc.setTextColor(42, 26, 15);
+    x += 32;
   });
   
-  y += 15;
-  doc.text(`HP: ${currentCharacter.hp} | CA: ${currentCharacter.ac} | Velocidad: ${currentCharacter.speed} ft`, 20, y);
+  y += 30;
   
+  // ===== COMBATE =====
+  doc.setFontSize(16);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(139, 0, 0);
+  doc.text('⚔️ COMBATE', 15, y);
+  y += 8;
+  
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(42, 26, 15);
+  
+  doc.setFillColor(212, 196, 168);
+  doc.roundedRect(15, y, 180, 25, 3, 3, 'FD');
+  
+  doc.text(`Puntos de Golpe: ${currentCharacter.hp}`, 20, y + 8);
+  doc.text(`Clase de Armadura: ${currentCharacter.ac}`, 20, y + 16);
+  doc.text(`Velocidad: ${currentCharacter.speed} ft`, 100, y + 8);
+  doc.text(`Iniciativa: ${calculateModifier(currentCharacter.stats.dexterity) >= 0 ? '+' : ''}${calculateModifier(currentCharacter.stats.dexterity)}`, 100, y + 16);
+  
+  y += 35;
+  
+  // ===== RASGOS RACIALES =====
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(139, 0, 0);
+  doc.text('🐉 RASGOS RACIALES', 15, y);
+  y += 7;
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(42, 26, 15);
+  
+  currentCharacter.racialTraits.slice(0, 5).forEach(trait => {
+    doc.text(`• ${trait}`, 20, y);
+    y += 6;
+  });
+  
+  y += 5;
+  
+  // ===== CARACTERÍSTICAS DE CLASE =====
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(139, 0, 0);
+  doc.text('⚡ HABILIDADES DE CLASE', 15, y);
+  y += 7;
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(42, 26, 15);
+  
+  currentCharacter.classFeatures.slice(0, 5).forEach(feature => {
+    doc.text(`• ${feature}`, 20, y);
+    y += 6;
+  });
+  
+  y += 5;
+  
+  // ===== EQUIPO =====
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(139, 0, 0);
+  doc.text('🎒 EQUIPO', 15, y);
+  y += 7;
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(42, 26, 15);
+  
+  currentCharacter.equipment.slice(0, 8).forEach(item => {
+    doc.text(`• ${item}`, 20, y);
+    y += 6;
+  });
+  
+  // ===== TRASFONDO =====
+  y += 10;
+  if (y > 250) {
+    doc.addPage();
+    y = 20;
+  }
+  
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(139, 0, 0);
+  doc.text(`📜 TRASFONDO: ${currentCharacter.background}`, 15, y);
+  y += 7;
+  
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(42, 26, 15);
+  doc.text(`Habilidades: ${currentCharacter.backgroundData.skills.join(', ')}`, 20, y);
+  y += 6;
+  doc.text(`Rasgo: ${currentCharacter.backgroundData.feature}`, 20, y);
+  
+  // ===== FOOTER DECORATIVO =====
   doc.setFontSize(8);
-  doc.setTextColor(150, 150, 150);
-  doc.text('Generado en D&D Character Forge', 105, 285, { align: 'center' });
+  doc.setTextColor(93, 64, 55);
+  doc.text('Generado por D&D Character Forge', pageWidth / 2, 290, { align: 'center' });
+  doc.text(`Edición: ${currentEdition || '5e'}`, pageWidth / 2, 293, { align: 'center' });
   
-  doc.save(`${currentCharacter.name.replace(/\s/g, '_')}.pdf`);
+  // Decoración footer
+  doc.setFontSize(10);
+  doc.text('⚔️', 20, 290);
+  doc.text('🐉', pageWidth - 20, 290);
+  
+  // Guardar
+  doc.save(`${currentCharacter.name.replace(/\s/g, '_')}_DnD.pdf`);
 }
+
 // ==========================================
 // GENERADOR DE BESTIAS Y ENEMIGOS
 // ==========================================
