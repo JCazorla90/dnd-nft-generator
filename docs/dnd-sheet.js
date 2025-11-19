@@ -13,31 +13,24 @@ const btnHistory = document.getElementById('btnHistory');
 const btnExportPDF = document.getElementById('btnExportPDF');
 const btnToggleTheme = document.getElementById('toggleTheme');
 const btnRandom = document.getElementById('btnRandom');
+const btnMintNFT = document.getElementById('btnMintNFT');
 const powerBar = document.getElementById('powerbar');
 const historyModal = document.getElementById("historyModal");
 const storageKey = "dnd_sheet_history";
-
-// Datos para generar aleatorio
 const DATA_5E = {
-  names: ["Arannis", "Thorin", "Miriel", "Kara", "Ulfgar", "Lia", "Draven", "Soren", "Valen", "Leena", "Grym", "Jax"],
+  names: ["Arannis","Lia","Thorin","Kara","Ulfgar","Miriel","Draven","Soren","Valen","Leena","Grym","Jax"],
   races: ["Humano","Enano","Elfo","Orco","Mediano","Dracónido","Tiefling"],
   classes: ["Guerrero","Mago","Pícaro","Clérigo","Paladín","Bardo","Bárbaro","Druida","Monje","Explorador","Hechicero","Brujo"],
   backgrounds: ["Noble","Soldado","Erudito","Acólito","Héroe popular","Marinero"],
   alignments: ["Legal Bueno","Neutral Bueno","Caótico Bueno","Legal Neutral","Neutral","Caótico Neutral","Legal Malvado","Neutral Malvado","Caótico Malvado"]
 };
-
-// Inicial
 SHEETS[select.value]();
-
-// Cambia edición
 select.addEventListener('change', () => { main.innerHTML = ""; SHEETS[select.value](); setTimeout(updatePowerLevel,300); });
 btnToggleTheme.addEventListener('click', () => {
   document.body.classList.toggle('dark');
   document.querySelector('.sheet-surface').classList.toggle('dark');
   if(historyModal)historyModal.classList.toggle('dark');
 });
-
-// --------- RENDER 5e
 function renderSheet5e() {
   main.innerHTML = `
 <div class="avatar-block"><svg id="charAvatar" width="96" height="96"></svg></div>
@@ -45,56 +38,64 @@ function renderSheet5e() {
   <img id="aiPortraitImg" src="" alt="Retrato IA" style="display:block;">
   <button id="reloadAIPortrait" class="btn btn-secondary">🔄 Cambiar retrato IA</button>
 </div>
-    <form class="sheet5e" id="form5e" autocomplete="off">
-      <div class="stats-panel">
-        <span class="block-title">Características</span>
-        <div class="stats-circles">
-          ${["FUE", "DES", "CON", "INT", "SAB", "CAR"].map(stat => `
-            <div class="stat-circle">
-              <label>${stat}</label>
-              <input type="number" min="1" max="20" value="10" id="stat${stat}">
-              <div class="stat-val" id="val${stat}">10</div>
-              <div class="stat-mod" id="mod${stat}">+0</div>
-            </div>
-          `).join('')}
-        </div>
+<form class="sheet5e" id="form5e" autocomplete="off">
+  <div class="block-fields stats-panel">
+    <span class="block-title">Características</span>
+    <div class="stats-circles">${["FUE","DES","CON","INT","SAB","CAR"].map(stat=>`
+      <div class="stat-circle">
+        <label title="Típico humano: 10~11">${stat}</label>
+        <input type="number" min="3" max="20" value="10" id="stat${stat}">
+        <div class="stat-val" id="val${stat}">10</div>
+        <div class="stat-mod" id="mod${stat}">+0</div>
       </div>
-      <div class="main-panel">
-        <span class="block-title">Info de personaje</span>
-        <div class="sheet-row">
-          <label>Nombre</label><input id="cName"><label>Clase/Nvl</label><input id="cClassLevel"><label>Raza</label><input id="cRace">
-        </div>
-        <div class="sheet-row">
-          <label>Trasfondo</label><input id="cBg"><label>Alineamiento</label><input id="cAlign"><label>XP</label><input id="cXP" type="number">
-        </div>
-        <span class="block-title">Salvaciones & Habilidades</span>
-        <div class="saves-list" id="saveList5e"></div>
-        <div class="skills-list" id="skillList5e"></div>
-        <span class="block-title">Combate</span>
-        <div class="combatgrid">
-          <label>CA <input id="ca" maxlength="2" value="10"></label>
-          <label>Iniciativa <input id="init" maxlength="3" value="+0"></label>
-          <label>Velocidad <input id="speed" maxlength="3" value="30"></label>
-          <label>PV <input id="hpMax" maxlength="3" value="10"></label>
-          <label>Actual <input id="hpCurr" maxlength="3" value="10"></label>
-          <label>DGolpe <input id="hd" maxlength="6" value="1d10"></label>
-        </div>
-        <span class="block-title">Equipo & notas</span>
-        <div class="notes-area"><textarea id="equipNotes" placeholder="Equipo, conjuros, notas..."></textarea></div>
-      </div>
-    </form>
+    `).join("")}</div>
+    <div class="stats-help">Sugerencia: 4d6 (deshecha el menor), rango 8-18 habitual. Usa el botón Aleatorio.</div>
+  </div>
+  <div class="block-fields main-panel">
+    <span class="block-title">Datos de personaje</span>
+    <div class="sheet-row">
+      <label>Nombre</label><input id="cName" title="Nombre (puedes inventar o generar)">
+      <label>Clase / Nivel</label><input id="cClassLevel" placeholder="Mago 1" title="Ej: Guerrero 3">
+      <label>Raza</label><input id="cRace" title="Escribe o elige al azar">
+    </div>
+    <div class="sheet-row">
+      <label>Trasfondo</label><input id="cBg" title="Ejemplo: Noble, Soldado...">
+      <label>Alineamiento</label><input id="cAlign" title="Ej: Legal Bueno">
+      <label>XP</label><input id="cXP" type="number" value="0">
+    </div>
+    <div class="sheet-row">
+      <label>Historia/Notas</label>
+      <input id="cNotes" placeholder="Aventuras, motivaciones, secretos...">
+    </div>
+  </div>
+  <div class="block-fields">
+    <span class="block-title">Salvaciones & Habilidades</span>
+    <div class="saves-list" id="saveList5e"></div>
+    <div class="skills-list" id="skillList5e"></div>
+  </div>
+  <div class="block-fields">
+    <span class="block-title">Combate</span>
+    <div class="combatgrid">
+      <label>CA<input id="ca" maxlength="2" value="10"></label>
+      <label>Iniciativa<input id="init" maxlength="3" value="+0"></label>
+      <label>Velocidad<input id="speed" maxlength="3" value="30"></label>
+      <label>PV<input id="hpMax" maxlength="3" value="10"></label>
+      <label>Actual<input id="hpCurr" maxlength="3" value="10"></label>
+      <label>Dado Golpe<input id="hd" maxlength="6" value="1d10"></label>
+    </div>
+  </div>
+  <div class="block-fields">
+    <span class="block-title">Equipo & conjuros</span>
+    <div class="notes-area"><textarea id="equipNotes" rows="2" placeholder="Espada, armadura, conjuros, objetos..." title="Equipo principal y cosas especiales"></textarea></div>
+  </div>
+</form>
   `;
   renderSkillsAndSaves();
-
-  // Bind
   bindFields5e();
 }
-
-// -----
 function renderSheet35e() {
-  main.innerHTML = `<div style="padding:2em;font-size:1.3em;text-align:center;color:#b4653d;">Hoja 3.5 en construcción.<br>¿Quieres colaborar? 😄</div>`;
+  main.innerHTML = `<div class="block-fields" style="padding:2em;font-size:1.2em;text-align:center;color:#963a1b;">Hoja D&D 3.5 próximamente.<br>¿Te gustaría colaborar?</div>`;
 }
-
 function renderSkillsAndSaves() {
   const skills = [
     "Acrobacias (Dex)","Arcanos (Int)","Atletismo (Fue)","Engaño (Car)",
@@ -110,8 +111,6 @@ function renderSkillsAndSaves() {
     ["Fuerza","Destreza","Constitución","Inteligencia","Sabiduría","Carisma"]
     .map(sv=>`<div class="save-item"><input type="checkbox">${sv}</div>`).join('');
 }
-
-// ---- AVATAR SVG y Retrato IA
 function updateAvatar() {
   const name = document.getElementById("cName")?.value || "Aventurero";
   const race = document.getElementById("cRace")?.value || "Humano";
@@ -140,14 +139,12 @@ async function fetchFantasyPortrait() {
   const race = document.getElementById("cRace")?.value || "Human";
   const clazz = (document.getElementById("cClassLevel")?.value||"Warrior").split(' ')[0];
   const prompt = encodeURIComponent([race, clazz, "fantasy dnd portrait"].filter(Boolean).join(" "));
-  document.getElementById("aiPortraitImg").src = "https://placehold.co/170x210/fbf0e6/7a3a13?text=Loading...";
+  document.getElementById("aiPortraitImg").src = "https://placehold.co/170x210/ffe3b1/7a3a13?text=...";
   const res = await fetch(`https://lexica.art/api/v1/search?q=${prompt}`);
   const data = await res.json();
   const img = data.images && data.images.length ? data.images[Math.floor(Math.random()*data.images.length)].srcSmall : null;
   document.getElementById("aiPortraitImg").src = img || "https://placehold.co/170x210/edd8cc/7a3a13?text=No+portrait";
 }
-
-// Generador ALEATORIO
 function random5e() {
   function randAr(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
   function stat() {
@@ -160,38 +157,26 @@ function random5e() {
   document.getElementById("cBg").value = randAr(DATA_5E.backgrounds);
   document.getElementById("cAlign").value = randAr(DATA_5E.alignments);
   document.getElementById("cXP").value = Math.pow(2,6+Math.floor(Math.random()*6));
+  document.getElementById("cNotes").value="Criado por lobos, busca una reliquia.";
   ["FUE","DES","CON","INT","SAB","CAR"].forEach(s=>{
     document.getElementById("stat"+s).value = stat();
     document.getElementById("stat"+s).dispatchEvent(new Event('input'));
   });
-  // Equipo/notas aleatorio
   document.getElementById("equipNotes").value = "Espada corta, Pócima de curación, Ropas de viaje";
-  // Limpia/aleatoria habilidades
   [...document.querySelectorAll("#skillList5e input")].forEach(inpt=>inpt.checked = Math.random()>0.7);
   [...document.querySelectorAll("#saveList5e input")].forEach(inpt=>inpt.checked = Math.random()>0.8);
-  updateAvatar(); fetchFantasyPortrait();
-  updatePowerLevel();
+  updateAvatar(); fetchFantasyPortrait(); updatePowerLevel();
 }
-
 function bindFields5e() {
-  // Hooks de inputs para actualizar avatar, IA...
   ["cName","cRace","cClassLevel"].forEach(id=>{
-    document.getElementById(id).addEventListener("input",()=>{
-      updateAvatar(); fetchFantasyPortrait();
-    });
+    document.getElementById(id).addEventListener("input",()=>{updateAvatar(); fetchFantasyPortrait();});
   });
-  // Stats power bar
   for(let stat of ["FUE","DES","CON","INT","SAB","CAR"]) {
     document.getElementById(`stat${stat}`).addEventListener('input',updatePowerLevel);
   }
-  document.getElementById("aiPortraitImg").style.display="block";
-  document.getElementById("reloadAIPortrait").style.display="inline-block";
   document.getElementById("reloadAIPortrait").onclick = fetchFantasyPortrait;
-  // Al abrir, render avatar y retrato IA
   updateAvatar(); fetchFantasyPortrait();
 }
-
-// Power Bar
 function updatePowerLevel() {
   const stats = ["FUE","DES","CON","INT","SAB","CAR"].map(s=>parseInt(document.getElementById(`stat${s}`)?.value||10));
   const avg = stats.reduce((a,b)=>a+b,0)/6;
@@ -204,21 +189,59 @@ function updatePowerLevel() {
   powerLvl.textContent=lvl;
 }
 
-// ---- Funcional común (historial, json, markdown, pdf) ----
-btnExportPDF.onclick = ()=>alert("Exportación PDF demo: integra jsPDF según ficha visual.");
-btnExportJSON.onclick=()=>{
-  const form = document.querySelector('.sheet5e');
+// NFT TESTNET (SVG)
+const testnetNFTContract = "0x3Dd267B885777b2Fe60C63Fc59B2a45a4fD1Dd58"; // Testnet address demo
+const contractABI = [
+  "function safeMint(address to, string memory tokenURI) public"
+];
+async function mintCharacterNFT() {
+  let svgData = document.getElementById("charAvatar").outerHTML;
+  let svg64 = btoa(unescape(encodeURIComponent(svgData)));
+  let image = `data:image/svg+xml;base64,${svg64}`;
+  let json = {
+    name: document.getElementById("cName")?.value || "D&D Character",
+    description: "Personaje generado en Character Forge D&D NFT",
+    image,
+    attributes: [
+      {trait_type:"Clase",value:document.getElementById("cClassLevel")?.value || ""},
+      {trait_type:"Raza",value:document.getElementById("cRace")?.value || ""},
+      {trait_type:"Fuerza",value:document.getElementById("statFUE")?.value || "10"},
+      {trait_type:"Destreza",value:document.getElementById("statDES")?.value || "10"},
+      {trait_type:"Constitución",value:document.getElementById("statCON")?.value || "10"},
+      {trait_type:"Inteligencia",value:document.getElementById("statINT")?.value || "10"},
+      {trait_type:"Sabiduría",value:document.getElementById("statSAB")?.value || "10"},
+      {trait_type:"Carisma",value:document.getElementById("statCAR")?.value || "10"},
+    ]
+  };
+  let jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(json))));
+  let tokenURI = `data:application/json;base64,${jsonB64}`;
+  if (!window.ethereum) return alert("Necesitas Metamask instalada");
+  const provider = new window.ethers.BrowserProvider(window.ethereum);
+  await window.ethereum.request({ method: 'eth_requestAccounts' });
+  const signer = await provider.getSigner();
+  const contract = new window.ethers.Contract(testnetNFTContract, contractABI, signer);
+  try {
+    let tx = await contract.safeMint(await signer.getAddress(), tokenURI);
+    alert("NFT minteado (polygon testnet). Puedes verlo en testnets.opensea.io o explorer: "+tx.hash);
+  } catch(err) {
+    alert("Error minteando NFT: "+(err.message || err));
+  }
+}
+
+// Funcionalidad común
+btnExportPDF.onclick = ()=>alert("Exporta PDF (demo, implementa con jsPDF si deseas un formato pulido).");
+btnExportJSON.onclick=()=>{ const form = document.querySelector('.sheet5e');
   if(!form){alert("No hay ficha cargada");return;}
   const data = Object.fromEntries([...form.querySelectorAll("input,textarea")].map(f=>[f.id || f.name,f.value]));
   saveHistory(data);
   navigator.clipboard.writeText(JSON.stringify(data,null,2));
-  alert("JSON copiado al portapapeles. ¡Guárdalo para tus aventuras!");
+  alert("JSON copiado al portapapeles.");
 };
 btnMarkdown.onclick=()=>{
   const form = document.querySelector('.sheet5e');
   if(!form){alert("No hay ficha cargada");return;}
   const fields = [...form.querySelectorAll("input,textarea")];
-  let md = `## Ficha D&D\`\`\`\n`;
+  let md = `## Ficha D&D\n\`\`\`\n`;
   fields.forEach(f=>{if(f.value) md+=`${f.id||f.name||""}: ${f.value}\n`;});
   md += "```
   navigator.clipboard.writeText(md); alert("Ficha D&D copiada como Markdown");
@@ -237,8 +260,7 @@ function fillFormFromData(d){
     if(d[f.id]!==undefined) f.value=d[f.id];
     if(f.type==="number"||f.type==="text") f.dispatchEvent(new Event('input'));
   });
-  updateAvatar(); fetchFantasyPortrait();
-  updatePowerLevel();
+  updateAvatar(); fetchFantasyPortrait(); updatePowerLevel();
 }
 btnHistory.onclick = ()=>showHistoryModal();
 function saveHistory(data){
@@ -259,11 +281,10 @@ window.loadHist = function(i){
 };
 window.closeHist = function(){historyModal.style.display="none";};
 
-// Powers: atajos teclado y "🎲 Aleatorio"
+// Atajos y binds
+btnRandom.onclick = ()=> random5e();
+btnMintNFT.onclick = mintCharacterNFT;
 document.addEventListener('keydown',e=>{
   if(e.key==="d"&&e.ctrlKey)btnToggleTheme.click();
   if(e.key==="r"&&e.ctrlKey){ random5e(); }
 });
-if(btnRandom){
-  btnRandom.onclick = ()=> random5e();
-}
