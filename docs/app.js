@@ -87,18 +87,34 @@ function generateCharacter(customData = {}) {
 
 function generateRandomName(race, charClass) {
   const names = {
-    'Humano': ['Aric', 'Brendan', 'Cassandra', 'Diana', 'Erik', 'Fiona'],
-    'Elfo': ['Aelrindel', 'Eldacar', 'Galadriel', 'Legolas', 'Thranduil', 'Arwen'],
-    'Enano': ['Balin', 'Dwalin', 'Thorin', 'Gimli', 'Dain', 'Thrain'],
-    'Orco': ['Grunk', 'Thrak', 'Urgak', 'Mog', 'Grul', 'Drak'],
-    'Mediano': ['Bilbo', 'Frodo', 'Sam', 'Pippin', 'Merry', 'Rosie'],
-    'Tiefling': ['Akta', 'Damakos', 'Ekemon', 'Iados', 'Kairon', 'Leucis'],
-    'Dracónido': ['Arjhan', 'Balasar', 'Bharash', 'Donaar', 'Ghesh', 'Heskan']
+    'Humano': ['Aric', 'Brendan', 'Cassandra', 'Diana', 'Erik', 'Fiona', 'Gareth', 'Helena'],
+    'Elfo': ['Aelrindel', 'Eldacar', 'Galadriel', 'Legolas', 'Thranduil', 'Arwen', 'Elrond'],
+    'Alto Elfo': ['Aelrindel', 'Elenwe', 'Finrod', 'Gildor', 'Glorfindel'],
+    'Elfo Oscuro (Drow)': ['Drizzt', 'Zaknafein', 'Jarlaxle', 'Liriel', 'Quenthel'],
+    'Elfo de los Bosques': ['Tanis', 'Laurana', 'Gilthanas', 'Silvara'],
+    'Enano': ['Balin', 'Dwalin', 'Thorin', 'Gimli', 'Dain', 'Thrain', 'Bruenor'],
+    'Enano de las Montañas': ['Thorin', 'Dain', 'Thrain', 'Balin'],
+    'Enano de las Colinas': ['Flint', 'Bruenor', 'Wulfgar'],
+    'Orco': ['Grunk', 'Thrak', 'Urgak', 'Mog', 'Grul', 'Drak', 'Ugoth'],
+    'Semiorco': ['Obould', 'Gruumsh', 'Shargaas', 'Yurtrus'],
+    'Mediano': ['Bilbo', 'Frodo', 'Sam', 'Pippin', 'Merry', 'Rosie', 'Regis'],
+    'Mediano Piesligeros': ['Frodo', 'Bilbo', 'Merry', 'Pippin'],
+    'Mediano Fornido': ['Sam', 'Rosie', 'Lobelia'],
+    'Tiefling': ['Akta', 'Damakos', 'Ekemon', 'Iados', 'Kairon', 'Leucis', 'Melech'],
+    'Dracónido': ['Arjhan', 'Balasar', 'Bharash', 'Donaar', 'Ghesh', 'Heskan', 'Kriv'],
+    'Gnomo': ['Alston', 'Brocc', 'Burgell', 'Dimble', 'Eldon', 'Fonkin'],
+    'Gnomo de las Rocas': ['Alston', 'Boddynock', 'Dimble'],
+    'Gnomo de los Bosques': ['Brocc', 'Eldon', 'Fonkin'],
+    'Semielfo': ['Tanis', 'Goldmoon', 'Raistlin', 'Caramon']
   };
   
   const raceNames = names[race] || names['Humano'];
   const firstName = randomFromArray(raceNames);
-  const titles = ['el Valiente', 'el Sabio', 'el Rápido', 'el Fuerte', 'la Astuta', 'el Noble'];
+  const titles = [
+    'el Valiente', 'el Sabio', 'el Rápido', 'el Fuerte', 'la Astuta', 'el Noble',
+    'Puño de Hierro', 'Corazón de León', 'Sombra Oscura', 'Luz Estelar',
+    'Cazador de Dragones', 'Guardián del Bosque', 'Mata Orcos', 'Rompe Muros'
+  ];
   
   return `${firstName} ${randomFromArray(titles)}`;
 }
@@ -112,100 +128,129 @@ function formatProficiencies(prof) {
 }
 
 // ==========================================
-// AVATAR SVG MEJORADO
+// AVATAR SVG ÉPICO D&D
 // ==========================================
 function drawAvatar(name, race, charClass) {
   const avatarSvg = document.getElementById('charAvatar');
   if (!avatarSvg) return;
   
-  const races = {
-    'Humano': { skin: '#ffe5c0', outline: '#c1946a', hair: '#8b4513' },
-    'Elfo': { skin: '#bce4d7', outline: '#325254', hair: '#ffd700' },
-    'Alto Elfo': { skin: '#bce4d7', outline: '#325254', hair: '#ffd700' },
-    'Elfo Oscuro (Drow)': { skin: '#4a4a6a', outline: '#2a2a4a', hair: '#ffffff' },
-    'Elfo de los Bosques': { skin: '#d4e7c5', outline: '#5a7247', hair: '#8b6914' },
-    'Enano': { skin: '#d8a867', outline: '#855e29', hair: '#654321' },
-    'Enano de las Montañas': { skin: '#d8a867', outline: '#855e29', hair: '#654321' },
-    'Enano de las Colinas': { skin: '#d8a867', outline: '#855e29', hair: '#8b4513' },
-    'Mediano': { skin: '#fdeec7', outline: '#d19c52', hair: '#d2691e' },
-    'Mediano Piesligeros': { skin: '#fdeec7', outline: '#d19c52', hair: '#d2691e' },
-    'Mediano Fornido': { skin: '#f5deb3', outline: '#c9a961', hair: '#a0522d' },
-    'Orco': { skin: '#94b869', outline: '#3a501e', hair: '#2f4f2f' },
-    'Semiorco': { skin: '#b5c49a', outline: '#5a6e3d', hair: '#556b2f' },
-    'Tiefling': { skin: '#e1adc8', outline: '#7b2670', hair: '#4b0082' },
-    'Dracónido': { skin: '#e6d773', outline: '#aa8a21', hair: '#daa520' },
-    'Gnomo': { skin: '#f5c6a5', outline: '#d4915d', hair: '#ff6347' },
-    'Gnomo de las Rocas': { skin: '#f5c6a5', outline: '#d4915d', hair: '#ff6347' },
-    'Gnomo de los Bosques': { skin: '#e5d5a5', outline: '#c4a56d', hair: '#8b7355' },
-    'Semielfo': { skin: '#f0d5b5', outline: '#c9a581', hair: '#cd853f' }
+  // Paletas de colores épicas por raza (tonos medievales)
+  const racePalettes = {
+    'Humano': { skin: '#d4a574', outline: '#8b6f47', hair: '#3d2817', armor: '#4a4a4a' },
+    'Elfo': { skin: '#c8b5a0', outline: '#6b5b4e', hair: '#d4af37', armor: '#2d5a3d' },
+    'Alto Elfo': { skin: '#c8b5a0', outline: '#6b5b4e', hair: '#d4af37', armor: '#1a3a52' },
+    'Elfo Oscuro (Drow)': { skin: '#5a4a6a', outline: '#2a1a3a', hair: '#e8e8e8', armor: '#8b008b' },
+    'Elfo de los Bosques': { skin: '#b8a080', outline: '#6b5a42', hair: '#8b6914', armor: '#2d5a2d' },
+    'Enano': { skin: '#a8926a', outline: '#6b5a42', hair: '#654321', armor: '#696969' },
+    'Enano de las Montañas': { skin: '#a8926a', outline: '#6b5a42', hair: '#8b4513', armor: '#404040' },
+    'Enano de las Colinas': { skin: '#a8926a', outline: '#6b5a42', hair: '#d2691e', armor: '#8b7355' },
+    'Mediano': { skin: '#e8d4b8', outline: '#b8926a', hair: '#8b4513', armor: '#3d3d3d' },
+    'Mediano Piesligeros': { skin: '#e8d4b8', outline: '#b8926a', hair: '#d2691e', armor: '#2d2d2d' },
+    'Mediano Fornido': { skin: '#d8b8a8', outline: '#9b7f5f', hair: '#8b6f47', armor: '#4a4a4a' },
+    'Orco': { skin: '#7a9a5a', outline: '#3a501e', hair: '#1a3a1a', armor: '#8b4513' },
+    'Semiorco': { skin: '#8aaa7a', outline: '#4a6a2a', hair: '#2d5a2d', armor: '#8b6f47' },
+    'Tiefling': { skin: '#d4a8c8', outline: '#8b3a6b', hair: '#4b0082', armor: '#8b008b' },
+    'Dracónido': { skin: '#d4c747', outline: '#aa8a21', hair: '#b8860b', armor: '#cd5c5c' },
+    'Gnomo': { skin: '#e8c4a0', outline: '#c49060', hair: '#ff6347', armor: '#3d5a3d' },
+    'Gnomo de las Rocas': { skin: '#e8c4a0', outline: '#c49060', hair: '#ff4500', armor: '#696969' },
+    'Gnomo de los Bosques': { skin: '#d8b8a0', outline: '#a89878', hair: '#8b6914', armor: '#4a7c4e' },
+    'Semielfo': { skin: '#d8c4a8', outline: '#9b8868', hair: '#b8860b', armor: '#2d4a52' }
   };
   
-  const classColors = {
-    'Guerrero': '#7972a9',
-    'Mago': '#b5d0e2',
-    'Pícaro': '#a2b39c',
-    'Clérigo': '#f0e68c',
-    'Paladín': '#ffd700',
-    'Bardo': '#dda0dd',
-    'Bárbaro': '#dc143c',
-    'Druida': '#228b22',
-    'Monje': '#ff8c00',
-    'Explorador': '#8fbc8f',
-    'Hechicero': '#9370db',
-    'Brujo': '#8b008b'
+  // Símbolos y colores por clase
+  const classStyles = {
+    'Guerrero': { crest: '⚔️', color: '#8b4513', badge: '🛡️' },
+    'Mago': { crest: '✨', color: '#4169e1', badge: '📜' },
+    'Pícaro': { crest: '🗡️', color: '#2d5a2d', badge: '🗝️' },
+    'Clérigo': { crest: '✞', color: '#daa520', badge: '⛪' },
+    'Paladín': { crest: '✦', color: '#ffd700', badge: '⚡' },
+    'Bardo': { crest: '🎵', color: '#8b3a8b', badge: '🎸' },
+    'Bárbaro': { crest: '🔥', color: '#dc143c', badge: '💥' },
+    'Druida': { crest: '🌿', color: '#228b22', badge: '🍃' },
+    'Monje': { crest: '☯️', color: '#ff8c00', badge: '🤝' },
+    'Explorador': { crest: '🏹', color: '#8fbc8f', badge: '🦌' },
+    'Hechicero': { crest: '⚡', color: '#9370db', badge: '🔮' },
+    'Brujo': { crest: '🌙', color: '#8b008b', badge: '👁️' }
   };
   
-  const eyes = ['#372502','#365f63','#3a276d','#375514','#8b4513','#4a90e2'];
+  const palette = racePalettes[race] || racePalettes['Humano'];
+  const classStyle = classStyles[charClass] || { crest: '⚔️', color: '#696969', badge: '🎯' };
   
-  // Hash basado en nombre para consistencia
+  // Hash para consistencia
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = ((hash << 5) - hash) + name.charCodeAt(i);
     hash = hash & hash;
   }
-  hash = Math.abs(hash) / 1000000;
+  hash = Math.abs(hash) % 100;
   
-  const raceColors = races[race] || races['Humano'];
-  const classColor = classColors[charClass] || '#e5b6ac';
-  const eyeColor = eyes[Math.floor(hash * eyes.length)];
-  
-  // Crear SVG
+  // SVG Épico
   const svg = `
-    <!-- Fondo del avatar -->
-    <circle cx="60" cy="60" r="58" fill="${raceColors.skin}" stroke="${raceColors.outline}" stroke-width="3"/>
+    <defs>
+      <radialGradient id="skinGrad" cx="40%" cy="40%">
+        <stop offset="0%" style="stop-color:${palette.skin};stop-opacity:1" />
+        <stop offset="100%" style="stop-color:${palette.outline};stop-opacity:0.5" />
+      </radialGradient>
+      <linearGradient id="armorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:${classStyle.color};stop-opacity:0.8" />
+        <stop offset="100%" style="stop-color:${palette.armor};stop-opacity:0.6" />
+      </linearGradient>
+      <filter id="shadow">
+        <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.4"/>
+      </filter>
+    </defs>
     
-    <!-- Cabello/Casco (parte superior) -->
-    <ellipse cx="60" cy="30" rx="35" ry="25" fill="${classColor}" opacity="0.7"/>
-    <path d="M 25,35 Q 60,15 95,35" fill="${raceColors.hair}" opacity="0.6"/>
+    <!-- Fondo escudo heráldico -->
+    <g filter="url(#shadow)">
+      <path d="M 60,10 L 100,40 L 100,95 Q 60,115 20,95 L 20,40 Z" 
+            fill="${classStyle.color}" opacity="0.15"/>
+      <path d="M 60,10 L 100,40 L 100,95 Q 60,115 20,95 L 20,40 Z" 
+            fill="none" stroke="${classStyle.color}" stroke-width="2" opacity="0.5"/>
+    </g>
+    
+    <!-- Cabello/Cabeza -->
+    <ellipse cx="60" cy="35" rx="25" ry="28" fill="${palette.hair}" opacity="0.9"/>
+    <path d="M 35,30 Q 60,15 85,30" fill="${palette.hair}" opacity="0.7" stroke="${palette.outline}" stroke-width="0.5"/>
     
     <!-- Cara -->
-    <ellipse cx="60" cy="65" rx="30" ry="35" fill="${raceColors.skin}" stroke="${raceColors.outline}" stroke-width="2"/>
+    <ellipse cx="60" cy="50" rx="22" ry="24" fill="url(#skinGrad)" stroke="${palette.outline}" stroke-width="1.5"/>
     
-    <!-- Ojos -->
-    <ellipse cx="50" cy="60" rx="6" ry="8" fill="white"/>
-    <ellipse cx="70" cy="60" rx="6" ry="8" fill="white"/>
-    <circle cx="${50 + hash * 2}" cy="${60 + hash}" r="3" fill="${eyeColor}"/>
-    <circle cx="${70 - hash * 2}" cy="${60 + hash}" r="3" fill="${eyeColor}"/>
+    <!-- Ojos expresivos -->
+    <ellipse cx="52" cy="48" rx="4" ry="5" fill="white" opacity="0.9"/>
+    <ellipse cx="68" cy="48" rx="4" ry="5" fill="white" opacity="0.9"/>
+    <circle cx="52" cy="49" r="2.5" fill="#1a1a1a"/>
+    <circle cx="68" cy="49" r="2.5" fill="#1a1a1a"/>
+    <circle cx="53" cy="47.5" r="1" fill="white" opacity="0.7"/>
+    <circle cx="69" cy="47.5" r="1" fill="white" opacity="0.7"/>
+    
+    <!-- Cejas -->
+    <path d="M 48,44 Q 52,42 56,44" fill="none" stroke="${palette.hair}" stroke-width="1" stroke-linecap="round"/>
+    <path d="M 64,44 Q 68,42 72,44" fill="none" stroke="${palette.hair}" stroke-width="1" stroke-linecap="round"/>
     
     <!-- Nariz -->
-    <line x1="60" y1="65" x2="60" y2="75" stroke="${raceColors.outline}" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 60,48 L 60,58" stroke="${palette.outline}" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
     
     <!-- Boca -->
-    <path d="M 52,82 Q 60,85 68,82" fill="none" stroke="${raceColors.outline}" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 55,60 Q 60,63 65,60" fill="none" stroke="${palette.outline}" stroke-width="1.5" stroke-linecap="round" opacity="0.7"/>
     
-    <!-- Cuello/Armadura -->
-    <rect x="45" y="95" width="30" height="10" rx="3" fill="${classColor}" opacity="0.8"/>
+    <!-- Armadura/Pecho épica -->
+    <path d="M 40,70 L 60,65 L 80,70 L 80,90 Q 60,95 40,90 Z" 
+          fill="url(#armorGrad)" stroke="${palette.armor}" stroke-width="2"/>
     
-    <!-- Detalles de clase (símbolos) -->
-    ${charClass === 'Mago' || charClass === 'Hechicero' || charClass === 'Brujo' ? 
-      '<circle cx="60" cy="40" r="4" fill="#ffd700" opacity="0.8"/>' : ''}
-    ${charClass === 'Guerrero' || charClass === 'Paladín' ? 
-      '<rect x="58" y="38" width="4" height="8" fill="#c0c0c0"/>' : ''}
-    ${charClass === 'Clérigo' ? 
-      '<path d="M 58,35 L 62,35 M 60,33 L 60,37" stroke="#ffd700" stroke-width="2"/>' : ''}
+    <!-- Detalles de armadura -->
+    <circle cx="60" cy="78" r="4" fill="none" stroke="${classStyle.color}" stroke-width="1" opacity="0.7"/>
+    <line x1="55" y1="85" x2="65" y2="85" stroke="${palette.armor}" stroke-width="1" opacity="0.5"/>
+    
+    <!-- Cuello/Capa -->
+    <ellipse cx="60" cy="65" rx="15" ry="8" fill="${palette.outline}" opacity="0.4"/>
+    
+    <!-- Badge de clase -->
+    <circle cx="60" cy="12" r="8" fill="${classStyle.color}" stroke="white" stroke-width="1.5" opacity="0.9"/>
+    <text x="60" y="15" text-anchor="middle" font-size="12" fill="white" font-weight="bold" opacity="0.9">${classStyle.crest}</text>
     
     <!-- Etiqueta de raza -->
-    <text x="60" y="115" text-anchor="middle" font-size="12" font-weight="bold" fill="${raceColors.outline}">${race.substring(0, 3).toUpperCase()}</text>
+    <rect x="25" y="100" width="70" height="14" rx="3" fill="${palette.outline}" opacity="0.2" stroke="${palette.outline}" stroke-width="1"/>
+    <text x="60" y="109" text-anchor="middle" font-size="11" font-weight="bold" fill="${palette.outline}">${race.substring(0, 12)}</text>
   `;
   
   avatarSvg.innerHTML = svg;
@@ -213,62 +258,87 @@ function drawAvatar(name, race, charClass) {
 }
 
 // ==========================================
-// RETRATO AI CON MULTI-API FALLBACK
+// RETRATO AI FANTASY D&D MEJORADO
 // ==========================================
 async function fetchAIPortrait(race, charClass) {
   const portraitImg = document.getElementById('aiPortrait');
   if (!portraitImg) return;
   
-  // Placeholder mientras carga
   portraitImg.src = "https://placehold.co/180x220/667eea/ffffff?text=Generando...";
   portraitImg.alt = "Generando retrato...";
   
-  const prompt = `${race} ${charClass} fantasy dnd character portrait`.toLowerCase();
+  // Prompts específicos por combinación raza/clase
+  const specificPrompts = {
+    'Mago-Humano': 'human wizard with blue robes magical aura fantasy dnd art',
+    'Mago-Elfo': 'elven mage with arcane symbols long hair fantasy dnd',
+    'Guerrero-Humano': 'human knight with armor and sword medieval fantasy dnd',
+    'Guerrero-Enano': 'dwarf warrior with axe and beard fantasy dnd art',
+    'Pícaro-Mediano': 'halfling rogue with daggers sneaky expression dnd fantasy',
+    'Pícaro-Elfo': 'elven rogue with bow dark leather armor fantasy dnd',
+    'Clérigo-Humano': 'human priest with holy symbol divine aura dnd fantasy',
+    'Paladín-Humano': 'human paladin with golden armor holy sword dnd art',
+    'Bárbaro-Orco': 'orc barbarian with massive axe fierce dnd fantasy',
+    'Druida-Elfo': 'elven druid with animal companion mystical dnd art',
+    'Tiefling-Brujo': 'tiefling warlock with dark magic red skin dnd fantasy'
+  };
   
-  // API 1: Lexica.art (Stable Diffusion búsqueda)
+  const promptKey = `${charClass}-${race}`;
+  const prompt = specificPrompts[promptKey] || 
+                 `${race} ${charClass} fantasy dungeons and dragons character portrait detailed epic art`;
+  
+  // API 1: Lexica.art con prompt mejorado
   try {
-    const res = await fetch(`https://lexica.art/api/v1/search?q=${encodeURIComponent(prompt)}`);
+    const encodedPrompt = encodeURIComponent(prompt);
+    const res = await fetch(`https://lexica.art/api/v1/search?q=${encodedPrompt}`);
     if (res.ok) {
       const data = await res.json();
       if (data.images && data.images.length > 0) {
         const randomIndex = Math.floor(Math.random() * Math.min(data.images.length, 20));
         portraitImg.src = data.images[randomIndex].src;
-        portraitImg.alt = `${race} ${charClass} - Generado por IA`;
-        console.log('✅ Imagen cargada desde Lexica.art');
+        portraitImg.alt = `${race} ${charClass} - D&D Fantasy Art`;
+        console.log('✅ Retrato D&D cargado desde Lexica.art');
         return;
       }
     }
-  } catch (error) {
-    console.warn('Lexica.art falló, intentando siguiente API...', error);
+  } catch(e) {
+    console.warn('Lexica.art falló, intentando siguiente API...');
   }
   
-  // API 2: Fallback - DiceBear Avatars (avatares procedurales)
+  // API 2: DiceBear con estilo fantasy
   try {
-    const style = 'avataaars';
-    const seed = encodeURIComponent(`${race}-${charClass}-${Date.now()}`);
-    const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}&backgroundColor=b6e3f4`;
+    const styles = ['avataaars', 'adventurer', 'big-ears'];
+    const style = styles[Math.floor(Math.random() * styles.length)];
+    const seed = encodeURIComponent(`${race}-${charClass}-dnd-${Date.now()}`);
+    const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}&backgroundColor=667eea&scale=85`;
     
     const testRes = await fetch(avatarUrl);
     if (testRes.ok) {
       portraitImg.src = avatarUrl;
-      portraitImg.alt = `${race} ${charClass} - Avatar generado`;
-      console.log('✅ Avatar cargado desde DiceBear');
+      portraitImg.alt = `${race} ${charClass} - Avatar Fantasy`;
+      console.log('✅ Avatar fantasy generado desde DiceBear');
       return;
     }
-  } catch (error) {
-    console.warn('DiceBear falló, intentando siguiente opción...', error);
+  } catch(e) {
+    console.warn('DiceBear falló, usando placeholder...');
   }
   
-  // API 3: Fallback final - UI Avatars
+  // API 3: Fallback con estilo D&D
   try {
-    const placeholderUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(race + ' ' + charClass)}&size=180&background=667eea&color=fff&bold=true&format=svg`;
+    const classEmojis = {
+      'Mago': '✨', 'Guerrero': '⚔️', 'Pícaro': '🗡️', 'Clérigo': '✞',
+      'Paladín': '✦', 'Bardo': '🎵', 'Bárbaro': '🔥', 'Druida': '🌿',
+      'Monje': '☯️', 'Explorador': '🏹', 'Hechicero': '⚡', 'Brujo': '🌙'
+    };
+    
+    const placeholderUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(race + ' ' + charClass)}&size=180&background=667eea&color=fff&bold=true&fontSize=0.4&format=svg`;
+    
     portraitImg.src = placeholderUrl;
-    portraitImg.alt = `${race} ${charClass}`;
-    console.log('✅ Placeholder generado');
-  } catch (error) {
-    console.error('Error en todas las APIs de imagen:', error);
-    portraitImg.src = "https://placehold.co/180x220/f56565/ffffff?text=Error";
-    portraitImg.alt = "Error al generar imagen";
+    portraitImg.alt = `${race} ${charClass} - D&D`;
+    console.log('✅ Placeholder D&D generado');
+  } catch(error) {
+    console.error('Error en todas las APIs:', error);
+    portraitImg.src = "https://placehold.co/180x220/8b4513/ffd700?text=⚔️+D%26D";
+    portraitImg.alt = "D&D Character";
   }
 }
 
