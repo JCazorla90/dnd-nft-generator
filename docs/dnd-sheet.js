@@ -188,9 +188,7 @@ function updatePowerLevel() {
   else{lvl="⭐ Novato";powerBar.style.background="linear-gradient(90deg,#eeeeda,#b89560)";}
   powerLvl.textContent=lvl;
 }
-
-// NFT TESTNET (SVG)
-const testnetNFTContract = "0x3Dd267B885777b2Fe60C63Fc59B2a45a4fD1Dd58"; // Testnet address demo
+const testnetNFTContract = "0x3Dd267B885777b2Fe60C63Fc59B2a45a4fD1Dd58"; // Demo testnet
 const contractABI = [
   "function safeMint(address to, string memory tokenURI) public"
 ];
@@ -227,9 +225,8 @@ async function mintCharacterNFT() {
     alert("Error minteando NFT: "+(err.message || err));
   }
 }
-
-// Funcionalidad común
-btnExportPDF.onclick = ()=>alert("Exporta PDF (demo, implementa con jsPDF si deseas un formato pulido).");
+// Features comunes
+btnExportPDF.onclick = ()=>alert("Exporta PDF (demo, integra jsPDF para pulido premium).");
 btnExportJSON.onclick=()=>{ const form = document.querySelector('.sheet5e');
   if(!form){alert("No hay ficha cargada");return;}
   const data = Object.fromEntries([...form.querySelectorAll("input,textarea")].map(f=>[f.id || f.name,f.value]));
@@ -280,8 +277,6 @@ window.loadHist = function(i){
   let arr = JSON.parse(localStorage.getItem(storageKey)||"[]");fillFormFromData(arr[i]);historyModal.style.display="none";
 };
 window.closeHist = function(){historyModal.style.display="none";};
-
-// Atajos y binds
 btnRandom.onclick = ()=> random5e();
 btnMintNFT.onclick = mintCharacterNFT;
 document.addEventListener('keydown',e=>{
