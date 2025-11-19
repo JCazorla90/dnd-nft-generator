@@ -35,7 +35,7 @@ function generateStats() {
 function generateCharacter(customData = {}) {
   const race = customData.race || randomFromArray(Object.keys(DND_DATA.races));
   const charClass = customData.class || randomFromArray(Object.keys(DND_DATA.classes));
-  const background = customData.background || randomFromArray(Object.keys(DND_DATA.backgrounds));
+  const background = customData.background || randomFromArray(Object.keys(DND_DATA.backgrounds)); // FIX: Object.keys()
   const alignment = customData.alignment || randomFromArray(DND_DATA.alignments);
   
   const stats = generateStats();
@@ -143,7 +143,10 @@ function displayCharacter(character) {
   
   // Mostrar ficha y botón NFT
   document.getElementById('characterSheet').classList.remove('hidden');
-  document.getElementById('mintNFTBtn').style.display = 'inline-block';
+  const nftBtn = document.getElementById('mintNFTBtn');
+  if (nftBtn) {
+    nftBtn.style.display = 'inline-block';
+  }
   
   // Scroll suave
   document.getElementById('characterSheet').scrollIntoView({ behavior: 'smooth' });
@@ -177,7 +180,7 @@ function populateSelects() {
     classSelect.appendChild(option);
   });
   
-  // Trasfondos
+  // Trasfondos - FIX: usar Object.keys()
   Object.keys(DND_DATA.backgrounds).forEach(bg => {
     const option = document.createElement('option');
     option.value = bg;
@@ -280,7 +283,7 @@ async function generatePDF() {
   // Salvaciones
   y += 10;
   doc.setFont(undefined, 'bold');
-  doc.text('Salvaciones competentes:', 20, y);
+  doc.text('Salvaciones:', 20, y);
   y += 6;
   doc.setFont(undefined, 'normal');
   doc.text(currentCharacter.savingThrows.join(', '), 20, y);
@@ -293,12 +296,20 @@ async function generatePDF() {
   doc.setFont(undefined, 'normal');
   const skillsLines = doc.splitTextToSize(currentCharacter.skills, 170);
   skillsLines.forEach(line => {
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
     doc.text(line, 20, y);
     y += 5;
   });
   
   // Rasgos raciales
   y += 10;
+  if (y > 260) {
+    doc.addPage();
+    y = 20;
+  }
   doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
   doc.text('RASGOS RACIALES', 20, y);
@@ -320,13 +331,13 @@ async function generatePDF() {
   
   // Competencias de clase
   y += 10;
-  if (y > 270) {
+  if (y > 260) {
     doc.addPage();
     y = 20;
   }
   doc.setFontSize(14);
   doc.setFont(undefined, 'bold');
-  doc.text('COMPETENCIAS Y RASGOS DE CLASE', 20, y);
+  doc.text('COMPETENCIAS DE CLASE', 20, y);
   
   y += 8;
   doc.setFontSize(10);
@@ -342,7 +353,7 @@ async function generatePDF() {
   
   // Características de clase
   y += 10;
-  if (y > 270) {
+  if (y > 260) {
     doc.addPage();
     y = 20;
   }
@@ -364,7 +375,7 @@ async function generatePDF() {
   
   // Equipo
   y += 10;
-  if (y > 270) {
+  if (y > 260) {
     doc.addPage();
     y = 20;
   }
@@ -438,7 +449,7 @@ async function connectWalletAndMint() {
   }
 }
 
-// NUEVAS FUNCIONES INTERESANTES
+// FUNCIONES ADICIONALES
 
 // Guardar personaje en localStorage
 function saveCharacterToStorage(character) {
@@ -448,7 +459,6 @@ function saveCharacterToStorage(character) {
       ...character,
       savedAt: new Date().toISOString()
     });
-    // Mantener solo los últimos 10
     localStorage.setItem('dnd_characters', JSON.stringify(savedCharacters.slice(0, 10)));
   } catch (e) {
     console.log('No se pudo guardar en localStorage');
@@ -473,7 +483,6 @@ function loadLastCharacter() {
 
 // Animación de celebración
 function celebrateCharacterCreation() {
-  // Crear confetti effect
   const colors = ['#667eea', '#764ba2', '#FFD700', '#48bb78'];
   for (let i = 0; i < 50; i++) {
     setTimeout(() => {
@@ -507,18 +516,6 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
-
-// Comparar dos personajes (para futura implementación)
-function compareCharacters(char1, char2) {
-  const stats1Total = Object.values(char1.stats).reduce((a, b) => a + b, 0);
-  const stats2Total = Object.values(char2.stats).reduce((a, b) => a + b, 0);
-  
-  return {
-    char1: { ...char1, statTotal: stats1Total },
-    char2: { ...char2, statTotal: stats2Total },
-    winner: stats1Total > stats2Total ? char1.name : char2.name
-  };
-}
 
 // Calcular nivel de poder del personaje
 function calculatePowerLevel(character) {
@@ -564,16 +561,21 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Generar aleatorio
   document.getElementById('randomBtn').addEventListener('click', () => {
-    const character = generateCharacter();
-    displayCharacter(character);
-    
-    // Mostrar nivel de poder
-    setTimeout(() => {
-      const powerLevel = calculatePowerLevel(character);
-      const backstory = generateBackstory(character);
-      console.log(`🎲 ${character.name} - ${powerLevel}`);
-      console.log(`📖 ${backstory}`);
-    }, 500);
+    try {
+      const character = generateCharacter();
+      displayCharacter(character);
+      
+      // Mostrar nivel de poder
+      setTimeout(() => {
+        const powerLevel = calculatePowerLevel(character);
+        const backstory = generateBackstory(character);
+        console.log(`🎲 ${character.name} - ${powerLevel}`);
+        console.log(`📖 ${backstory}`);
+      }, 500);
+    } catch (error) {
+      console.error('Error generando personaje:', error);
+      alert('Error al generar personaje. Por favor, recarga la página.');
+    }
   });
   
   // Toggle panel personalizado
@@ -584,28 +586,39 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Generar personalizado
   document.getElementById('customGenerateBtn').addEventListener('click', () => {
-    const customData = {
-      name: document.getElementById('charName').value,
-      race: document.getElementById('raceSelect').value,
-      class: document.getElementById('classSelect').value,
-      background: document.getElementById('backgroundSelect').value,
-      alignment: document.getElementById('alignmentSelect').value
-    };
-    
-    const character = generateCharacter(customData);
-    displayCharacter(character);
+    try {
+      const customData = {
+        name: document.getElementById('charName').value,
+        race: document.getElementById('raceSelect').value,
+        class: document.getElementById('classSelect').value,
+        background: document.getElementById('backgroundSelect').value,
+        alignment: document.getElementById('alignmentSelect').value
+      };
+      
+      const character = generateCharacter(customData);
+      displayCharacter(character);
+    } catch (error) {
+      console.error('Error generando personaje personalizado:', error);
+      alert('Error al generar personaje. Verifica los datos.');
+    }
   });
   
   // Descargar PDF
   document.getElementById('downloadBtn').addEventListener('click', generatePDF);
   
   // Mintear NFT
-  document.getElementById('mintNFTBtn').addEventListener('click', connectWalletAndMint);
+  const nftBtn = document.getElementById('mintNFTBtn');
+  if (nftBtn) {
+    nftBtn.addEventListener('click', connectWalletAndMint);
+  }
   
   // Nuevo personaje
   document.getElementById('newCharBtn').addEventListener('click', () => {
     document.getElementById('characterSheet').classList.add('hidden');
-    document.getElementById('mintNFTBtn').style.display = 'none';
+    const nftBtn = document.getElementById('mintNFTBtn');
+    if (nftBtn) {
+      nftBtn.style.display = 'none';
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
   
@@ -651,7 +664,6 @@ document.addEventListener('keydown', (e) => {
   konamiCode = konamiCode.slice(-10);
   
   if (konamiCode.join(',') === konamiSequence.join(',')) {
-    // Generar personaje legendario
     const legendaryChar = generateCharacter();
     legendaryChar.stats = {
       strength: 18,
