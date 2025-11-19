@@ -119,4 +119,102 @@ const DND_DATA = {
     },
     "Monje": {
       hitDie: 8,
-      proficiencies: ["Armas simples", "Espadas cortas", "Herramientas de artesano o instr
+      proficiencies: ["Armas simples", "Espadas cortas", "Herramientas de artesano o instrumento"],
+      savingThrows: ["Fuerza", "Destreza"],
+      skills: ["Elige 2: Acrobacias, Atletismo, Historia, Perspicacia, Religión, Sigilo"],
+      features: ["Defensa sin armadura", "Artes marciales (1d4)", "Ki (3 puntos)", "Movimiento sin armadura (+10 ft)", "Deflectar proyectiles"],
+      equipment: ["Espada corta", "10 dardos", "Equipo de explorador"]
+    },
+    "Explorador": {
+      hitDie: 10,
+      proficiencies: ["Armaduras ligeras", "Armaduras medianas", "Escudos", "Armas simples", "Armas marciales"],
+      savingThrows: ["Fuerza", "Destreza"],
+      skills: ["Elige 3: Trato con animales, Atletismo, Perspicacia, Investigación, Naturaleza, Percepción, Sigilo, Supervivencia"],
+      features: ["Enemigo predilecto", "Explorador nato", "Estilo de combate", "Lanzamiento de conjuros", "Conciencia primaria"],
+      equipment: ["Armadura de escamas", "2 espadas cortas", "Equipo de explorador", "Arco largo + 20 flechas"]
+    },
+    "Hechicero": {
+      hitDie: 6,
+      proficiencies: ["Dagas", "Dardos", "Hondas", "Bastones", "Ballestas ligeras"],
+      savingThrows: ["Constitución", "Carisma"],
+      skills: ["Elige 2: Arcanos, Engaño, Perspicacia, Intimidación, Persuasión, Religión"],
+      features: ["Lanzamiento de conjuros", "Origen de hechicería", "Puntos de hechicería", "Metamagia (2 opciones)"],
+      equipment: ["Ballesta ligera + 20 virotes", "Bolsa de componentes", "Equipo de explorador", "2 dagas"]
+    },
+    "Brujo": {
+      hitDie: 8,
+      proficiencies: ["Armaduras ligeras", "Armas simples"],
+      savingThrows: ["Sabiduría", "Carisma"],
+      skills: ["Elige 2: Arcanos, Engaño, Historia, Intimidación, Investigación, Naturaleza, Religión"],
+      features: ["Lanzamiento de conjuros (Pacto)", "Invocaciones sobrenaturales (2)", "Don del pacto", "Explosión mística"],
+      equipment: ["Armadura de cuero", "Arma simple", "2 dagas", "Bolsa de componentes", "Equipo de erudito"]
+    }
+  },
+  
+  skills: [
+    "Acrobacias (DES)", "Trato con animales (SAB)", "Arcanos (INT)", "Atletismo (FUE)",
+    "Engaño (CAR)", "Historia (INT)", "Perspicacia (SAB)", "Intimidación (CAR)",
+    "Investigación (INT)", "Medicina (SAB)", "Naturaleza (INT)", "Percepción (SAB)",
+    "Interpretación (CAR)", "Persuasión (CAR)", "Religión (INT)", "Juego de manos (DES)",
+    "Sigilo (DES)", "Supervivencia (SAB)"
+  ],
+  
+  backgrounds: {
+    "Noble": {
+      skills: ["Historia", "Persuasión"],
+      equipment: ["Ropas finas", "Anillo de sello", "Pergamino de linaje", "Bolsa con 25 po"],
+      feature: "Posición de privilegio"
+    },
+    "Criminal": {
+      skills: ["Engaño", "Sigilo"],
+      equipment: ["Palanca", "Ropas oscuras con capucha", "Bolsa con 15 po"],
+      feature: "Contacto criminal"
+    },
+    "Erudito": {
+      skills: ["Arcanos", "Historia"],
+      equipment: ["Tinta y pluma", "Cuchillo pequeño", "Carta de mentor", "Ropas de estudiante", "Bolsa con 10 po"],
+      feature: "Investigador"
+    },
+    "Soldado": {
+      skills: ["Atletismo", "Intimidación"],
+      equipment: ["Insignia de rango", "Trofeo de enemigo", "Juego de dados", "Ropas comunes", "Bolsa con 10 po"],
+      feature: "Rango militar"
+    },
+    "Acólito": {
+      skills: ["Perspicacia", "Religión"],
+      equipment: ["Símbolo sagrado", "Libro de plegarias", "5 varitas de incienso", "Ropas de ceremonia", "Bolsa con 15 po"],
+      feature: "Refugio de los fieles"
+    },
+    "Artista": {
+      skills: ["Acrobacias", "Interpretación"],
+      equipment: ["Instrumento musical", "Regalo de admirador", "Disfraz", "Bolsa con 15 po"],
+      feature: "A petición del público"
+    },
+    "Charlatán": {
+      skills: ["Engaño", "Juego de manos"],
+      equipment: ["Ropas finas", "Kit de disfraz", "Herramientas de estafador", "Bolsa con 15 po"],
+      feature: "Identidad falsa"
+    },
+    "Ermitaño": {
+      skills: ["Medicina", "Religión"],
+      equipment: ["Estuche de pergaminos", "Manta de invierno", "Ropas comunes", "Kit de herbolario", "5 po"],
+      feature: "Descubrimiento"
+    },
+    "Héroe popular": {
+      skills: ["Trato con animales", "Supervivencia"],
+      equipment: ["Herramientas de artesano", "Pala", "Olla de hierro", "Ropas comunes", "Bolsa con 10 po"],
+      feature: "Hospitalidad rústica"
+    },
+    "Marinero": {
+      skills: ["Atletismo", "Percepción"],
+      equipment: ["Garfio de abordaje", "50 ft de cuerda de seda", "Amuleto de la suerte", "Ropas comunes", "Bolsa con 10 po"],
+      feature: "Paso de barco"
+    }
+  },
+  
+  alignments: [
+    "Legal Bueno", "Neutral Bueno", "Caótico Bueno",
+    "Legal Neutral", "Neutral", "Caótico Neutral",
+    "Legal Malvado", "Neutral Malvado", "Caótico Malvado"
+  ]
+};
