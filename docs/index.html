@@ -22,6 +22,132 @@
       </div>
     </header>
 
+    <!-- SECCIÓN BESTIARIO -->
+<section class="bestiary-section">
+  <h2>🐉 Bestiario D&D - Generador de Enemigos</h2>
+  
+  <div class="bestiary-controls">
+    <div class="filter-group">
+      <label>Tipo de Criatura:</label>
+      <select id="creatureTypeFilter">
+        <option value="">Todos</option>
+        <option value="Aberración">Aberración</option>
+        <option value="Bestia">Bestia</option>
+        <option value="Celestial">Celestial</option>
+        <option value="Dragón">Dragón</option>
+        <option value="Demonio">Demonio</option>
+        <option value="Gigante">Gigante</option>
+        <option value="Humanoide">Humanoide</option>
+        <option value="No-muerto">No-muerto</option>
+        <option value="Monstruosidad">Monstruosidad</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>Challenge Rating:</label>
+      <select id="crFilter">
+        <option value="">Todos</option>
+        <option value="1/4">CR 1/4</option>
+        <option value="1/2">CR 1/2</option>
+        <option value="1">CR 1</option>
+        <option value="2">CR 2</option>
+        <option value="3">CR 3</option>
+        <option value="5">CR 5</option>
+        <option value="8">CR 8</option>
+        <option value="10">CR 10</option>
+        <option value="13">CR 13+</option>
+      </select>
+    </div>
+    
+    <div class="filter-group">
+      <label>Ambiente:</label>
+      <select id="environmentFilter">
+        <option value="">Todos</option>
+        <option value="Mazmorra">Mazmorra</option>
+        <option value="Bosque">Bosque</option>
+        <option value="Montaña">Montaña</option>
+        <option value="Pantano">Pantano</option>
+        <option value="Subterráneo">Subterráneo</option>
+      </select>
+    </div>
+    
+    <button id="generateCreatureBtn" class="btn btn-primary">🎲 Generar Criatura</button>
+    <button id="generateFromAPIBtn" class="btn btn-secondary">📚 Desde API D&D</button>
+  </div>
+  
+  <div class="encounter-generator">
+    <h3>Generador de Encuentros</h3>
+    <div class="encounter-controls">
+      <input type="number" id="partyLevel" value="5" min="1" max="20" placeholder="Nivel del grupo">
+      <input type="number" id="partySize" value="4" min="1" max="8" placeholder="Tamaño del grupo">
+      <button id="generateEncounterBtn" class="btn">⚔️ Generar Encuentro</button>
+    </div>
+    <div id="encounterPanel" class="hidden">
+      <p><strong>XP del Encuentro:</strong> <span id="encounterXP"></span></p>
+      <div id="encounterList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- FICHA DE CRIATURA -->
+<div id="creatureSheet" class="character-sheet hidden">
+  <div class="sheet-header">
+    <h2 id="creatureName">Nombre Criatura</h2>
+    <p id="creatureType">Tipo y Tamaño</p>
+    <div class="creature-cr">
+      <span id="creatureCR">CR</span>
+      <span id="creatureXP">XP</span>
+    </div>
+  </div>
+  
+  <div class="creature-visual">
+    <img id="creaturePortrait" src="" alt="Retrato criatura">
+    <button id="regenCreaturePortrait" class="btn btn-small">🔄 Regenerar</button>
+  </div>
+  
+  <div class="creature-stats">
+    <h3>Estadísticas de Combate</h3>
+    <div class="combat-stats">
+      <div><strong>CA:</strong> <span id="creatureAC"></span></div>
+      <div><strong>HP:</strong> <span id="creatureHP"></span></div>
+      <div><strong>Velocidad:</strong> <span id="creatureSpeed"></span></div>
+    </div>
+    
+    <h3>Características</h3>
+    <div class="ability-scores">
+      <div><strong>FUE:</strong> <span id="creatureStr"></span></div>
+      <div><strong>DES:</strong> <span id="creatureDex"></span></div>
+      <div><strong>CON:</strong> <span id="creatureCon"></span></div>
+      <div><strong>INT:</strong> <span id="creatureInt"></span></div>
+      <div><strong>SAB:</strong> <span id="creatureWis"></span></div>
+      <div><strong>CAR:</strong> <span id="creatureCha"></span></div>
+    </div>
+    
+    <h3>Habilidades</h3>
+    <ul id="creatureSkills"></ul>
+    
+    <h3>Rasgos Especiales</h3>
+    <ul id="creatureTraits"></ul>
+    
+    <h3>Acciones</h3>
+    <ul id="creatureActions"></ul>
+    
+    <div id="legendarySection" class="hidden">
+      <h3>Acciones Legendarias</h3>
+      <ul id="creatureLegendaryActions"></ul>
+    </div>
+    
+    <h3>Defensas</h3>
+    <p id="creatureDefenses"></p>
+    
+    <h3>Ambiente</h3>
+    <p id="creatureEnvironment"></p>
+  </div>
+  
+  <button id="newCreatureBtn" class="btn">🆕 Nueva Criatura</button>
+</div>
+
+
     <!-- Power Bar -->
     <div id="powerBar" class="power-bar">
       <span id="powerLevel">⭐⭐⭐ Novato</span>
