@@ -1,8 +1,14 @@
-// Estado global
+// ==========================================
+// ESTADO GLOBAL Y CONFIGURACIÓN
+// ==========================================
 let currentCharacter = null;
 const STORAGE_KEY = 'dnd_character_history';
+const NFT_CONTRACT = "0x3Dd267B885777b2Fe60C63Fc59B2a45a4fD1Dd58"; // Testnet
+const NFT_ABI = ["function safeMint(address to, string memory tokenURI) public"];
 
-// Utilidades
+// ==========================================
+// UTILIDADES BÁSICAS
+// ==========================================
 function randomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -32,6 +38,9 @@ function generateStats() {
   };
 }
 
+// ==========================================
+// GENERACIÓN DE PERSONAJES
+// ==========================================
 function generateCharacter(customData = {}) {
   const race = customData.race || randomFromArray(Object.keys(DND_DATA.races));
   const charClass = customData.class || randomFromArray(Object.keys(DND_DATA.classes));
@@ -40,14 +49,21 @@ function generateCharacter(customData = {}) {
   
   const stats = generateStats();
   const classData = DND_DATA.classes[charClass];
-  const raceData = DND_DATA.races[race];
+  
+  // Obtener datos de raza (manejando subrazas)
+  let raceData = DND_DATA.races[race];
+  if (raceData.subraces) {
+    const subraceKey = randomFromArray(Object.keys(raceData.subraces));
+    raceData = { ...raceData, ...raceData.subraces[subraceKey] };
+  }
+  
   const backgroundData = DND_DATA.backgrounds[background];
   
   const hp = classData.hitDie + calculateModifier(stats.constitution);
   const ac = 10 + calculateModifier(stats.dexterity);
   
   return {
-    name: customData.name || `${race} el ${charClass}`,
+    name: customData.name || generateRandomName(race, charClass),
     race,
     class: charClass,
     background,
@@ -58,59 +74,220 @@ function generateCharacter(customData = {}) {
     ac,
     speed: raceData.speed,
     racialTraits: raceData.traits,
-    classProficiencies: classData.proficiencies,
+    classProficiencies: formatProficiencies(classData.proficiencies),
     classFeatures: classData.features,
-    savingThrows: classData.savingThrows,
-    skills: classData.skills,
+    savingThrows: classData.proficiencies.savingThrows,
+    skills: classData.skills.from ? 
+      `Elige ${classData.skills.choose}: ${classData.skills.from.join(', ')}` : 
+      'Ver clase',
     equipment: classData.equipment,
     backgroundData: backgroundData
   };
 }
 
-// ========== AVATAR SVG ==========
-function drawAvatar(name, race, charClass) {
-  const races = {
-    'Elfo': ['#bce4d7','#325254'],
-    'Enano': ['#d8a867','#855e29'],
-    'Mediano': ['#fdeec7','#d19c52'],
-    'Orco': ['#94b869','#3a501e'],
-    'Humano': ['#ffe5c0','#c1946a'],
-    'Dracónido': ['#e6d773','#aa8a21'],
-    'Tiefling': ['#e1adc8','#7b2670']
+function generateRandomName(race, charClass) {
+  const names = {
+    'Humano': ['Aric', 'Brendan', 'Cassandra', 'Diana', 'Erik', 'Fiona'],
+    'Elfo': ['Aelrindel', 'Eldacar', 'Galadriel', 'Legolas', 'Thranduil', 'Arwen'],
+    'Enano': ['Balin', 'Dwalin', 'Thorin', 'Gimli', 'Dain', 'Thrain'],
+    'Orco': ['Grunk', 'Thrak', 'Urgak', 'Mog', 'Grul', 'Drak'],
+    'Mediano': ['Bilbo', 'Frodo', 'Sam', 'Pippin', 'Merry', 'Rosie'],
+    'Tiefling': ['Akta', 'Damakos', 'Ekemon', 'Iados', 'Kairon', 'Leucis'],
+    'Dracónido': ['Arjhan', 'Balasar', 'Bharash', 'Donaar', 'Ghesh', 'Heskan']
   };
-  const eyes = ['#372502','#365f63','#3a276d','#375514'];
-  let hash = (Array.from(name+race+charClass).reduce((a,c)=>a+c.charCodeAt(0),0)%1000)/1000;
-  let raceColors = races[race] || ['#ffe4bc','#947855'];
-  let svg = `
-    <ellipse cx="60" cy="75" rx="40" ry="45" fill="${raceColors[0]}" stroke="${raceColors[1]}" stroke-width="4"/>
-    <ellipse cx="60" cy="61" rx="10" ry="15" fill="${eyes[Math.floor(hash*eyes.length)]}" />
-    <ellipse cx="${47+hash*8}" cy="62" rx="5" ry="6" fill="white"/>
-    <ellipse cx="${73-hash*8}" cy="62" rx="5" ry="6" fill="white"/>
-    <rect x="40" y="100" width="40" height="9" rx="4" fill="${raceColors[1]}" opacity="0.7"/>
-    <ellipse cx="60" cy="31" rx="22" ry="18" fill="#${charClass==="Mago"?"b5d0e2":charClass==="Pícaro"?"a2b39c":charClass==="Guerrero"?"7972a9":"e5b6ac"}" opacity="0.5"/>
-    <text x="60" y="115" text-anchor="middle" font-size="18" fill="#7a3913">${race[0]}</text>
-  `;
-  document.getElementById('charAvatar').innerHTML = svg;
+  
+  const raceNames = names[race] || names['Humano'];
+  const firstName = randomFromArray(raceNames);
+  const titles = ['el Valiente', 'el Sabio', 'el Rápido', 'el Fuerte', 'la Astuta', 'el Noble'];
+  
+  return `${firstName} ${randomFromArray(titles)}`;
 }
 
-// ========== RETRATO AI ==========
-async function fetchAIPortrait(race, charClass) {
-  const prompt = encodeURIComponent([race, charClass, "fantasy dnd portrait"].filter(Boolean).join(" "));
-  document.getElementById("aiPortrait").src = "https://placehold.co/180x220/ffe3b1/7a3a13?text=Cargando...";
+function formatProficiencies(prof) {
+  const parts = [];
+  if (prof.armor && prof.armor.length) parts.push(`Armaduras: ${prof.armor.join(', ')}`);
+  if (prof.weapons && prof.weapons.length) parts.push(`Armas: ${prof.weapons.join(', ')}`);
+  if (prof.tools && prof.tools.length) parts.push(`Herramientas: ${prof.tools.join(', ')}`);
+  return parts;
+}
+
+// ==========================================
+// AVATAR SVG MEJORADO
+// ==========================================
+function drawAvatar(name, race, charClass) {
+  const avatarSvg = document.getElementById('charAvatar');
+  if (!avatarSvg) return;
   
+  const races = {
+    'Humano': { skin: '#ffe5c0', outline: '#c1946a', hair: '#8b4513' },
+    'Elfo': { skin: '#bce4d7', outline: '#325254', hair: '#ffd700' },
+    'Alto Elfo': { skin: '#bce4d7', outline: '#325254', hair: '#ffd700' },
+    'Elfo Oscuro (Drow)': { skin: '#4a4a6a', outline: '#2a2a4a', hair: '#ffffff' },
+    'Elfo de los Bosques': { skin: '#d4e7c5', outline: '#5a7247', hair: '#8b6914' },
+    'Enano': { skin: '#d8a867', outline: '#855e29', hair: '#654321' },
+    'Enano de las Montañas': { skin: '#d8a867', outline: '#855e29', hair: '#654321' },
+    'Enano de las Colinas': { skin: '#d8a867', outline: '#855e29', hair: '#8b4513' },
+    'Mediano': { skin: '#fdeec7', outline: '#d19c52', hair: '#d2691e' },
+    'Mediano Piesligeros': { skin: '#fdeec7', outline: '#d19c52', hair: '#d2691e' },
+    'Mediano Fornido': { skin: '#f5deb3', outline: '#c9a961', hair: '#a0522d' },
+    'Orco': { skin: '#94b869', outline: '#3a501e', hair: '#2f4f2f' },
+    'Semiorco': { skin: '#b5c49a', outline: '#5a6e3d', hair: '#556b2f' },
+    'Tiefling': { skin: '#e1adc8', outline: '#7b2670', hair: '#4b0082' },
+    'Dracónido': { skin: '#e6d773', outline: '#aa8a21', hair: '#daa520' },
+    'Gnomo': { skin: '#f5c6a5', outline: '#d4915d', hair: '#ff6347' },
+    'Gnomo de las Rocas': { skin: '#f5c6a5', outline: '#d4915d', hair: '#ff6347' },
+    'Gnomo de los Bosques': { skin: '#e5d5a5', outline: '#c4a56d', hair: '#8b7355' },
+    'Semielfo': { skin: '#f0d5b5', outline: '#c9a581', hair: '#cd853f' }
+  };
+  
+  const classColors = {
+    'Guerrero': '#7972a9',
+    'Mago': '#b5d0e2',
+    'Pícaro': '#a2b39c',
+    'Clérigo': '#f0e68c',
+    'Paladín': '#ffd700',
+    'Bardo': '#dda0dd',
+    'Bárbaro': '#dc143c',
+    'Druida': '#228b22',
+    'Monje': '#ff8c00',
+    'Explorador': '#8fbc8f',
+    'Hechicero': '#9370db',
+    'Brujo': '#8b008b'
+  };
+  
+  const eyes = ['#372502','#365f63','#3a276d','#375514','#8b4513','#4a90e2'];
+  
+  // Hash basado en nombre para consistencia
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = ((hash << 5) - hash) + name.charCodeAt(i);
+    hash = hash & hash;
+  }
+  hash = Math.abs(hash) / 1000000;
+  
+  const raceColors = races[race] || races['Humano'];
+  const classColor = classColors[charClass] || '#e5b6ac';
+  const eyeColor = eyes[Math.floor(hash * eyes.length)];
+  
+  // Crear SVG
+  const svg = `
+    <!-- Fondo del avatar -->
+    <circle cx="60" cy="60" r="58" fill="${raceColors.skin}" stroke="${raceColors.outline}" stroke-width="3"/>
+    
+    <!-- Cabello/Casco (parte superior) -->
+    <ellipse cx="60" cy="30" rx="35" ry="25" fill="${classColor}" opacity="0.7"/>
+    <path d="M 25,35 Q 60,15 95,35" fill="${raceColors.hair}" opacity="0.6"/>
+    
+    <!-- Cara -->
+    <ellipse cx="60" cy="65" rx="30" ry="35" fill="${raceColors.skin}" stroke="${raceColors.outline}" stroke-width="2"/>
+    
+    <!-- Ojos -->
+    <ellipse cx="50" cy="60" rx="6" ry="8" fill="white"/>
+    <ellipse cx="70" cy="60" rx="6" ry="8" fill="white"/>
+    <circle cx="${50 + hash * 2}" cy="${60 + hash}" r="3" fill="${eyeColor}"/>
+    <circle cx="${70 - hash * 2}" cy="${60 + hash}" r="3" fill="${eyeColor}"/>
+    
+    <!-- Nariz -->
+    <line x1="60" y1="65" x2="60" y2="75" stroke="${raceColors.outline}" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Boca -->
+    <path d="M 52,82 Q 60,85 68,82" fill="none" stroke="${raceColors.outline}" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Cuello/Armadura -->
+    <rect x="45" y="95" width="30" height="10" rx="3" fill="${classColor}" opacity="0.8"/>
+    
+    <!-- Detalles de clase (símbolos) -->
+    ${charClass === 'Mago' || charClass === 'Hechicero' || charClass === 'Brujo' ? 
+      '<circle cx="60" cy="40" r="4" fill="#ffd700" opacity="0.8"/>' : ''}
+    ${charClass === 'Guerrero' || charClass === 'Paladín' ? 
+      '<rect x="58" y="38" width="4" height="8" fill="#c0c0c0"/>' : ''}
+    ${charClass === 'Clérigo' ? 
+      '<path d="M 58,35 L 62,35 M 60,33 L 60,37" stroke="#ffd700" stroke-width="2"/>' : ''}
+    
+    <!-- Etiqueta de raza -->
+    <text x="60" y="115" text-anchor="middle" font-size="12" font-weight="bold" fill="${raceColors.outline}">${race.substring(0, 3).toUpperCase()}</text>
+  `;
+  
+  avatarSvg.innerHTML = svg;
+  avatarSvg.setAttribute('viewBox', '0 0 120 120');
+}
+
+// ==========================================
+// RETRATO AI CON MULTI-API FALLBACK
+// ==========================================
+async function fetchAIPortrait(race, charClass) {
+  const portraitImg = document.getElementById('aiPortrait');
+  if (!portraitImg) return;
+  
+  // Placeholder mientras carga
+  portraitImg.src = "https://placehold.co/180x220/667eea/ffffff?text=Generando...";
+  portraitImg.alt = "Generando retrato...";
+  
+  const prompt = `${race} ${charClass} fantasy dnd character portrait`.toLowerCase();
+  
+  // API 1: Lexica.art (Stable Diffusion búsqueda)
   try {
-    const res = await fetch(`https://lexica.art/api/v1/search?q=${prompt}`);
-    const data = await res.json();
-    const img = data.images && data.images.length ? 
-      data.images[Math.floor(Math.random()*data.images.length)].srcSmall : null;
-    document.getElementById("aiPortrait").src = img || "https://placehold.co/180x220/edd8cc/7a3a13?text=Sin+retrato";
-  } catch(e) {
-    document.getElementById("aiPortrait").src = "https://placehold.co/180x220/edd8cc/7a3a13?text=Error";
+    const res = await fetch(`https://lexica.art/api/v1/search?q=${encodeURIComponent(prompt)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.images && data.images.length > 0) {
+        const randomIndex = Math.floor(Math.random() * Math.min(data.images.length, 20));
+        portraitImg.src = data.images[randomIndex].src;
+        portraitImg.alt = `${race} ${charClass} - Generado por IA`;
+        console.log('✅ Imagen cargada desde Lexica.art');
+        return;
+      }
+    }
+  } catch (error) {
+    console.warn('Lexica.art falló, intentando siguiente API...', error);
+  }
+  
+  // API 2: Fallback - DiceBear Avatars (avatares procedurales)
+  try {
+    const style = 'avataaars';
+    const seed = encodeURIComponent(`${race}-${charClass}-${Date.now()}`);
+    const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}&backgroundColor=b6e3f4`;
+    
+    const testRes = await fetch(avatarUrl);
+    if (testRes.ok) {
+      portraitImg.src = avatarUrl;
+      portraitImg.alt = `${race} ${charClass} - Avatar generado`;
+      console.log('✅ Avatar cargado desde DiceBear');
+      return;
+    }
+  } catch (error) {
+    console.warn('DiceBear falló, intentando siguiente opción...', error);
+  }
+  
+  // API 3: Fallback final - UI Avatars
+  try {
+    const placeholderUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(race + ' ' + charClass)}&size=180&background=667eea&color=fff&bold=true&format=svg`;
+    portraitImg.src = placeholderUrl;
+    portraitImg.alt = `${race} ${charClass}`;
+    console.log('✅ Placeholder generado');
+  } catch (error) {
+    console.error('Error en todas las APIs de imagen:', error);
+    portraitImg.src = "https://placehold.co/180x220/f56565/ffffff?text=Error";
+    portraitImg.alt = "Error al generar imagen";
   }
 }
 
-// ========== POWER LEVEL ==========
+function regeneratePortrait() {
+  if (!currentCharacter) {
+    alert('Primero genera un personaje');
+    return;
+  }
+  fetchAIPortrait(currentCharacter.race, currentCharacter.class);
+}
+
+// ==========================================
+// POWER LEVEL
+// ==========================================
 function updatePowerLevel(stats) {
+  const powerBar = document.getElementById('powerBar');
+  const powerLevel = document.getElementById('powerLevel');
+  if (!powerBar || !powerLevel) return;
+  
   const avg = Object.values(stats).reduce((a,b)=>a+b,0)/6;
   let lvl = "⭐ Novato";
   let gradient = "linear-gradient(90deg,#eeeeda,#b89560)";
@@ -129,10 +306,13 @@ function updatePowerLevel(stats) {
     gradient="linear-gradient(90deg,#ece7bc,#caa87a)";
   }
   
-  document.getElementById('powerLevel').textContent = lvl;
-  document.getElementById('powerBar').style.background = gradient;
+  powerLevel.textContent = lvl;
+  powerBar.style.background = gradient;
 }
 
+// ==========================================
+// MOSTRAR PERSONAJE
+// ==========================================
 function displayCharacter(character) {
   currentCharacter = character;
   
@@ -170,7 +350,8 @@ function displayCharacter(character) {
     calculateModifier(character.stats.dexterity);
   
   // Salvaciones y habilidades
-  document.getElementById('displaySavingThrows').textContent = character.savingThrows.join(', ');
+  document.getElementById('displaySavingThrows').textContent = 
+    Array.isArray(character.savingThrows) ? character.savingThrows.join(', ') : character.savingThrows;
   document.getElementById('displaySkills').textContent = character.skills;
   
   // Equipo
@@ -211,6 +392,9 @@ function displayCharacter(character) {
   saveToHistory(character);
 }
 
+// ==========================================
+// POBLAR SELECTORES
+// ==========================================
 function populateSelects() {
   const raceSelect = document.getElementById('raceSelect');
   const classSelect = document.getElementById('classSelect');
@@ -246,14 +430,16 @@ function populateSelects() {
   });
 }
 
-// ========== HISTORIAL ==========
+// ==========================================
+// HISTORIAL
+// ==========================================
 function saveToHistory(character) {
   let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
   history.unshift({
     ...character,
     savedAt: new Date().toISOString()
   });
-  history = history.slice(0, 10); // Máximo 10
+  history = history.slice(0, 10);
   localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
 }
 
@@ -289,7 +475,9 @@ function loadCharacterFromHistory(index) {
   document.getElementById('historyModal').classList.add('hidden');
 }
 
-// ========== EXPORT/IMPORT JSON ==========
+// ==========================================
+// EXPORT/IMPORT JSON
+// ==========================================
 function exportJSON() {
   if(!currentCharacter) {
     alert('Primero genera un personaje');
@@ -325,10 +513,9 @@ function importJSON() {
   input.value = '';
 }
 
-// ========== MINTEAR NFT ==========
-const NFT_CONTRACT = "0x3Dd267B885777b2Fe60C63Fc59B2a45a4fD1Dd58"; // Testnet
-const NFT_ABI = ["function safeMint(address to, string memory tokenURI) public"];
-
+// ==========================================
+// MINTEAR NFT
+// ==========================================
 async function mintNFT() {
   if(!currentCharacter) {
     alert('Primero genera un personaje');
@@ -341,7 +528,6 @@ async function mintNFT() {
   }
   
   try {
-    // Generar metadata
     const svgData = document.getElementById("charAvatar").outerHTML;
     const svg64 = btoa(unescape(encodeURIComponent(svgData)));
     const image = `data:image/svg+xml;base64,${svg64}`;
@@ -366,13 +552,11 @@ async function mintNFT() {
     const jsonB64 = btoa(unescape(encodeURIComponent(JSON.stringify(metadata))));
     const tokenURI = `data:application/json;base64,${jsonB64}`;
     
-    // Conectar wallet
     const provider = new ethers.BrowserProvider(window.ethereum);
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     const signer = await provider.getSigner();
     const contract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer);
     
-    // Mintear
     const tx = await contract.safeMint(await signer.getAddress(), tokenURI);
     alert(`NFT minteado en testnet!\n\nHash: ${tx.hash}\n\nPuedes verlo en testnets.opensea.io`);
     
@@ -382,15 +566,22 @@ async function mintNFT() {
   }
 }
 
-// ========== MODO OSCURO ==========
+// ==========================================
+// MODO OSCURO
+// ==========================================
 function toggleDarkMode() {
   document.body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
 }
 
-// ========== PDF ==========
+// ==========================================
+// GENERAR PDF
+// ==========================================
 async function generatePDF() {
-  if (!currentCharacter) return;
+  if (!currentCharacter) {
+    alert('Primero genera un personaje');
+    return;
+  }
   
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
@@ -435,7 +626,6 @@ async function generatePDF() {
     x += 30;
   });
   
-  // Más contenido...
   y += 15;
   doc.text(`HP: ${currentCharacter.hp} | CA: ${currentCharacter.ac} | Velocidad: ${currentCharacter.speed} ft`, 20, y);
   
@@ -447,7 +637,9 @@ async function generatePDF() {
   doc.save(`${currentCharacter.name.replace(/\s/g, '_')}.pdf`);
 }
 
-// ========== EVENT LISTENERS ==========
+// ==========================================
+// EVENT LISTENERS
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
   populateSelects();
   
@@ -496,11 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   // Regenerar retrato
-  document.getElementById('regenPortrait').addEventListener('click', () => {
-    if(currentCharacter) {
-      fetchAIPortrait(currentCharacter.race, currentCharacter.class);
-    }
-  });
+  document.getElementById('regenPortrait').addEventListener('click', regeneratePortrait);
   
   // Compartir
   document.getElementById('shareBtn').addEventListener('click', () => {
