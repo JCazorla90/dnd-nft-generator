@@ -130,6 +130,8 @@ h1 {
 
 .btn-success:hover {
   background: #38a169;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
 }
 
 .custom-panel {
@@ -197,11 +199,18 @@ h1 {
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 3px solid var(--primary);
+  flex-wrap: wrap;
+  gap: 15px;
 }
 
 .sheet-header h2 {
   color: var(--primary);
   font-size: 2em;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 10px;
 }
 
 .info-section {
@@ -212,6 +221,12 @@ h1 {
   color: var(--primary);
   margin-bottom: 15px;
   font-size: 1.3em;
+}
+
+.info-section h4 {
+  color: var(--secondary);
+  margin-bottom: 10px;
+  font-size: 1.1em;
 }
 
 .info-grid {
@@ -226,6 +241,8 @@ h1 {
   padding: 10px;
   background: #f7fafc;
   border-radius: 8px;
+  flex-wrap: wrap;
+  gap: 5px;
 }
 
 .label {
@@ -236,6 +253,7 @@ h1 {
 .value {
   color: var(--primary);
   font-weight: 700;
+  text-align: right;
 }
 
 .value.big {
@@ -256,6 +274,11 @@ h1 {
   border-radius: 12px;
   text-align: center;
   box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  transition: transform 0.3s;
+}
+
+.stat-box:hover {
+  transform: translateY(-5px);
 }
 
 .stat-name {
@@ -286,6 +309,11 @@ h1 {
   padding: 15px;
   border-radius: 8px;
   text-align: center;
+  transition: background 0.3s;
+}
+
+.combat-item:hover {
+  background: #e2e8f0;
 }
 
 .traits-list {
@@ -299,6 +327,12 @@ h1 {
   margin-bottom: 8px;
   border-radius: 8px;
   border-left: 4px solid var(--primary);
+  transition: all 0.3s;
+}
+
+.traits-list li:hover {
+  background: #e2e8f0;
+  transform: translateX(5px);
 }
 
 .actions {
@@ -307,6 +341,12 @@ h1 {
   margin-top: 30px;
   padding-top: 20px;
   border-top: 2px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.actions .btn {
+  flex: 1 1 auto;
+  min-width: 150px;
 }
 
 footer {
@@ -326,9 +366,133 @@ footer a:hover {
   text-decoration: underline;
 }
 
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 768px) {
-  h1 { font-size: 2em; }
-  .generation-mode { flex-direction: column; }
-  .stats-grid { grid-template-columns: repeat(3, 1fr); }
-  .sheet-header { flex-direction: column; gap: 15px; }
+  h1 { 
+    font-size: 2em; 
+  }
+  
+  .subtitle {
+    font-size: 1em;
+  }
+  
+  .generation-mode { 
+    flex-direction: column; 
+  }
+  
+  .stats-grid { 
+    grid-template-columns: repeat(3, 1fr); 
+  }
+  
+  .sheet-header { 
+    flex-direction: column; 
+    align-items: flex-start;
+  }
+  
+  .header-buttons {
+    width: 100%;
+  }
+  
+  .header-buttons .btn {
+    flex: 1;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .combat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .actions {
+    flex-direction: column;
+  }
+  
+  .actions .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.5em;
+  }
+  
+  .card {
+    padding: 20px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .stat-value {
+    font-size: 2em;
+  }
+  
+  .combat-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animaciones adicionales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.info-section {
+  animation: fadeIn 0.6s ease;
+}
+
+/* Estilos para impresión */
+@media print {
+  body {
+    background: white;
+  }
+  
+  .generator-panel,
+  .actions,
+  footer,
+  .github-link {
+    display: none;
+  }
+  
+  .card {
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+  
+  .main-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Scrollbar personalizada (Chrome/Safari) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.3);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.5);
 }
