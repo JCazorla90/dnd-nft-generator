@@ -1,515 +1,1119 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Character Forge - Generador de Personajes y Bestiario</title>
-    
-    <!-- Fuentes épicas -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- jsPDF para generar PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <!-- Ethers.js para NFTs (opcional) -->
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
-</head>
-<body>
-    <!-- HEADER ÉPICO -->
-    <header class="main-header">
-        <div class="header-decoration">⚔️</div>
-        <div class="header-content">
-            <h1 class="main-title">D&D Character Forge</h1>
-            <p class="subtitle">Generador Épico de Personajes y Bestiario</p>
-        </div>
-        <div class="header-decoration">🐉</div>
-    </header>
+/* ==========================================
+   D&D CHARACTER FORGE - ESTILOS ÉPICOS PROFESIONALES
+   Inspirado en Baldur's Gate 3, Pathfinder, fichas clásicas D&D
+   ========================================== */
 
-    <div class="container">
-        
-        <!-- SELECTOR DE EDICIÓN -->
-        <section class="edition-selector">
-            <label for="editionSelect">📖 Edición de D&D:</label>
-            <select id="editionSelect">
-                <option value="5e" selected>5ta Edición (2014)</option>
-                <option value="3.5e">3.5 Edición (2003)</option>
-                <option value="4e">4ta Edición (2008)</option>
-            </select>
-        </section>
+/* ===== IMPORTS Y VARIABLES ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap');
 
-        <!-- GENERADOR DE PERSONAJES -->
-        <section class="generator-section">
-            <h2 class="section-title">
-                <span class="title-decoration">⚔️</span>
-                Generador de Personajes
-                <span class="title-decoration">⚔️</span>
-            </h2>
+:root {
+  /* Colores principales */
+  --parchment-light: #f4e9d8;
+  --parchment: #e8d5b7;
+  --parchment-dark: #d4c4a8;
+  --ink-black: #1a0f08;
+  --ink-dark: #2a1a0f;
+  --ink-medium: #5d4037;
+  --ink-light: #8d6e63;
+  
+  /* Colores épicos */
+  --gold: #d4af37;
+  --gold-light: #f4d03f;
+  --copper: #b87333;
+  --bronze: #cd7f32;
+  --blood-red: #8b0000;
+  --dark-red: #5c0000;
+  --forest-green: #2d5016;
+  --dark-green: #1a3d0f;
+  --royal-purple: #4b0082;
+  --steel-blue: #4682b4;
+  --stone-gray: #6b6b6b;
+  
+  /* Fuentes */
+  --font-title: 'MedievalSharp', 'Cinzel', serif;
+  --font-heading: 'Cinzel', serif;
+  --font-script: 'Marck Script', cursive;
+  --font-body: 'Cinzel', 'Georgia', serif;
+  
+  /* Espaciado */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 40px;
+  
+  /* Bordes y sombras */
+  --border-width: 3px;
+  --border-radius: 12px;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
+  --shadow-epic: 0 12px 48px rgba(0, 0, 0, 0.5);
+}
 
-            <div class="controls-grid">
-                <button id="randomBtn" class="btn btn-primary btn-large">
-                    🎲 Generar Personaje Aleatorio
-                </button>
-                
-                <button id="toggleCustom" class="btn btn-secondary">
-                    ⚙️ Personalizar Personaje
-                </button>
-            </div>
+/* ===== DARK MODE ===== */
+body.dark-mode {
+  --parchment-light: #2a1a0f;
+  --parchment: #3a2517;
+  --parchment-dark: #4a3527;
+  --ink-black: #f4e9d8;
+  --ink-dark: #e8d5b7;
+  --ink-medium: #d4c4a8;
+  --ink-light: #b8a080;
+}
 
-            <!-- Panel de personalización (oculto inicialmente) -->
-            <div id="customPanel" class="custom-panel hidden">
-                <div class="custom-grid">
-                    <div class="form-group">
-                        <label for="charName">Nombre del Personaje:</label>
-                        <input type="text" id="charName" placeholder="Ej: Thorin Puño de Hierro">
-                    </div>
+/* ===== RESET Y BASE ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-                    <div class="form-group">
-                        <label for="raceSelect">Raza:</label>
-                        <select id="raceSelect">
-                            <option value="">Aleatorio</option>
-                        </select>
-                    </div>
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
 
-                    <div class="form-group">
-                        <label for="classSelect">Clase:</label>
-                        <select id="classSelect">
-                            <option value="">Aleatorio</option>
-                        </select>
-                    </div>
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(135deg, #3a2517 0%, #1a0f08 50%, #3a2517 100%);
+  color: var(--ink-dark);
+  min-height: 100vh;
+  line-height: 1.6;
+  position: relative;
+  overflow-x: hidden;
+}
 
-                    <div class="form-group">
-                        <label for="backgroundSelect">Trasfondo:</label>
-                        <select id="backgroundSelect">
-                            <option value="">Aleatorio</option>
-                        </select>
-                    </div>
+/* Textura de pergamino */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.02) 2px,
+      rgba(0, 0, 0, 0.02) 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.02) 2px,
+      rgba(0, 0, 0, 0.02) 4px
+    );
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.3;
+}
 
-                    <div class="form-group">
-                        <label for="alignmentSelect">Alineamiento:</label>
-                        <select id="alignmentSelect">
-                            <option value="">Aleatorio</option>
-                        </select>
-                    </div>
-                </div>
+/* ===== HEADER ÉPICO ===== */
+.main-header {
+  background: linear-gradient(
+    to bottom,
+    rgba(244, 233, 216, 0.95),
+    rgba(232, 213, 183, 0.9)
+  );
+  border-bottom: 5px double var(--gold);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  text-align: center;
+  position: relative;
+  box-shadow: var(--shadow-epic);
+  margin-bottom: var(--spacing-xl);
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
 
-                <button id="customGenerateBtn" class="btn btn-primary">
-                    ✨ Generar Personaje Personalizado
-                </button>
-            </div>
-        </section>
+.main-header::before,
+.main-header::after {
+  content: '';
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  filter: grayscale(50%);
+}
 
-        <!-- FICHA DE PERSONAJE -->
-        <div id="characterSheet" class="character-sheet hidden">
-            <div class="sheet-decoration-top"></div>
-            
-            <!-- Header de ficha -->
-            <div class="sheet-header">
-                <div class="header-skulls">💀💀💀</div>
-                <h2 id="displayName" class="character-name">Nombre del Personaje</h2>
-                <div class="character-subtitle">
-                    <span id="displayRace">Raza</span>
-                    <span class="separator">•</span>
-                    <span id="displayClass">Clase</span>
-                    <span class="separator">•</span>
-                    <span>Nivel <span id="displayLevel">1</span></span>
-                </div>
-                <div class="character-meta">
-                    <span id="displayBackground">Trasfondo</span>
-                    <span class="separator">|</span>
-                    <span id="displayAlignment">Alineamiento</span>
-                </div>
-            </div>
+.main-header::before {
+  left: -30px;
+  top: 50%;
+  transform: translateY(-50%) rotate(-15deg);
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="80" font-size="100" text-anchor="middle">🐉</text></svg>');
+}
 
-            <!-- Avatar y retrato -->
-            <div class="character-visual">
-                <div class="portrait-container">
-                    <div class="portrait-frame">
-                        <img id="aiPortrait" src="" alt="Retrato del personaje">
-                        <button id="regenPortrait" class="regen-btn" title="Regenerar retrato">
-                            🔄
-                        </button>
-                    </div>
-                </div>
+.main-header::after {
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%) rotate(15deg) scaleX(-1);
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="50" y="80" font-size="100" text-anchor="middle">🐉</text></svg>');
+}
 
-                <div class="avatar-container">
-                    <div class="avatar-frame">
-                        <svg id="charAvatar" viewBox="0 0 120 120"></svg>
-                    </div>
-                </div>
-            </div>
+.header-decoration {
+  font-size: 4rem;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.2;
+  filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+}
 
-            <!-- Power Level -->
-            <div class="power-level-container">
-                <div class="power-label">Poder del Personaje</div>
-                <div id="powerBar" class="power-bar"></div>
-                <div id="powerLevel" class="power-level-text">⭐ Novato</div>
-            </div>
+.header-decoration:first-child {
+  left: 20px;
+}
 
-            <!-- Características -->
-            <div class="abilities-section">
-                <h3 class="section-subtitle">⚡ Características</h3>
-                <div class="ability-scores-grid">
-                    <div class="ability-shield">
-                        <div class="ability-icon">💪</div>
-                        <div class="ability-name">FUE</div>
-                        <div class="ability-value" id="statStr">10</div>
-                        <div class="ability-modifier" id="modStr">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">🏃</div>
-                        <div class="ability-name">DES</div>
-                        <div class="ability-value" id="statDex">10</div>
-                        <div class="ability-modifier" id="modDex">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">🛡️</div>
-                        <div class="ability-name">CON</div>
-                        <div class="ability-value" id="statCon">10</div>
-                        <div class="ability-modifier" id="modCon">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">🧠</div>
-                        <div class="ability-name">INT</div>
-                        <div class="ability-value" id="statInt">10</div>
-                        <div class="ability-modifier" id="modInt">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">👁️</div>
-                        <div class="ability-name">SAB</div>
-                        <div class="ability-value" id="statWis">10</div>
-                        <div class="ability-modifier" id="modWis">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">💬</div>
-                        <div class="ability-name">CAR</div>
-                        <div class="ability-value" id="statCha">10</div>
-                        <div class="ability-modifier" id="modCha">+0</div>
-                    </div>
-                </div>
-            </div>
+.header-decoration:last-child {
+  right: 20px;
+}
 
-            <!-- Combate -->
-            <div class="combat-section">
-                <h3 class="section-subtitle">⚔️ Combate</h3>
-                <div class="combat-stats-grid">
-                    <div class="combat-stat">
-                        <div class="stat-icon">❤️</div>
-                        <div class="stat-label">Puntos de Golpe</div>
-                        <div class="stat-value" id="displayHP">0</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-icon">🛡️</div>
-                        <div class="stat-label">Clase de Armadura</div>
-                        <div class="stat-value" id="displayAC">0</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-icon">👟</div>
-                        <div class="stat-label">Velocidad</div>
-                        <div class="stat-value" id="displaySpeed">30 ft</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-icon">⚡</div>
-                        <div class="stat-label">Iniciativa</div>
-                        <div class="stat-value" id="displayInit">+0</div>
-                    </div>
-                </div>
-            </div>
+.main-title {
+  font-family: var(--font-title);
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  color: var(--blood-red);
+  text-shadow: 
+    3px 3px 0 var(--gold),
+    5px 5px 10px rgba(0,0,0,0.6);
+  letter-spacing: 0.1em;
+  margin-bottom: var(--spacing-sm);
+  font-weight: 900;
+  position: relative;
+  z-index: 1;
+}
 
-            <!-- Salvaciones y habilidades -->
-            <div class="info-grid">
-                <div class="info-box">
-                    <h4>🎯 Salvaciones</h4>
-                    <p id="displaySavingThrows">—</p>
-                </div>
-                <div class="info-box">
-                    <h4>🔧 Habilidades</h4>
-                    <p id="displaySkills">—</p>
-                </div>
-            </div>
+.subtitle {
+  font-family: var(--font-script);
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  color: var(--ink-medium);
+  font-weight: normal;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
 
-            <!-- Rasgos, características y equipo -->
-            <div class="details-section">
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🐉 Rasgos Raciales</h3>
-                    <ul id="racialTraits" class="trait-list"></ul>
-                </div>
+/* ===== CONTAINER ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+  position: relative;
+  z-index: 1;
+}
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">⚡ Competencias de Clase</h3>
-                    <ul id="classProficiencies" class="trait-list"></ul>
-                </div>
+/* ===== SELECTOR DE EDICIÓN ===== */
+.edition-selector {
+  background: var(--parchment);
+  border: var(--border-width) solid var(--ink-dark);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-md);
+  box-shadow: var(--shadow-md);
+}
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">✨ Características de Clase</h3>
-                    <ul id="classFeatures" class="trait-list"></ul>
-                </div>
+.edition-selector label {
+  font-weight: 600;
+  color: var(--ink-dark);
+  font-size: 1.1rem;
+}
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🎒 Equipo Inicial</h3>
-                    <ul id="equipment" class="trait-list"></ul>
-                </div>
+/* ===== SECCIONES ===== */
+.generator-section,
+.bestiary-section {
+  background: var(--parchment-light);
+  border: 5px double var(--ink-dark);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xl);
+  margin-bottom: var(--spacing-xl);
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
 
-                <div class="detail-panel background-panel">
-                    <h3 class="section-subtitle">📜 Trasfondo: <span id="backgroundName"></span></h3>
-                    <p><strong>Habilidades:</strong> <span id="backgroundSkills"></span></p>
-                    <p><strong>Rasgo:</strong> <span id="backgroundFeature"></span></p>
-                    <ul id="backgroundEquipment" class="trait-list"></ul>
-                </div>
-            </div>
+.section-title {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--blood-red);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: 0.05em;
+  position: relative;
+}
 
-            <!-- Botones de acción -->
-            <div class="action-buttons">
-                <button id="downloadBtn" class="btn btn-primary">
-                    📄 Descargar PDF
-                </button>
-                <button id="exportJSONBtn" class="btn btn-secondary">
-                    💾 Exportar JSON
-                </button>
-                <button id="importJSONBtn" class="btn btn-secondary">
-                    📂 Importar JSON
-                </button>
-                <button id="shareBtn" class="btn btn-secondary">
-                    📤 Compartir
-                </button>
-                <button id="mintNFTBtn" class="btn btn-accent">
-                    🎨 Mintear NFT
-                </button>
-                <button id="historyBtn" class="btn btn-secondary">
-                    📚 Historial
-                </button>
-                <button id="newCharBtn" class="btn btn-danger">
-                    🆕 Nuevo Personaje
-                </button>
-            </div>
+.title-decoration {
+  display: inline-block;
+  margin: 0 var(--spacing-md);
+  font-size: 0.8em;
+  opacity: 0.7;
+}
 
-            <input type="file" id="fileImport" accept=".json" style="display: none;">
-        </div>
+.section-subtitle {
+  font-family: var(--font-heading);
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  color: var(--blood-red);
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
 
-        <!-- SEPARADOR ÉPICO -->
-        <div class="section-divider">
-            <span class="divider-text">🐉 BESTIARIO 🐉</span>
-        </div>
+/* ===== BOTONES ÉPICOS ===== */
+.btn {
+  font-family: var(--font-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: var(--border-width) solid var(--ink-dark);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+}
 
-        <!-- GENERADOR DE BESTIAS -->
-        <section class="bestiary-section">
-            <h2 class="section-title">
-                <span class="title-decoration">👹</span>
-                Generador de Criaturas
-                <span class="title-decoration">👹</span>
-            </h2>
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.5s ease, height 0.5s ease;
+  z-index: 0;
+}
 
-            <div class="bestiary-controls">
-                <div class="filter-grid">
-                    <div class="form-group">
-                        <label for="creatureTypeFilter">Tipo:</label>
-                        <select id="creatureTypeFilter">
-                            <option value="">Todos</option>
-                            <option value="Aberración">Aberración</option>
-                            <option value="Bestia">Bestia</option>
-                            <option value="Dragón">Dragón</option>
-                            <option value="Demonio">Demonio</option>
-                            <option value="Gigante">Gigante</option>
-                            <option value="Humanoide">Humanoide</option>
-                            <option value="No-muerto">No-muerto</option>
-                            <option value="Monstruosidad">Monstruosidad</option>
-                        </select>
-                    </div>
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
 
-                    <div class="form-group">
-                        <label for="crFilter">Challenge Rating:</label>
-                        <select id="crFilter">
-                            <option value="">Todos</option>
-                            <option value="0.25">CR 0-1</option>
-                            <option value="2">CR 2-3</option>
-                            <option value="5">CR 4-5</option>
-                            <option value="8">CR 6-8</option>
-                            <option value="13">CR 9+</option>
-                        </select>
-                    </div>
+.btn:active {
+  transform: translateY(2px);
+  box-shadow: var(--shadow-sm);
+}
 
-                    <div class="form-group">
-                        <label for="environmentFilter">Ambiente:</label>
-                        <select id="environmentFilter">
-                            <option value="">Todos</option>
-                            <option value="Mazmorra">Mazmorra</option>
-                            <option value="Bosque">Bosque</option>
-                            <option value="Montaña">Montaña</option>
-                            <option value="Pantano">Pantano</option>
-                            <option value="Subterráneo">Subterráneo</option>
-                        </select>
-                    </div>
-                </div>
+.btn-primary {
+  background: linear-gradient(135deg, var(--blood-red) 0%, #a00000 100%);
+  color: var(--gold);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+}
 
-                <div class="controls-grid">
-                    <button id="generateCreatureBtn" class="btn btn-primary">
-                        🎲 Generar Criatura
-                    </button>
-                    <button id="generateFromAPIBtn" class="btn btn-accent">
-                        📚 Desde API D&D 5e
-                    </button>
-                </div>
-            </div>
+.btn-primary:hover {
+  background: linear-gradient(135deg, #a00000 0%, var(--blood-red) 100%);
+  box-shadow: 0 6px 20px rgba(139,0,0,0.6);
+  transform: translateY(-2px);
+}
 
-            <!-- Generador de encuentros -->
-            <div class="encounter-generator">
-                <h3 class="section-subtitle">⚔️ Generador de Encuentros</h3>
-                <div class="encounter-controls">
-                    <div class="form-group">
-                        <label for="partyLevel">Nivel del Grupo:</label>
-                        <input type="number" id="partyLevel" value="5" min="1" max="20">
-                    </div>
-                    <div class="form-group">
-                        <label for="partySize">Tamaño del Grupo:</label>
-                        <input type="number" id="partySize" value="4" min="1" max="8">
-                    </div>
-                    <button id="generateEncounterBtn" class="btn btn-primary">
-                        ⚔️ Generar Encuentro
-                    </button>
-                </div>
+.btn-secondary {
+  background: linear-gradient(135deg, var(--forest-green) 0%, #3d6526 100%);
+  color: var(--parchment-light);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+}
 
-                <div id="encounterPanel" class="encounter-panel hidden">
-                    <p class="encounter-xp"><strong>XP del Encuentro:</strong> <span id="encounterXP"></span></p>
-                    <div id="encounterList" class="encounter-list"></div>
-                </div>
-            </div>
-        </section>
+.btn-secondary:hover {
+  background: linear-gradient(135deg, #3d6526 0%, var(--forest-green) 100%);
+  box-shadow: 0 6px 20px rgba(45,80,22,0.5);
+  transform: translateY(-2px);
+}
 
-        <!-- FICHA DE CRIATURA -->
-        <div id="creatureSheet" class="creature-sheet hidden">
-            <div class="sheet-decoration-top"></div>
-            
-            <div class="sheet-header">
-                <h2 id="creatureName" class="character-name">Nombre Criatura</h2>
-                <div class="character-subtitle">
-                    <span id="creatureType">Tipo</span>
-                    <span class="separator">•</span>
-                    <span>CR <span id="creatureCR">0</span></span>
-                    <span class="separator">•</span>
-                    <span id="creatureXP">0 XP</span>
-                </div>
-            </div>
+.btn-accent {
+  background: linear-gradient(135deg, var(--gold) 0%, var(--copper) 100%);
+  color: var(--ink-black);
+  text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+}
 
-            <div class="character-visual">
-                <div class="portrait-container">
-                    <div class="portrait-frame">
-                        <img id="creaturePortrait" src="" alt="Retrato de criatura">
-                        <button id="regenCreaturePortrait" class="regen-btn">🔄</button>
-                    </div>
-                </div>
-            </div>
+.btn-accent:hover {
+  background: linear-gradient(135deg, var(--gold-light) 0%, var(--gold) 100%);
+  box-shadow: 0 6px 20px rgba(212,175,55,0.6);
+  transform: translateY(-2px);
+}
 
-            <!-- Stats de criatura -->
-            <div class="combat-section">
-                <h3 class="section-subtitle">⚔️ Estadísticas de Combate</h3>
-                <div class="combat-stats-grid">
-                    <div class="combat-stat">
-                        <div class="stat-label">CA</div>
-                        <div class="stat-value" id="creatureAC">0</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-label">HP</div>
-                        <div class="stat-value" id="creatureHP">0</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-label">Velocidad</div>
-                        <div class="stat-value" id="creatureSpeed">30 ft</div>
-                    </div>
-                </div>
-            </div>
+.btn-danger {
+  background: linear-gradient(135deg, var(--dark-red) 0%, var(--blood-red) 100%);
+  color: var(--parchment-light);
+}
 
-            <div class="abilities-section">
-                <h3 class="section-subtitle">⚡ Características</h3>
-                <div class="ability-scores-grid">
-                    <div class="ability-shield">
-                        <div class="ability-name">FUE</div>
-                        <div class="ability-value" id="creatureStr">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">DES</div>
-                        <div class="ability-value" id="creatureDex">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">CON</div>
-                        <div class="ability-value" id="creatureCon">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">INT</div>
-                        <div class="ability-value" id="creatureInt">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">SAB</div>
-                        <div class="ability-value" id="creatureWis">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">CAR</div>
-                        <div class="ability-value" id="creatureCha">10</div>
-                    </div>
-                </div>
-            </div>
+.btn-large {
+  font-size: 1.3rem;
+  padding: var(--spacing-lg) var(--spacing-xl);
+}
 
-            <div class="details-section">
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🔧 Habilidades</h3>
-                    <ul id="creatureSkills" class="trait-list"></ul>
-                </div>
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(50%);
+}
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">✨ Rasgos Especiales</h3>
-                    <ul id="creatureTraits" class="trait-list"></ul>
-                </div>
+/* ===== GRIDS Y LAYOUTS ===== */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">⚔️ Acciones</h3>
-                    <ul id="creatureActions" class="trait-list"></ul>
-                </div>
+.custom-grid,
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
 
-                <div id="legendarySection" class="detail-panel hidden">
-                    <h3 class="section-subtitle">👑 Acciones Legendarias</h3>
-                    <ul id="creatureLegendaryActions" class="trait-list"></ul>
-                </div>
+/* ===== FORMULARIOS ===== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🛡️ Defensas</h3>
-                    <p id="creatureDefenses">—</p>
-                </div>
+.form-group label {
+  font-weight: 600;
+  color: var(--ink-dark);
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🌍 Ambiente</h3>
-                    <p id="creatureEnvironment">—</p>
-                </div>
-            </div>
+select,
+input[type="text"],
+input[type="number"] {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  padding: var(--spacing-md);
+  border: 2px solid var(--ink-medium);
+  border-radius: var(--border-radius);
+  background: var(--parchment);
+  color: var(--ink-dark);
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
 
-            <div class="action-buttons">
-                <button id="newCreatureBtn" class="btn btn-danger">
-                    🆕 Nueva Criatura
-                </button>
-            </div>
-        </div>
+select:focus,
+input:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 
+    inset 0 2px 4px rgba(0,0,0,0.1),
+    0 0 12px rgba(212,175,55,0.4);
+}
 
-    </div>
+/* ===== PANEL PERSONALIZADO ===== */
+.custom-panel {
+  background: var(--parchment);
+  border: var(--border-width) solid var(--ink-medium);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
 
-    <!-- MODAL DE HISTORIAL -->
-    <div id="historyModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">✖️</span>
-            <h2>📚 Historial de Personajes</h2>
-            <div id="historyList" class="history-list"></div>
-        </div>
-    </div>
+/* ===== FICHA DE PERSONAJE ===== */
+.character-sheet,
+.creature-sheet {
+  background: var(--parchment-light);
+  border: 6px double var(--ink-dark);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xl);
+  margin: var(--spacing-xl) auto;
+  max-width: 1200px;
+  box-shadow: var(--shadow-epic);
+  position: relative;
+  animation: fadeInScale 0.6s ease-out;
+}
 
-    <!-- FOOTER -->
-    <footer class="main-footer">
-        <p>⚔️ D&D Character Forge © 2025 🐉</p>
-        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
-        <button id="toggleTheme" class="theme-toggle">🌙 Modo Oscuro</button>
-    </footer>
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
 
-    <!-- SCRIPTS -->
-    <script src="data/dnd-data.js"></script>
-    <script src="data/bestiary.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>
+.sheet-decoration-top {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--gold), transparent);
+  clip-path: polygon(10% 0%, 90% 0%, 100% 100%, 0% 100%);
+  opacity: 0.6;
+}
+
+/* ===== HEADER DE FICHA ===== */
+.sheet-header {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 3px double var(--gold);
+  position: relative;
+}
+
+.header-skulls {
+  font-size: 2rem;
+  opacity: 0.3;
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: var(--spacing-lg);
+}
+
+.character-name {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  color: var(--blood-red);
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.4);
+  margin-bottom: var(--spacing-sm);
+  letter-spacing: 0.05em;
+}
+
+.character-subtitle {
+  font-size: 1.3rem;
+  color: var(--ink-medium);
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+}
+
+.character-meta {
+  font-size: 1rem;
+  color: var(--ink-light);
+  font-style: italic;
+}
+
+.separator {
+  margin: 0 var(--spacing-sm);
+  opacity: 0.5;
+}
+
+/* ===== VISUAL (AVATAR + RETRATO) ===== */
+.character-visual {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.portrait-container,
+.avatar-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.portrait-frame,
+.avatar-frame {
+  position: relative;
+  border: 5px solid var(--gold);
+  border-radius: var(--border-radius);
+  padding: 8px;
+  background: linear-gradient(135deg, var(--parchment-dark), var(--parchment));
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.portrait-frame {
+  max-width: 320px;
+  width: 100%;
+}
+
+.portrait-frame::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid rgba(212, 175, 55, 0.3);
+  border-radius: var(--border-radius);
+  pointer-events: none;
+}
+
+.portrait-frame img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3/4;
+  object-fit: cover;
+  border-radius: calc(var(--border-radius) - 4px);
+  display: block;
+}
+
+.avatar-frame {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+}
+
+.avatar-frame svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+.regen-btn {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 2px solid var(--ink-dark);
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.regen-btn:hover {
+  background: var(--gold-light);
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ===== POWER LEVEL ===== */
+.power-level-container {
+  background: var(--parchment);
+  border: 3px solid var(--gold);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.power-label {
+  font-weight: 600;
+  color: var(--ink-medium);
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.9rem;
+}
+
+.power-bar {
+  height: 30px;
+  border-radius: 20px;
+  background: linear-gradient(90deg, var(--parchment-dark), var(--gold));
+  margin-bottom: var(--spacing-sm);
+  box-shadow: inset 0 2px 6px rgba(0,0,0,0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.power-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3), transparent);
+}
+
+.power-level-text {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--blood-red);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+}
+
+/* ===== CARACTERÍSTICAS ===== */
+.abilities-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.ability-scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.ability-shield {
+  background: linear-gradient(135deg, var(--parchment), var(--parchment-dark));
+  border: 3px solid var(--ink-dark);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  text-align: center;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.ability-shield:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.ability-shield::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 30px;
+  background: var(--gold);
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  border: 2px solid var(--ink-dark);
+}
+
+.ability-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.ability-name {
+  font-size: 0.85rem;
+  color: var(--ink-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.ability-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--blood-red);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+  margin-bottom: var(--spacing-xs);
+}
+
+.ability-modifier {
+  font-size: 1.1rem;
+  color: var(--forest-green);
+  font-weight: 600;
+}
+
+/* ===== COMBATE ===== */
+.combat-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.combat-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.combat-stat {
+  background: var(--parchment);
+  border: 3px solid var(--ink-medium);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-icon {
+  font-size: 2rem;
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--ink-medium);
+  text-transform: uppercase;
+  margin-bottom: var(--spacing-xs);
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--blood-red);
+}
+
+/* ===== INFO BOXES ===== */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.info-box {
+  background: var(--parchment);
+  border: 2px solid var(--ink-medium);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.info-box h4 {
+  font-size: 1rem;
+  color: var(--blood-red);
+  margin-bottom: var(--spacing-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-box p {
+  color: var(--ink-dark);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ===== DETALLES ===== */
+.details-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.detail-panel {
+  background: var(--parchment-dark);
+  border: 3px solid var(--ink-medium);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.background-panel {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, var(--parchment-dark), var(--parchment));
+  border-color: var(--gold);
+}
+
+.trait-list {
+  list-style: none;
+  padding: 0;
+}
+
+.trait-list li {
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px dashed var(--ink-light);
+  color: var(--ink-dark);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.trait-list li:last-child {
+  border-bottom: none;
+}
+
+.trait-list li::before {
+  content: '⚔️';
+  margin-right: var(--spacing-sm);
+  opacity: 0.5;
+  font-size: 0.8em;
+}
+
+/* ===== BOTONES DE ACCIÓN ===== */
+.action-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+/* ===== BESTIARIO ===== */
+.bestiary-section {
+  background: linear-gradient(135deg, rgba(26,15,8,0.95), rgba(58,37,23,0.95));
+  border-color: var(--blood-red);
+}
+
+.bestiary-section .section-title {
+  color: var(--gold);
+}
+
+.bestiary-controls {
+  margin-bottom: var(--spacing-lg);
+}
+
+.encounter-generator {
+  background: var(--parchment-light);
+  border: 3px solid var(--ink-dark);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-lg);
+  margin-top: var(--spacing-lg);
+  box-shadow: var(--shadow-md);
+}
+
+.encounter-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.encounter-panel {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--parchment);
+  border: 2px solid var(--gold);
+  border-radius: var(--border-radius);
+}
+
+.encounter-xp {
+  font-size: 1.2rem;
+  color: var(--blood-red);
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  text-align: center;
+}
+
+.encounter-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+}
+
+.creature-card {
+  background: var(--parchment-light);
+  border: 3px solid var(--ink-dark);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.creature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--gold);
+}
+
+.creature-card h4 {
+  color: var(--blood-red);
+  margin-bottom: var(--spacing-xs);
+  font-size: 1.2rem;
+}
+
+.creature-card p {
+  color: var(--ink-medium);
+  font-size: 0.9rem;
+}
+
+/* ===== SEPARADOR ===== */
+.section-divider {
+  text-align: center;
+  margin: var(--spacing-xl) 0;
+  position: relative;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40%;
+  height: 3px;
+  background: linear-gradient(to right, transparent, var(--gold), transparent);
+}
+
+.section-divider::before {
+  left: 0;
+}
+
+.section-divider::after {
+  right: 0;
+}
+
+.divider-text {
+  font-family: var(--font-title);
+  font-size: 2rem;
+  color: var(--gold);
+  background: var(--ink-black);
+  padding: 0 var(--spacing-lg);
+  position: relative;
+  z-index: 1;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+/* ===== MODAL ===== */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: var(--parchment-light);
+  border: 5px double var(--gold);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-xl);
+  max-width: 800px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-epic);
+  position: relative;
+}
+
+.close-modal {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--blood-red);
+  transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+  transform: rotate(90deg) scale(1.2);
+  color: var(--dark-red);
+}
+
+.history-list {
+  display: grid;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.history-item {
+  background: var(--parchment);
+  border: 2px solid var(--ink-medium);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.history-item:hover {
+  border-color: var(--gold);
+  transform: translateX(8px);
+  box-shadow: var(--shadow-md);
+}
+
+.history-item h4 {
+  color: var(--blood-red);
+  margin-bottom: var(--spacing-xs);
+}
+
+.history-item p {
+  color: var(--ink-medium);
+  font-size: 0.9rem;
+}
+
+/* ===== FOOTER ===== */
+.main-footer {
+  background: linear-gradient(to top, var(--parchment-light), transparent);
+  padding: var(--spacing-xl) var(--spacing-lg);
+  text-align: center;
+  margin-top: var(--spacing-xl);
+  border-top: 3px double var(--gold);
+}
+
+.main-footer p {
+  color: var(--ink-medium);
+  margin-bottom: var(--spacing-sm);
+  font-size: 0.95rem;
+}
+
+.theme-toggle {
+  margin-top: var(--spacing-md);
+  font-size: 0.9rem;
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+/* ===== UTILIDADES ===== */
+.hidden {
+  display: none !important;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .main-title {
+    font-size: 2.5rem;
+  }
+  
+  .character-visual {
+    grid-template-columns: 1fr;
+  }
+  
+  .ability-scores-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .details-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .action-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .ability-scores-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ===== ANIMACIONES ===== */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.btn-primary {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ===== SCROLLBAR PERSONALIZADO ===== */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--parchment-dark);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 10px;
+  border: 2px solid var(--parchment-dark);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-light);
+}
