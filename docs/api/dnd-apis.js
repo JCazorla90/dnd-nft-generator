@@ -1,6 +1,6 @@
 // ==========================================
 // 🌐 INTEGRACIÓN DE APIs D&D - SISTEMA COMPLETO
-// APIs: DnD5eAPI.co + Open5e + Lexica (imágenes)
+// APIs: DnD5eAPI.co + Open5e + Lexica (Arte) + Pollinations (Generación IA)
 // ==========================================
 
 const DND_API = {
@@ -8,7 +8,7 @@ const DND_API = {
   dnd5e: 'https://www.dnd5eapi.co/api',
   open5e: 'https://api.open5e.com',
   
-  // Cache para optimizar llamadas
+  // Cache para optimizar llamadas y no saturar la red
   cache: {
     monsters: {},
     spells: {},
@@ -16,26 +16,74 @@ const DND_API = {
     classes: {},
     races: {},
     feats: {},
-    magicItems: {}
+    images: {} // Cache de imágenes
+  },
+
+  // ============================================================
+  // 🎨 MÓDULO DE IMÁGENES (NUEVO)
+  // ============================================================
+  Images: {
+    /**
+     * Busca o genera una imagen épica para personaje o monstruo
+     * @param {string} query - Descripción (ej: "Elf Wizard fireball fantasy art")
+     * @param {string} type - 'character' o 'monster'
+     */
+    async getEpicImage(query, type = 'character') {
+      const cacheKey = `img_${query.replace(/\s/g, '_')}`;
+      if (DND_API.cache.images[cacheKey]) return DND_API.cache.images[cacheKey];
+
+      console.log(`🎨 Buscando arte para: ${query}`);
+
+      // 1. INTENTO PRINCIPAL: Lexica (Busca arte de Stable Diffusion existente - Calidad Ultra)
+      try {
+        // Añadimos palabras clave para asegurar estilo D&D
+        const searchPrompt = `${query} fantasy dnd character portrait detailed 8k masterpiece artstation`;
+        const res = await fetch(`https://lexica.art/api/v1/search?q=${encodeURIComponent(searchPrompt)}`);
+        
+        if (res.ok) {
+          const data = await res.json();
+          if (data.images && data.images.length > 0) {
+            // Seleccionamos una aleatoria de las primeras 20 para variedad
+            const img = data.images[Math.floor(Math.random() * Math.min(data.images.length, 20))].src;
+            DND_API.cache.images[cacheKey] = img;
+            return img;
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ Lexica API no disponible, probando generador...');
+      }
+
+      // 2. INTENTO SECUNDARIO: Pollinations.ai (Genera imagen nueva al vuelo - Gratis)
+      try {
+        const seed = Math.floor(Math.random() * 10000);
+        const genPrompt = `${query} fantasy painting, rpg portrait, dnd style, detailed, 4k`;
+        // URL directa de imagen generada
+        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(genPrompt)}?width=512&height=768&seed=${seed}&nologo=true`;
+        
+        DND_API.cache.images[cacheKey] = imgUrl;
+        return imgUrl;
+      } catch (e) {
+        console.warn('⚠️ Error generando imagen');
+      }
+
+      // 3. FALLBACK: Placeholder temático
+      const fallbackUrl = `https://placehold.co/400x600/2a1a0f/d4af37?text=${encodeURIComponent(query)}`;
+      return fallbackUrl;
+    }
   },
   
-  // ===== 🏃 RAZAS ENRIQUECIDAS =====
+  // ============================================================
+  // 🏃 RAZAS (DATOS)
+  // ============================================================
   async getRaceDetails(raceName) {
     console.log(`📡 Obteniendo detalles de raza: ${raceName}`);
     
     try {
-      // Mapeo de nombres
       const raceMap = {
-        'Humano': 'human',
-        'Elfo': 'elf',
-        'Enano': 'dwarf',
-        'Mediano': 'halfling',
-        'Orco': 'half-orc',
-        'Semiorco': 'half-orc',
-        'Tiefling': 'tiefling',
-        'Dracónido': 'dragonborn',
-        'Gnomo': 'gnome',
-        'Semielfo': 'half-elf'
+        'Humano': 'human', 'Elfo': 'elf', 'Enano': 'dwarf', 
+        'Mediano': 'halfling', 'Orco': 'half-orc', 'Semiorco': 'half-orc',
+        'Tiefling': 'tiefling', 'Dracónido': 'dragonborn', 
+        'Gnomo': 'gnome', 'Semielfo': 'half-elf'
       };
       
       const apiName = raceMap[raceName] || raceName.toLowerCase();
@@ -72,35 +120,27 @@ const DND_API = {
       }
       
     } catch (e) {
-      console.warn(`⚠️ Error obteniendo raza desde API: ${e.message}`);
+      console.warn(`⚠️ Error obteniendo raza: ${e.message}`);
     }
-    
     return null;
   },
   
-  // ===== ⚔️ CLASES ENRIQUECIDAS =====
+  // ============================================================
+  // ⚔️ CLASES (DATOS)
+  // ============================================================
   async getClassDetails(className) {
     console.log(`📡 Obteniendo detalles de clase: ${className}`);
     
     try {
       const classMap = {
-        'Guerrero': 'fighter',
-        'Mago': 'wizard',
-        'Pícaro': 'rogue',
-        'Clérigo': 'cleric',
-        'Paladín': 'paladin',
-        'Bárbaro': 'barbarian',
-        'Druida': 'druid',
-        'Bardo': 'bard',
-        'Monje': 'monk',
-        'Explorador': 'ranger',
-        'Brujo': 'warlock',
-        'Hechicero': 'sorcerer'
+        'Guerrero': 'fighter', 'Mago': 'wizard', 'Pícaro': 'rogue',
+        'Clérigo': 'cleric', 'Paladín': 'paladin', 'Bárbaro': 'barbarian',
+        'Druida': 'druid', 'Bardo': 'bard', 'Monje': 'monk',
+        'Explorador': 'ranger', 'Brujo': 'warlock', 'Hechicero': 'sorcerer'
       };
       
       const apiName = classMap[className] || className.toLowerCase();
       
-      // DnD5eAPI
       const res = await fetch(`${this.dnd5e}/classes/${apiName}`);
       if (res.ok) {
         const data = await res.json();
@@ -124,58 +164,31 @@ const DND_API = {
           levels: levelsData
         };
       }
-      
     } catch (e) {
-      console.warn(`⚠️ Error obteniendo clase desde API: ${e.message}`);
+      console.warn(`⚠️ Error obteniendo clase: ${e.message}`);
     }
-    
     return null;
   },
   
-  // ===== 🐉 MONSTRUOS/CRIATURAS ENRIQUECIDOS =====
+  // ============================================================
+  // 🐉 MONSTRUOS (DATOS)
+  // ============================================================
   async getMonsterDetails(monsterName) {
-    console.log(`📡 Obteniendo monstruo: ${monsterName}`);
-    
-    // Buscar en cache
-    if (this.cache.monsters[monsterName]) {
-      return this.cache.monsters[monsterName];
-    }
+    if (this.cache.monsters[monsterName]) return this.cache.monsters[monsterName];
     
     try {
-      // Normalizar nombre
       const apiName = monsterName.toLowerCase().replace(/\s+/g, '-');
       
       // DnD5eAPI
       const res = await fetch(`${this.dnd5e}/monsters/${apiName}`);
       if (res.ok) {
         const data = await res.json();
+        const monster = this._formatMonsterData(data);
         
-        const monster = {
-          name: data.name,
-          type: data.type,
-          cr: data.challenge_rating.toString(),
-          xp: data.xp || 0,
-          size: data.size,
-          hp: `${data.hit_points} (${data.hit_dice})`,
-          ac: data.armor_class[0]?.value || 10,
-          speed: Object.entries(data.speed).map(([k, v]) => `${k} ${v}`).join(', '),
-          str: data.strength,
-          dex: data.dexterity,
-          con: data.constitution,
-          int: data.intelligence,
-          wis: data.wisdom,
-          cha: data.charisma,
-          skills: data.proficiencies?.map(p => p.proficiency.name) || [],
-          traits: data.special_abilities?.map(a => `${a.name}: ${a.desc}`) || [],
-          actions: data.actions?.map(a => `${a.name}: ${a.desc.substring(0, 150)}...`) || [],
-          legendaryActions: data.legendary_actions?.map(a => a.name) || [],
-          immunities: data.damage_immunities || [],
-          resistances: data.damage_resistances || [],
-          vulnerabilities: data.damage_vulnerabilities || [],
-          environment: ["Varios"]
-        };
-        
-        // Guardar en cache
+        // Obtener imagen para el monstruo
+        const image = await this.Images.getEpicImage(`${monster.name} ${monster.type} dnd monster`);
+        monster.image = image;
+
         this.cache.monsters[monsterName] = monster;
         return monster;
       }
@@ -195,36 +208,57 @@ const DND_API = {
             hp: `${m.hit_points} (${m.hit_dice})`,
             ac: m.armor_class,
             speed: m.speed?.walk || "30 ft",
-            str: m.strength,
-            dex: m.dexterity,
-            con: m.constitution,
-            int: m.intelligence,
-            wis: m.wisdom,
-            cha: m.charisma,
+            stats: { str: m.strength, dex: m.dexterity, con: m.constitution, int: m.intelligence, wis: m.wisdom, cha: m.charisma },
             traits: m.special_abilities ? [m.special_abilities] : [],
             actions: m.actions ? [m.actions] : [],
             environment: ["Varios"]
           };
           
+          // Imagen
+          monster.image = await this.Images.getEpicImage(`${monster.name} monster fantasy`);
+          
           this.cache.monsters[monsterName] = monster;
           return monster;
         }
       }
-      
     } catch (e) {
-      console.warn(`⚠️ Error obteniendo monstruo desde API: ${e.message}`);
+      console.warn(`⚠️ Error API Monstruo: ${e.message}`);
     }
-    
     return null;
   },
+
+  // Helper para formatear datos de DnD5eAPI
+  _formatMonsterData(data) {
+    return {
+      name: data.name,
+      type: data.type,
+      cr: data.challenge_rating.toString(),
+      xp: data.xp || 0,
+      size: data.size,
+      hp: `${data.hit_points} (${data.hit_dice})`,
+      ac: data.armor_class[0]?.value || 10,
+      speed: Object.entries(data.speed).map(([k, v]) => `${k} ${v}`).join(', '),
+      stats: {
+        str: data.strength, dex: data.dexterity, con: data.constitution,
+        int: data.intelligence, wis: data.wisdom, cha: data.charisma
+      },
+      skills: data.proficiencies?.map(p => p.proficiency.name) || [],
+      traits: data.special_abilities?.map(a => `${a.name}: ${a.desc}`) || [],
+      actions: data.actions?.map(a => `${a.name}: ${a.desc.substring(0, 150)}...`) || [],
+      legendaryActions: data.legendary_actions?.map(a => a.name) || [],
+      immunities: data.damage_immunities || [],
+      resistances: data.damage_resistances || [],
+      vulnerabilities: data.damage_vulnerabilities || [],
+      environment: ["Varios"]
+    };
+  },
   
-  // ===== 🗡️ EQUIPO ENRIQUECIDO =====
+  // ============================================================
+  // 🗡️ EQUIPO
+  // ============================================================
   async getEquipmentDetails(equipmentName) {
-    console.log(`📡 Obteniendo equipo: ${equipmentName}`);
-    
     try {
       const apiName = equipmentName.toLowerCase().replace(/\s+/g, '-');
-      
       const res = await fetch(`${this.dnd5e}/equipment/${apiName}`);
       if (res.ok) {
         const data = await res.json();
@@ -239,29 +273,21 @@ const DND_API = {
           properties: data.properties?.map(p => p.name) || []
         };
       }
-      
-    } catch (e) {
-      console.warn(`⚠️ Error obteniendo equipo: ${e.message}`);
-    }
-    
+    } catch (e) { console.warn(`⚠️ Error equipo: ${e.message}`); }
     return null;
   },
   
-  // ===== ✨ HECHIZOS ENRIQUECIDOS =====
+  // ============================================================
+  // ✨ HECHIZOS
+  // ============================================================
   async getSpellDetails(spellName) {
-    console.log(`📡 Obteniendo hechizo: ${spellName}`);
-    
-    if (this.cache.spells[spellName]) {
-      return this.cache.spells[spellName];
-    }
+    if (this.cache.spells[spellName]) return this.cache.spells[spellName];
     
     try {
       const apiName = spellName.toLowerCase().replace(/\s+/g, '-');
-      
       const res = await fetch(`${this.dnd5e}/spells/${apiName}`);
       if (res.ok) {
         const data = await res.json();
-        
         const spell = {
           name: data.name,
           level: data.level,
@@ -274,132 +300,47 @@ const DND_API = {
           higherLevel: data.higher_level ? data.higher_level.join('\n') : null,
           classes: data.classes.map(c => c.name)
         };
-        
         this.cache.spells[spellName] = spell;
         return spell;
       }
-      
-    } catch (e) {
-      console.warn(`⚠️ Error obteniendo hechizo: ${e.message}`);
-    }
-    
+    } catch (e) { console.warn(`⚠️ Error hechizo: ${e.message}`); }
     return null;
   },
   
-  // ===== 🎁 OBJETOS MÁGICOS =====
-  async getMagicItemDetails(itemName) {
-    console.log(`📡 Obteniendo objeto mágico: ${itemName}`);
-    
-    try {
-      const res = await fetch(`${this.open5e}/magicitems/?search=${encodeURIComponent(itemName)}`);
-      if (res.ok) {
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          const item = data.results[0];
-          return {
-            name: item.name,
-            type: item.type,
-            rarity: item.rarity,
-            requiresAttunement: item.requires_attunement,
-            description: item.desc
-          };
-        }
-      }
-    } catch (e) {
-      console.warn(`⚠️ Error obteniendo objeto mágico: ${e.message}`);
-    }
-    
-    return null;
-  },
-  
-  // ===== 🏆 DOTES (FEATS) =====
-  async getFeatDetails(featName) {
-    console.log(`📡 Obteniendo dote: ${featName}`);
-    
-    try {
-      const apiName = featName.toLowerCase().replace(/\s+/g, '-');
-      
-      const res = await fetch(`${this.dnd5e}/feats/${apiName}`);
-      if (res.ok) {
-        const data = await res.json();
-        return {
-          name: data.name,
-          prerequisites: data.prerequisites || [],
-          description: data.desc.join('\n')
-        };
-      }
-    } catch (e) {
-      console.warn(`⚠️ Error obteniendo dote: ${e.message}`);
-    }
-    
-    return null;
-  },
-  
-  // ===== 📊 LISTAR CATEGORÍAS =====
+  // ============================================================
+  // 📊 LISTADOS Y UTILIDADES
+  // ============================================================
   async listMonsters(options = {}) {
-    console.log('📡 Listando monstruos desde API...');
-    
     try {
       let url = `${this.dnd5e}/monsters`;
-      if (options.cr) {
-        url = `${this.open5e}/monsters/?challenge_rating=${options.cr}`;
-      }
+      if (options.cr) url = `${this.open5e}/monsters/?challenge_rating=${options.cr}`;
       
       const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         return data.results || data;
       }
-    } catch (e) {
-      console.warn(`⚠️ Error listando monstruos: ${e.message}`);
-    }
-    
+    } catch (e) { console.warn(`⚠️ Error listando monstruos: ${e.message}`); }
     return [];
   },
   
-  async listSpells(classFilter = null) {
-    console.log('📡 Listando hechizos desde API...');
-    
-    try {
-      let url = `${this.dnd5e}/spells`;
-      if (classFilter) {
-        url = `${this.dnd5e}/classes/${classFilter}/spells`;
-      }
-      
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        return data.results || data;
-      }
-    } catch (e) {
-      console.warn(`⚠️ Error listando hechizos: ${e.message}`);
-    }
-    
-    return [];
-  },
-  
-  // ===== 🧮 UTILIDADES =====
   calculateXP(cr) {
     const xpTable = {
-      "0": 10, "1/8": 25, "1/4": 50, "1/2": 100,
-      "1": 200, "2": 450, "3": 700, "4": 1100, "5": 1800,
-      "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900,
-      "11": 7200, "12": 8400, "13": 10000, "14": 11500, "15": 13000,
-      "16": 15000, "17": 18000, "18": 20000, "19": 22000, "20": 25000
+      "0": 10, "1/8": 25, "1/4": 50, "1/2": 100, "1": 200, "2": 450, "3": 700, 
+      "4": 1100, "5": 1800, "6": 2300, "7": 2900, "8": 3900, "9": 5000, "10": 5900,
+      "11": 7200, "12": 8400, "13": 10000, "14": 11500, "15": 13000, "16": 15000, 
+      "17": 18000, "18": 20000, "19": 22000, "20": 25000
     };
     return xpTable[cr?.toString()] || 0;
   },
   
-  // ===== 🎲 GENERAR ENCUENTRO ALEATORIO =====
+  // Generar Encuentro
   async generateRandomEncounter(partyLevel, partySize) {
-    console.log(`📡 Generando encuentro para nivel ${partyLevel}, ${partySize} jugadores`);
-    
+    console.log(`📡 Generando encuentro: Nivel ${partyLevel}, ${partySize} jugadores`);
     const targetXP = partyLevel * partySize * 200;
     const monsters = await this.listMonsters();
     
-    if (!monsters || monsters.length === 0) {
-      return null;
-    }
+    if (!monsters || monsters.length === 0) return null;
     
     const encounter = [];
     let currentXP = 0;
@@ -411,13 +352,11 @@ const DND_API = {
       
       if (monsterDetails) {
         const monsterXP = this.calculateXP(monsterDetails.cr);
-        
         if (currentXP + monsterXP <= targetXP * 1.3) {
           encounter.push(monsterDetails);
           currentXP += monsterXP;
         }
       }
-      
       attempts++;
     }
     
@@ -442,5 +381,5 @@ const DND_API = {
 // Exportar globalmente
 if (typeof window !== 'undefined') {
   window.DND_API = DND_API;
-  console.log('✅ Sistema de APIs D&D cargado y listo');
+  console.log('✅ Sistema de APIs D&D cargado: Reglas + Imágenes + Datos');
 }
