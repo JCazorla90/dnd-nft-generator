@@ -3,123 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Character Forge | José Cazorla</title>
+    <title>D&D NFT Character Forge | Ultimate Edition</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=MedievalSharp&family=Roboto+Mono:wght@300;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
 </head>
 <body>
 
+    <div class="bg-overlay"></div>
+
     <header class="main-header">
-        <div class="header-decoration">⚔️</div>
-        <div class="header-content">
-            <h1 class="main-title">D&D Character Forge</h1>
-            <p class="subtitle">La Forja Definitiva de Héroes y Bestias</p>
+        <div class="logo-area">
+            <h1>🐉 D&D NFT Forge</h1>
+            <span class="version-badge">v2.0 Ultimate</span>
         </div>
-        <div class="header-decoration">🐉</div>
+        
+        <div class="header-controls">
+            <select id="editionSelect" class="edition-select">
+                <option value="5e">D&D 5th Edition (SRD)</option>
+                <option value="3.5">D&D 3.5e (Legacy)</option>
+                <option value="pathfinder">Pathfinder</option>
+            </select>
+
+            <button id="connectWalletBtn" class="btn btn-wallet">
+                🦊 Conectar Wallet
+            </button>
+            <span id="walletAddress" class="wallet-address hidden">Not Connected</span>
+        </div>
     </header>
 
-    <div id="mainContainer" class="container">
+    <div class="main-container">
         
-        <div class="controls-grid">
-            <button id="generateBtn" class="btn btn-primary">🎲 Generar Aleatorio</button>
-            <button id="customCharBtn" class="btn btn-gold">🧙 Crear a Medida</button>
-            <button id="historyBtn" class="btn btn-secondary">📜 Historial</button>
-        </div>
-
-        <main id="characterSheet" class="character-sheet hidden">
-            <div class="sheet-header">
-                <div class="avatar-container">
-                    <div id="avatarPlaceholder" class="avatar-placeholder">?</div>
-                </div>
-                <div class="header-info">
-                    <h2 id="charName" class="char-name">Nombre del Héroe</h2>
-                    <p class="char-meta">
-                        <span id="charRace">Raza</span> | <span id="charClass">Clase</span> | Nivel 1
-                    </p>
-                    <p class="char-background">Trasfondo: <span id="charBackground">...</span></p>
-                    <p class="char-alignment">Alineamiento: <span id="charAlignment">Neutral</span></p>
-                </div>
+        <aside class="control-panel">
+            <h2>🛠️ Herramientas</h2>
+            
+            <div class="panel-section">
+                <h3>Generación</h3>
+                <button id="btnGenerateRandom" class="btn btn-primary full-width">🎲 Generar Aleatorio</button>
+                <button id="btnOpenWizard" class="btn btn-gold full-width">🧙 Crear a Medida</button>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-box"><span class="stat-label">FUE</span><span id="strVal" class="stat-value">10</span><span id="strMod" class="stat-mod">+0</span></div>
-                <div class="stat-box"><span class="stat-label">DES</span><span id="dexVal" class="stat-value">10</span><span id="dexMod" class="stat-mod">+0</span></div>
-                <div class="stat-box"><span class="stat-label">CON</span><span id="conVal" class="stat-value">10</span><span id="conMod" class="stat-mod">+0</span></div>
-                <div class="stat-box"><span class="stat-label">INT</span><span id="intVal" class="stat-value">10</span><span id="intMod" class="stat-mod">+0</span></div>
-                <div class="stat-box"><span class="stat-label">SAB</span><span id="wisVal" class="stat-value">10</span><span id="wisMod" class="stat-mod">+0</span></div>
-                <div class="stat-box"><span class="stat-label">CAR</span><span id="chaVal" class="stat-value">10</span><span id="chaMod" class="stat-mod">+0</span></div>
+            <div class="panel-section">
+                <h3>Bestiario & Caos</h3>
+                <button id="btnGenerateMonster" class="btn btn-danger full-width">🐺 Monstruo Aleatorio</button>
+                <button id="btnChaosBeast" class="btn btn-chaos full-width">🌀 Bestia del Caos</button>
+                <button id="btnEncounter" class="btn btn-secondary full-width">⚔️ Generar Encuentro</button>
             </div>
 
-            <div class="details-grid">
-                <div class="detail-panel">
-                    <h3>🛡️ Combate</h3>
-                    <p>HP: <span id="hpVal">0</span> | AC: <span id="acVal">10</span></p>
-                    <p>Iniciativa: <span id="initVal">+0</span></p>
-                </div>
-                <div class="detail-panel">
-                    <h3>🎒 Equipo</h3>
-                    <ul id="equipmentList" class="item-list"></ul>
-                </div>
-                <div class="detail-panel">
-                    <h3>✨ Rasgos</h3>
-                    <ul id="traitsList" class="item-list"></ul>
-                </div>
+            <div class="panel-section">
+                <h3>Exportación</h3>
+                <button id="btnExportPDF" class="btn btn-outline full-width">📄 Descargar PDF</button>
+                <button id="btnExportJSON" class="btn btn-outline full-width">💾 Guardar JSON</button>
+                <button id="btnMintNFT" class="btn btn-purple full-width" disabled>💎 Mint NFT</button>
             </div>
             
-            <div class="sheet-actions">
-                <button id="exportPdfBtn" class="btn btn-secondary">💾 Guardar como PDF</button>
+            <div class="panel-section">
+                <h3>Historial</h3>
+                <ul id="historyList" class="history-list-sidebar"></ul>
+                <button id="btnClearHistory" class="btn-text">Borrar Historial</button>
             </div>
+        </aside>
+
+        <main class="display-area">
+            
+            <div id="wizard-container" class="hidden"></div>
+
+            <div id="characterSheet" class="sheet-container hidden">
+                <div class="sheet-header-row">
+                    <div class="portrait-frame">
+                        <img id="charImage" src="https://via.placeholder.com/300x300?text=Waiting+for+AI..." alt="Character Portrait">
+                        <button id="btnRegenImage" class="btn-mini">🎨 Regenerar Imagen</button>
+                    </div>
+                    
+                    <div class="header-stats">
+                        <h2 id="charName" class="epic-title">Nombre del Héroe</h2>
+                        <p class="char-meta"><span id="charRace">Raza</span> <span id="charClass">Clase</span> • Nivel <span id="charLevel">1</span></p>
+                        <p class="char-submeta"><span id="charBackground">Trasfondo</span> • <span id="charAlignment">Alineamiento</span></p>
+                        
+                        <div class="combat-stats">
+                            <div class="combat-box">🛡️ AC <span id="valAC">10</span></div>
+                            <div class="combat-box">❤️ HP <span id="valHP">10</span></div>
+                            <div class="combat-box">⚡ INIT <span id="valInit">+0</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="ability-score"><label>FUE</label><span id="statStr">10</span><small id="modStr">+0</small></div>
+                    <div class="ability-score"><label>DES</label><span id="statDex">10</span><small id="modDex">+0</small></div>
+                    <div class="ability-score"><label>CON</label><span id="statCon">10</span><small id="modCon">+0</small></div>
+                    <div class="ability-score"><label>INT</label><span id="statInt">10</span><small id="modInt">+0</small></div>
+                    <div class="ability-score"><label>SAB</label><span id="statWis">10</span><small id="modWis">+0</small></div>
+                    <div class="ability-score"><label>CAR</label><span id="statCha">10</span><small id="modCha">+0</small></div>
+                </div>
+
+                <div class="sheet-body">
+                    <div class="col">
+                        <h3>🎒 Equipo</h3>
+                        <ul id="listEquipment" class="data-list"></ul>
+                    </div>
+                    <div class="col">
+                        <h3>✨ Rasgos & Habilidades</h3>
+                        <ul id="listTraits" class="data-list"></ul>
+                    </div>
+                    <div class="col">
+                        <h3>📜 Hechizos / Acciones</h3>
+                        <ul id="listSpells" class="data-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="monsterCard" class="monster-card hidden">
+                <div class="monster-header">
+                    <h2 id="monsterName">Nombre del Monstruo</h2>
+                    <span id="monsterCR" class="cr-badge">CR 1</span>
+                </div>
+                <p id="monsterMeta">Tamaño Tipo, Alineamiento</p>
+                <hr>
+                <div class="monster-stats">
+                    <p><strong>Armor Class:</strong> <span id="monsterAC">10</span></p>
+                    <p><strong>Hit Points:</strong> <span id="monsterHP">10</span></p>
+                    <p><strong>Speed:</strong> <span id="monsterSpeed">30 ft.</span></p>
+                </div>
+                <hr>
+                <div id="monsterAbilities" class="monster-section"></div>
+                <div id="monsterActions" class="monster-section">
+                    <h3>Acciones</h3>
+                </div>
+            </div>
+
+            <div id="welcomeState" class="welcome-screen">
+                <h2>Bienvenido a la Forja</h2>
+                <p>Selecciona una opción en el panel izquierdo para comenzar.</p>
+                <p>Conecta tu Wallet para habilitar funciones NFT.</p>
+            </div>
+
         </main>
-
-        <div class="bestiary-section">
-            <h2 class="section-title">🐉 Invocación de Monstruos</h2>
-            <div class="controls-grid">
-                <button id="newCreatureBtn" class="btn btn-danger">🐺 Bestia Aleatoria</button>
-                <button id="chaosBtn" class="btn btn-accent">🌀 Engendro del Caos</button>
-            </div>
-            <div id="creatureDisplay" class="creature-card hidden">
-                <div class="creature-header">
-                    <h3 id="creatureName">Nombre de la Bestia</h3>
-                    <span id="creatureCR" class="cr-badge">CR 1</span>
-                </div>
-                <p id="creatureType" class="creature-type">Tipo - Tamaño</p>
-                <div class="stat-line">
-                    <span>❤️ HP: <span id="creatureHP">0</span></span>
-                    <span>🛡️ AC: <span id="creatureAC">0</span></span>
-                </div>
-                <div class="creature-actions">
-                    <h4>⚔️ Acciones / Habilidades</h4>
-                    <ul id="creatureActions" class="action-list"></ul>
-                </div>
-                <p id="creatureDesc" class="flavor-text"></p>
-            </div>
-        </div>
     </div>
-
-    <div id="wizard-container" class="hidden"></div>
-
-    <div id="historyModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h2>📜 Historial de Héroes</h2>
-            <div id="historyList" class="history-list"></div>
-            <button id="clearHistoryBtn" class="btn btn-small btn-danger">Borrar Historial</button>
-        </div>
-    </div>
-
-    <footer class="main-footer">
-        <p>Copyright © 2025 José Cazorla. Todos los derechos reservados.</p>
-        <button id="toggleTheme" class="theme-toggle">🌙 / ☀️</button>
-    </footer>
 
     <script src="dnd-monsters.js" defer></script>
     <script src="dnd-data.js" defer></script>
-    <script src="character-wizard.js" defer></script>
-    <script src="app.js" defer></script>
-
-</body>
+    <script src="dnd-apis.js" defer></script> <script src="character-wizard.js" defer></script> <script src="app.js" defer></script> </body>
 </html>
