@@ -1,9 +1,10 @@
 // Estado global
 let currentCharacter = null;
-let currentMonster = null;
-let currentEncounter = null;
 
-// Utilidades generales
+/* =====================
+ * Utilidades básicas
+ * ===================== */
+
 function randomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
@@ -16,12 +17,20 @@ function calculateModifier(stat) {
   return Math.floor((stat - 10) / 2);
 }
 
-// Generación de características 4d6 drop lowest
+function formatModifier(value) {
+  return (value >= 0 ? "+" : "") + value;
+}
+
+/* =====================
+ * Generación de stats
+ * ===================== */
+
+// 4d6 tirando 4 dados de 6, se descarta el más bajo y se suman los otros 3
 function generateStats() {
   const rollStat = () => {
     const rolls = [rollDice(6), rollDice(6), rollDice(6), rollDice(6)];
-    rolls.sort((a, b) => a - b);
-    return rolls.slice(1).reduce((a, b) => a + b, 0);
+    rolls.sort((a, b) => a - b); // el menor queda en [0]
+    return rolls[1] + rolls[2] + rolls[3];
   };
 
   return {
@@ -34,66 +43,106 @@ function generateStats() {
   };
 }
 
-// Calcula nivel de poder en base a la media de stats
+/* =====================
+ * Lógica de personaje
+ * ===================== */
+
+function calculateInitiative(stats) {
+  return calculateModifier(stats.dexterity);
+}
+
 function calculatePowerLevel(character) {
-  const statsTotal = Object.values(character.stats).reduce((a, b) => a + b, 0);
-  const avgStat = statsTotal / 6;
+  const s = character.stats;
+  const sumStats =
+    s.strength +
+    s.dexterity +
+    s.constitution +
+    s.intelligence +
+    s.wisdom +
+    s.charisma;
 
-  if (avgStat >= 16) return "⭐⭐⭐⭐⭐ Legendario";
-  if (avgStat >= 14) return "⭐⭐⭐⭐ Épico";
-  if (avgStat >= 12) return "⭐⭐⭐ Heroico";
-  if (avgStat >= 10) return "⭐⭐ Promedio";
-  return "⭐ Novato";
+  const mods = [
+    calculateModifier(s.strength),
+    calculateModifier(s.dexterity),
+    calculateModifier(s.constitution),
+    calculateModifier(s.intelligence),
+    calculateModifier(s.wisdom),
+    calculateModifier(s.charisma)
+  ].reduce((a, b) => a + b, 0);
+
+  const base =
+    sumStats / 6 +
+    mods * 2 +
+    (character.hp || 0) +
+    (character.ac || 0) +
+    (character.level || 1) * 2;
+
+  return Math.round(base);
 }
 
-// Historia breve
 function generateBackstory(character) {
-  const stories = {
-    "Guerrero": "forjado en el campo de batalla",
-    "Mago": "estudiante de las artes arcanas",
-    "Pícaro": "superviviente de las calles",
-    "Clérigo": "elegido por los dioses",
-    "Paladín": "campeón de la justicia",
-    "Bardo": "viajero de mil historias",
-    "Bárbaro": "hijo de las tierras salvajes",
-    "Druida": "guardián de la naturaleza",
-    "Monje": "maestro del cuerpo y mente",
-    "Explorador": "cazador de las tierras inhóspitas",
-    "Hechicero": "portador de magia innata",
-    "Brujo": "pactante de poderes oscuros"
-  };
+  const hooks = [
+    "ha sobrevivido a una batalla que debería haberle costado la vida",
+    "ha traicionado a alguien importante en su pasado",
+    "busca redención por algo que hizo hace años",
+    "tiene una deuda pendiente con un poderoso noble o mercader",
+    "sueña con fundar su propio gremio o reino",
+    "ha hecho un trato peligroso con una entidad extraplanar"
+  ];
 
-  const base = stories[character.class] || "aventurero de origen incierto";
-  return `${character.name}, ${character.race.toLowerCase()} ${base}, busca su destino en un mundo lleno de magia y peligros.`;
+  const hook = randomFromArray(hooks);
+
+  return `${character.name} es un ${character.race.toLowerCase()} ` +
+    `${character.class.toLowerCase()} con trasfondo de ${character.background.toLowerCase()}, ` +
+    `de alineamiento ${character.alignment.toLowerCase()}. ${character.name} ${hook}.`;
 }
 
-// Generador de personaje
+/**
+ * Genera un personaje a partir de DND_DATA
+ * customData puede tener: name, race, class, background, alignment
+ */
 function generateCharacter(customData = {}) {
-  const allRaces = Object.keys(DND_DATA.races);
-  const allClasses = Object.keys(DND_DATA.classes);
-  const allBackgrounds = Object.keys(DND_DATA.backgrounds);
+  if (typeof DND_DATA === "undefined") {
+    throw new Error(
+      "DND_DATA no está definido. Asegúrate de que dnd-data.js se carga antes de app.js"
+    );
+  }
 
-  const race = customData.race || randomFromArray(allRaces);
-  const charClass = customData.class || randomFromArray(allClasses);
-  const background = customData.background || randomFromArray(allBackgrounds);
-  const alignment = customData.alignment || randomFromArray(DND_DATA.alignments);
+  const race =
+    customData.race || randomFromArray(Object.keys(DND_DATA.races));
+  const charClass =
+    customData.class || randomFromArray(Object.keys(DND_DATA.classes));
+  const background =
+    customData.background || randomFromArray(Object.keys(DND_DATA.backgrounds));
+  const alignment =
+    customData.alignment || randomFromArray(DND_DATA.alignments);
 
   const stats = generateStats();
 
-  const classData =
-    DND_DATA.classes[charClass] || DND_DATA.classes[allClasses[0]];
-  const raceData = DND_DATA.races[race] || DND_DATA.races[allRaces[0]];
-  const backgroundData =
-    DND_DATA.backgrounds[background] || DND_DATA.backgrounds[allBackgrounds[0]];
+  const classData = DND_DATA.classes[charClass];
+  const raceData = DND_DATA.races[race];
+  const backgroundData = DND_DATA.backgrounds[background];
 
-  const hp = classData.hitDie + calculateModifier(stats.constitution);
+  const hp = (classData?.hitDie || 8) + calculateModifier(stats.constitution);
   const ac = 10 + calculateModifier(stats.dexterity);
+  const initiative = calculateInitiative(stats);
+
+  const skills = Array.from(
+    new Set([
+      ...(classData?.skills || []),
+      ...(backgroundData?.skills || [])
+    ])
+  );
+
+  const equipment = [
+    ...(classData?.equipment || []),
+    ...(backgroundData?.equipment || [])
+  ];
 
   const character = {
-    id: Date.now().toString(),
-    name:
-      (customData.name && customData.name.trim()) ||
-      `${race} ${charClass}`,
+    name: customData.name && customData.name.trim()
+      ? customData.name.trim()
+      : `${race} ${charClass}`,
     race,
     class: charClass,
     background,
@@ -102,28 +151,54 @@ function generateCharacter(customData = {}) {
     stats,
     hp,
     ac,
-    speed: raceData.speed,
-    racialTraits: raceData.traits || [],
-    classProficiencies: classData.proficiencies || [],
-    classFeatures: classData.features || [],
-    savingThrows: classData.savingThrows || [],
-    skills: classData.skills || "",
-    equipment: classData.equipment || [],
-    backgroundData
+    speed: raceData?.speed || 30,
+    initiative,
+    racialTraits: raceData?.traits || [],
+    classProficiencies: classData?.proficiencies || [],
+    classFeatures: classData?.features || [],
+    savingThrows: classData?.savingThrows || [],
+    skills,
+    equipment,
+    backgroundData: backgroundData || {}
   };
 
+  // añadimos info “narrativa”
   character.powerLevel = calculatePowerLevel(character);
   character.backstory = generateBackstory(character);
 
   return character;
 }
 
-// Pintar ficha de personaje
-function displayCharacter(character, options = {}) {
-  const { skipSave = false, skipCelebrate = false } = options;
+/* =====================
+ * Pintar en la ficha
+ * ===================== */
+
+function updateStatsOnSheet(stats) {
+  const map = [
+    ["Str", "strength"],
+    ["Dex", "dexterity"],
+    ["Con", "constitution"],
+    ["Int", "intelligence"],
+    ["Wis", "wisdom"],
+    ["Cha", "charisma"]
+  ];
+
+  map.forEach(([id, key]) => {
+    const value = stats[key];
+    const mod = calculateModifier(value);
+
+    const valueEl = document.getElementById("stat" + id);
+    const modEl = document.getElementById("mod" + id);
+
+    if (valueEl) valueEl.textContent = value;
+    if (modEl) modEl.textContent = formatModifier(mod);
+  });
+}
+
+function displayCharacter(character) {
   currentCharacter = character;
 
-  // Información básica
+  // Info básica
   document.getElementById("displayName").textContent = character.name;
   document.getElementById("displayRace").textContent = character.race;
   document.getElementById("displayClass").textContent = character.class;
@@ -133,718 +208,383 @@ function displayCharacter(character, options = {}) {
   document.getElementById("displayAlignment").textContent =
     character.alignment;
 
-  // Nivel de poder e historia
-  const powerEl = document.getElementById("displayPowerLevel");
-  const storyEl = document.getElementById("displayBackstory");
-  if (powerEl) powerEl.textContent = character.powerLevel || "-";
-  if (storyEl) storyEl.textContent = character.backstory || "-";
-
-  // Características
-  const statsMap = [
-    { id: "Str", value: character.stats.strength },
-    { id: "Dex", value: character.stats.dexterity },
-    { id: "Con", value: character.stats.constitution },
-    { id: "Int", value: character.stats.intelligence },
-    { id: "Wis", value: character.stats.wisdom },
-    { id: "Cha", value: character.stats.charisma }
-  ];
-
-  statsMap.forEach((stat) => {
-    const modifier = calculateModifier(stat.value);
-    const statEl = document.getElementById(`stat${stat.id}`);
-    const modEl = document.getElementById(`mod${stat.id}`);
-    if (statEl) statEl.textContent = stat.value;
-    if (modEl)
-      modEl.textContent = (modifier >= 0 ? "+" : "") + modifier;
-  });
-
   // Combate
   document.getElementById("displayHP").textContent = character.hp;
   document.getElementById("displayAC").textContent = character.ac;
-  document.getElementById(
-    "displaySpeed"
-  ).textContent = `${character.speed} ft`;
-  const initMod = calculateModifier(character.stats.dexterity);
+  document.getElementById("displaySpeed").textContent =
+    character.speed + " ft";
   document.getElementById("displayInit").textContent =
-    (initMod >= 0 ? "+" : "") + initMod;
+    formatModifier(character.initiative);
+
+  // Stats
+  updateStatsOnSheet(character.stats);
 
   // Salvaciones y habilidades
   document.getElementById("displaySavingThrows").textContent =
-    character.savingThrows.join(", ");
+    (character.savingThrows || []).join(", ") || "-";
   document.getElementById("displaySkills").textContent =
-    character.skills || "-";
+    (character.skills || []).join(", ") || "-";
 
-  // Equipo de clase
-  const equipmentHTML = (character.equipment || [])
-    .map((item) => `<li>• ${item}</li>`)
-    .join("");
-  document.getElementById("equipment").innerHTML = equipmentHTML;
+  // Equipo inicial
+  const eqList = document.getElementById("equipment");
+  eqList.innerHTML = "";
+  (character.equipment || []).forEach(item => {
+    const li = document.createElement("li");
+    li.className = "trait-item";
+    li.textContent = "• " + item;
+    eqList.appendChild(li);
+  });
 
   // Trasfondo
-  if (character.backgroundData) {
-    document.getElementById("backgroundName").textContent =
-      character.background;
-    document.getElementById("backgroundSkills").textContent =
-      (character.backgroundData.skills || []).join(", ");
-    document.getElementById("backgroundFeature").textContent =
-      character.backgroundData.feature || "-";
+  const bg = character.backgroundData || {};
+  document.getElementById("backgroundName").textContent =
+    character.background || "-";
+  document.getElementById("backgroundSkills").textContent =
+    (bg.skills || []).join(", ") || "-";
+  document.getElementById("backgroundFeature").textContent =
+    bg.feature || "-";
 
-    const bgEquipHTML = (character.backgroundData.equipment || [])
-      .map((item) => `<li>• ${item}</li>`)
-      .join("");
-    document.getElementById("backgroundEquipment").innerHTML =
-      bgEquipHTML;
-  }
+  const bgEqList = document.getElementById("backgroundEquipment");
+  bgEqList.innerHTML = "";
+  (bg.equipment || []).forEach(item => {
+    const li = document.createElement("li");
+    li.className = "trait-item";
+    li.textContent = "• " + item;
+    bgEqList.appendChild(li);
+  });
 
   // Rasgos raciales
-  const traitsHTML = (character.racialTraits || [])
-    .map((trait) => `<li>• ${trait}</li>`)
-    .join("");
-  document.getElementById("racialTraits").innerHTML = traitsHTML;
+  const racialList = document.getElementById("racialTraits");
+  racialList.innerHTML = "";
+  (character.racialTraits || []).forEach(trait => {
+    const li = document.createElement("li");
+    li.className = "trait-item";
+    li.textContent = "• " + trait;
+    racialList.appendChild(li);
+  });
 
   // Competencias de clase
-  const profHTML = (character.classProficiencies || [])
-    .map((prof) => `<li>• ${prof}</li>`)
-    .join("");
-  document.getElementById("classProficiencies").innerHTML = profHTML;
+  const profList = document.getElementById("classProficiencies");
+  profList.innerHTML = "";
+  (character.classProficiencies || []).forEach(p => {
+    const li = document.createElement("li");
+    li.className = "trait-item";
+    li.textContent = "• " + p;
+    profList.appendChild(li);
+  });
 
-  // Características de clase
-  const featuresHTML = (character.classFeatures || [])
-    .map((feature) => `<li>• ${feature}</li>`)
-    .join("");
-  document.getElementById("classFeatures").innerHTML = featuresHTML;
+  // Rasgos de clase
+  const featuresList = document.getElementById("classFeatures");
+  featuresList.innerHTML = "";
+  (character.classFeatures || []).forEach(f => {
+    const li = document.createElement("li");
+    li.className = "trait-item";
+    li.textContent = "• " + f;
+    featuresList.appendChild(li);
+  });
 
-  // Mostrar ficha y botón NFT
+  // Mostrar ficha
   const sheet = document.getElementById("characterSheet");
   sheet.classList.remove("hidden");
-  const nftBtn = document.getElementById("mintNFTBtn");
-  if (nftBtn) {
-    nftBtn.style.display = "inline-flex";
-  }
 
-  // Scroll suave
-  sheet.scrollIntoView({ behavior: "smooth" });
+  // Guardar en localStorage
+  saveCharacterToStorage(character);
+}
 
-  // Guardar en localStorage y recargar historial
-  if (!skipSave) {
-    saveCharacterToStorage(character);
-  }
+/* =====================
+ * LocalStorage
+ * ===================== */
 
-  // Confetti
-  if (!skipCelebrate) {
-    celebrateCharacterCreation();
+function saveCharacterToStorage(character) {
+  try {
+    localStorage.setItem("lastCharacter", JSON.stringify(character));
+  } catch (e) {
+    console.warn("No se pudo guardar el personaje en localStorage", e);
   }
 }
 
-// Selects del panel personalizado
+function loadLastCharacter() {
+  try {
+    const raw = localStorage.getItem("lastCharacter");
+    if (!raw) return false;
+    const char = JSON.parse(raw);
+    displayCharacter(char);
+    return true;
+  } catch (e) {
+    console.warn("No se pudo cargar el último personaje", e);
+    return false;
+  }
+}
+
+/* =====================
+ * Selects de personalización
+ * ===================== */
+
 function populateSelects() {
+  if (typeof DND_DATA === "undefined") {
+    console.error(
+      "DND_DATA no está definido. ¿Se está cargando dnd-data.js antes de app.js?"
+    );
+    return;
+  }
+
   const raceSelect = document.getElementById("raceSelect");
   const classSelect = document.getElementById("classSelect");
-  const backgroundSelect = document.getElementById("backgroundSelect");
+  const bgSelect = document.getElementById("backgroundSelect");
   const alignmentSelect = document.getElementById("alignmentSelect");
 
-  // Razas
-  Object.keys(DND_DATA.races).forEach((race) => {
-    const option = document.createElement("option");
-    option.value = race;
-    option.textContent = race;
-    raceSelect.appendChild(option);
-  });
+  const fillSelect = (select, options) => {
+    select.innerHTML = "";
+    options.forEach(opt => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt;
+      select.appendChild(option);
+    });
+  };
 
-  // Clases
-  Object.keys(DND_DATA.classes).forEach((cls) => {
-    const option = document.createElement("option");
-    option.value = cls;
-    option.textContent = cls;
-    classSelect.appendChild(option);
-  });
-
-  // Trasfondos
-  Object.keys(DND_DATA.backgrounds).forEach((bg) => {
-    const option = document.createElement("option");
-    option.value = bg;
-    option.textContent = bg;
-    backgroundSelect.appendChild(option);
-  });
-
-  // Alineamientos
-  DND_DATA.alignments.forEach((align) => {
-    const option = document.createElement("option");
-    option.value = align;
-    option.textContent = align;
-    alignmentSelect.appendChild(option);
-  });
+  fillSelect(raceSelect, Object.keys(DND_DATA.races));
+  fillSelect(classSelect, Object.keys(DND_DATA.classes));
+  fillSelect(bgSelect, Object.keys(DND_DATA.backgrounds));
+  fillSelect(alignmentSelect, DND_DATA.alignments);
 }
 
-// PDF con jsPDF
-async function generatePDF() {
-  if (!currentCharacter) return;
-  const { jsPDF } = window.jspdf;
+/* =====================
+ * PDF
+ * ===================== */
+
+function generatePDF() {
+  if (!currentCharacter) {
+    alert("Primero genera un personaje.");
+    return;
+  }
+
+  const jspdf = window.jspdf;
+  if (!jspdf || !jspdf.jsPDF) {
+    alert("No se ha podido cargar jsPDF.");
+    return;
+  }
+
+  const { jsPDF } = jspdf;
   const doc = new jsPDF();
 
   let y = 20;
 
   doc.setFontSize(18);
-  doc.setTextColor(40, 40, 40);
-  doc.text("D&D Character Forge", 20, y);
-  y += 8;
-  doc.setFontSize(12);
-  doc.text(currentCharacter.name, 20, y);
-  y += 6;
+  doc.text(`D&D - ${currentCharacter.name}`, 20, y);
 
-  doc.setDrawColor(102, 126, 234);
-  doc.setLineWidth(0.5);
-  doc.line(20, y, 190, y);
   y += 10;
-
-  // Información básica
-  doc.setFontSize(14);
-  doc.text("INFORMACIÓN BÁSICA", 20, y);
-  y += 8;
-  doc.setFontSize(10);
-
-  const basicInfo = [
-    `Nombre: ${currentCharacter.name}`,
-    `Raza: ${currentCharacter.race}`,
-    `Clase: ${currentCharacter.class} (Nivel ${currentCharacter.level})`,
-    `Trasfondo: ${currentCharacter.background}`,
-    `Alineamiento: ${currentCharacter.alignment}`
-  ];
-
-  basicInfo.forEach((line) => {
-    doc.text(line, 20, y);
-    y += 5;
-  });
-
-  y += 5;
-  const pLevel = currentCharacter.powerLevel || "";
-  const bStory = currentCharacter.backstory || "";
-  if (pLevel || bStory) {
-    doc.setFontSize(11);
-    doc.text(`Nivel de poder: ${pLevel}`, 20, y);
-    y += 5;
-    const storyLines = doc.splitTextToSize(
-      `Historia: ${bStory}`,
-      170
-    );
-    storyLines.forEach((line) => {
-      if (y > 280) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.text(line, 20, y);
-      y += 5;
-    });
-  }
-
-  // Stats
-  y += 8;
-  if (y > 270) {
-    doc.addPage();
-    y = 20;
-  }
-  doc.setFontSize(14);
-  doc.text("CARACTERÍSTICAS", 20, y);
-  y += 7;
-  doc.setFontSize(10);
-
-  const statsMap = [
-    ["FUE", currentCharacter.stats.strength],
-    ["DES", currentCharacter.stats.dexterity],
-    ["CON", currentCharacter.stats.constitution],
-    ["INT", currentCharacter.stats.intelligence],
-    ["SAB", currentCharacter.stats.wisdom],
-    ["CAR", currentCharacter.stats.charisma]
-  ];
-
-  statsMap.forEach(([label, score], idx) => {
-    const mod = calculateModifier(score);
-    const text = `${label}: ${score} (${mod >= 0 ? "+" : ""}${mod})`;
-    const x = 20 + (idx % 3) * 55;
-    const yy = y + Math.floor(idx / 3) * 6;
-    doc.text(text, x, yy);
-  });
-
-  y += 18;
-
-  // Combate
-  if (y > 270) {
-    doc.addPage();
-    y = 20;
-  }
-  doc.setFontSize(14);
-  doc.text("COMBATE", 20, y);
-  y += 7;
-  doc.setFontSize(10);
-  const combatLines = [
-    `Puntos de golpe: ${currentCharacter.hp}`,
-    `Clase de armadura: ${currentCharacter.ac}`,
-    `Velocidad: ${currentCharacter.speed} ft`,
-    `Iniciativa: ${
-      (calculateModifier(currentCharacter.stats.dexterity) >= 0 ? "+" : "") +
-      calculateModifier(currentCharacter.stats.dexterity)
-    }`
-  ];
-  combatLines.forEach((line) => {
-    doc.text(line, 20, y);
-    y += 5;
-  });
-
-  // Salvaciones y habilidades
-  y += 7;
-  if (y > 270) {
-    doc.addPage();
-    y = 20;
-  }
-  doc.setFontSize(14);
-  doc.text("COMPETENCIAS", 20, y);
-  y += 7;
-  doc.setFontSize(10);
+  doc.setFontSize(12);
   doc.text(
-    `T. Salvación: ${currentCharacter.savingThrows.join(", ")}`,
+    `${currentCharacter.race} ${currentCharacter.class} (Nivel ${currentCharacter.level})`,
     20,
     y
   );
-  y += 5;
-  const skillsLines = doc.splitTextToSize(
-    `Habilidades: ${currentCharacter.skills || "-"}`,
-    170
+
+  y += 8;
+  doc.text(`Trasfondo: ${currentCharacter.background}`, 20, y);
+  y += 8;
+  doc.text(`Alineamiento: ${currentCharacter.alignment}`, 20, y);
+
+  // Stats
+  y += 12;
+  doc.setFontSize(14);
+  doc.text("Características", 20, y);
+  y += 8;
+  doc.setFontSize(11);
+
+  const s = currentCharacter.stats;
+  const statsLines = [
+    `FUE: ${s.strength} (${formatModifier(calculateModifier(s.strength))})`,
+    `DES: ${s.dexterity} (${formatModifier(calculateModifier(s.dexterity))})`,
+    `CON: ${s.constitution} (${formatModifier(calculateModifier(s.constitution))})`,
+    `INT: ${s.intelligence} (${formatModifier(calculateModifier(s.intelligence))})`,
+    `SAB: ${s.wisdom} (${formatModifier(calculateModifier(s.wisdom))})`,
+    `CAR: ${s.charisma} (${formatModifier(calculateModifier(s.charisma))})`
+  ];
+
+  statsLines.forEach(line => {
+    doc.text(line, 20, y);
+    y += 6;
+  });
+
+  // Combate
+  y += 6;
+  doc.setFontSize(14);
+  doc.text("Combate", 20, y);
+  y += 8;
+  doc.setFontSize(11);
+  doc.text(
+    `PG: ${currentCharacter.hp}   CA: ${currentCharacter.ac}   Velocidad: ${currentCharacter.speed} ft   Iniciativa: ${formatModifier(
+      currentCharacter.initiative
+    )}`,
+    20,
+    y
   );
-  skillsLines.forEach((line) => {
+
+  // Salvaciones / habilidades
+  y += 10;
+  doc.setFontSize(14);
+  doc.text("Salvaciones y habilidades", 20, y);
+  y += 8;
+  doc.setFontSize(11);
+  doc.text(
+    `Tiradas de salvación: ${(currentCharacter.savingThrows || []).join(
+      ", "
+    ) || "-"}`,
+    20,
+    y
+  );
+  y += 6;
+  doc.text(
+    `Habilidades: ${(currentCharacter.skills || []).join(", ") || "-"}`,
+    20,
+    y
+  );
+
+  // Rasgos
+  const addListSection = (title, items) => {
+    if (!items || !items.length) return;
+    y += 10;
     if (y > 270) {
       doc.addPage();
       y = 20;
     }
-    doc.text(line, 20, y);
-    y += 5;
-  });
+    doc.setFontSize(14);
+    doc.text(title, 20, y);
+    y += 8;
+    doc.setFontSize(11);
+    items.forEach(it => {
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text("- " + it, 20, y);
+      y += 5;
+    });
+  };
 
-  // Rasgos y características
-  y += 7;
+  addListSection("Rasgos raciales", currentCharacter.racialTraits);
+  addListSection("Competencias de clase", currentCharacter.classProficiencies);
+  addListSection("Rasgos de clase", currentCharacter.classFeatures);
+  addListSection("Equipo", currentCharacter.equipment);
+
+  // Historieta
+  y += 10;
   if (y > 270) {
     doc.addPage();
     y = 20;
   }
   doc.setFontSize(14);
-  doc.text("RASGOS & CARACTERÍSTICAS", 20, y);
-  y += 7;
-  doc.setFontSize(10);
+  doc.text("Trasfondo narrativo", 20, y);
+  y += 8;
+  doc.setFontSize(11);
 
-  const sections = [
-    ["Rasgos raciales", currentCharacter.racialTraits || []],
-    ["Competencias de clase", currentCharacter.classProficiencies || []],
-    ["Características de clase", currentCharacter.classFeatures || []],
-    [
-      "Equipo",
-      (currentCharacter.equipment || []).concat(
-        currentCharacter.backgroundData?.equipment || []
-      )
-    ]
-  ];
-
-  sections.forEach(([title, items]) => {
-    if (!items.length) return;
-    if (y > 260) {
+  const textLines = doc.splitTextToSize(
+    currentCharacter.backstory || "",
+    170
+  );
+  textLines.forEach(line => {
+    if (y > 280) {
       doc.addPage();
       y = 20;
     }
-    doc.setFont(undefined, "bold");
-    doc.text(title + ":", 20, y);
+    doc.text(line, 20, y);
     y += 5;
-    doc.setFont(undefined, "normal");
-    const lines = doc.splitTextToSize(
-      items.map((i) => `• ${i}`).join("\n"),
-      170
-    );
-    lines.forEach((line) => {
-      if (y > 270) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.text(line, 20, y);
-      y += 4;
-    });
-    y += 3;
   });
 
-  doc.save(`${currentCharacter.name.replace(/\s+/g, "_")}_ficha.pdf`);
+  const safeName = currentCharacter.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gi, "_")
+    .replace(/^_+|_+$/g, "");
+
+  doc.save(`personaje-${safeName || "dnd"}.pdf`);
 }
 
-// Guardar en localStorage
-function saveCharacterToStorage(character) {
-  try {
-    const savedCharacters = JSON.parse(
-      localStorage.getItem("dnd_characters") || "[]"
-    );
-    savedCharacters.unshift({
-      ...character,
-      savedAt: new Date().toISOString()
-    });
-    const trimmed = savedCharacters.slice(0, 10);
-    localStorage.setItem(
-      "dnd_characters",
-      JSON.stringify(trimmed)
-    );
-    renderHistory(trimmed);
-  } catch (e) {
-    console.log("No se pudo guardar en localStorage");
-  }
+/* =====================
+ * Compartir
+ * ===================== */
+
+function buildShareText(character) {
+  const power = calculatePowerLevel(character);
+  const backstory = character.backstory || generateBackstory(character);
+
+  return (
+    `¡He creado un personaje de D&D!\n\n` +
+    `${backstory}\n\n` +
+    `Nivel de poder aproximado: ${power}\n\n` +
+    `Crea el tuyo en: https://jcazorla90.github.io/dnd-nft-generator/`
+  );
 }
 
-// Cargar historial + último personaje
-function loadHistoryAndLastCharacter() {
-  try {
-    const savedCharacters = JSON.parse(
-      localStorage.getItem("dnd_characters") || "[]"
-    );
-    renderHistory(savedCharacters);
-    if (savedCharacters.length > 0) {
-      const { savedAt, ...lastChar } = savedCharacters[0];
-      displayCharacter(lastChar, {
-        skipSave: true,
-        skipCelebrate: true
-      });
-      return true;
-    }
-  } catch (e) {
-    console.log("No se pudo cargar historial");
-  }
-  return false;
-}
+/* =====================
+ * Konami code (huevo de pascua)
+ * ===================== */
 
-// Render del historial
-function renderHistory(savedCharacters) {
-  const list = document.getElementById("historyList");
-  if (!list) return;
-
-  if (!savedCharacters || savedCharacters.length === 0) {
-    list.innerHTML =
-      '<li class="history-empty">Todavía no hay personajes guardados.</li>';
-    return;
-  }
-
-  list.innerHTML = savedCharacters
-    .map((ch, index) => {
-      const date =
-        ch.savedAt && !Number.isNaN(Date.parse(ch.savedAt))
-          ? new Date(ch.savedAt).toLocaleString()
-          : "";
-      return `
-      <li class="history-item" data-index="${index}">
-        <div class="history-main">
-          <strong>${ch.name}</strong>
-          <span>${ch.race} · ${ch.class}</span>
-        </div>
-        <div class="history-meta">
-          <span>Nivel ${ch.level}</span>
-          <span>${ch.alignment}</span>
-          ${
-            ch.powerLevel
-              ? `<span>${ch.powerLevel}</span>`
-              : ""
-          }
-          ${date ? `<span>${date}</span>` : ""}
-        </div>
-      </li>
-    `;
-    })
-    .join("");
-}
-
-// Confetti de celebración
-function celebrateCharacterCreation() {
-  const colors = ["#667eea", "#764ba2", "#FFD700", "#48bb78"];
-  for (let i = 0; i < 40; i++) {
-    setTimeout(() => {
-      const confetti = document.createElement("div");
-      confetti.style.cssText = `
-        position: fixed;
-        width: 10px;
-        height: 10px;
-        background: ${
-          colors[Math.floor(Math.random() * colors.length)]
-        };
-        top: -10px;
-        left: ${Math.random() * 100}vw;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 9999;
-        animation: fall ${2 + Math.random() * 2}s linear forwards;
-      `;
-      document.body.appendChild(confetti);
-      setTimeout(() => confetti.remove(), 4000);
-    }, i * 20);
-  }
-}
-
-// Añadir keyframe para confetti
-(function injectConfettiKeyframes() {
-  const style = document.createElement("style");
-  style.textContent = `
-    @keyframes fall {
-      to {
-        transform: translateY(100vh) rotate(360deg);
-        opacity: 0;
-      }
-    }
-  `;
-  document.head.appendChild(style);
-})();
-
-// NFT demo
-async function connectWalletAndMint() {
-  if (!currentCharacter) {
-    alert("Primero genera un personaje");
-    return;
-  }
-
-  if (typeof window.ethereum === "undefined") {
-    alert("Por favor instala MetaMask para crear NFTs");
-    window.open("https://metamask.io/", "_blank");
-    return;
-  }
-
-  try {
-    const accounts = await window.ethereum.request({
-      method: "eth_requestAccounts"
-    });
-    const account = accounts[0];
-    alert(
-      `Conectado a ${account}.\nAquí iría la lógica real de mintear el NFT del personaje.`
-    );
-  } catch (e) {
-    console.error(e);
-    alert("No se pudo conectar con MetaMask.");
-  }
-}
-
-/* ====================== */
-/*    BESTIARIO           */
-/* ====================== */
-
-function parseCRFilter(value) {
-  if (!value) return { min: null, max: null };
-  if (value === "11+") return { min: 11, max: null };
-  const [minStr, maxStr] = value.split("-");
-  return {
-    min: Number(minStr),
-    max: Number(maxStr)
-  };
-}
-
-function filterMonsters(filters) {
-  const { type, environment, crRange } = filters;
-  let pool = Array.isArray(DND_MONSTERS) ? DND_MONSTERS.slice() : [];
-
-  if (type) {
-    pool = pool.filter((m) => m.type === type);
-  }
-  if (environment) {
-    pool = pool.filter((m) =>
-      (m.environments || []).includes(environment)
-    );
-  }
-  if (crRange && (crRange.min != null || crRange.max != null)) {
-    pool = pool.filter((m) => {
-      if (crRange.min != null && m.cr < crRange.min) return false;
-      if (crRange.max != null && m.cr > crRange.max) return false;
-      return true;
-    });
-  }
-  return pool;
-}
-
-function generateRandomMonsterFromFilters() {
-  const type = document.getElementById("monsterTypeFilter").value;
-  const env = document.getElementById("monsterEnvFilter").value;
-  const crValue = document.getElementById("monsterCRFilter").value;
-  const crRange = parseCRFilter(crValue);
-
-  let pool = filterMonsters({ type, environment: env, crRange });
-  if (!pool.length) {
-    pool = Array.isArray(DND_MONSTERS) ? DND_MONSTERS : [];
-  }
-  if (!pool.length) return null;
-  return randomFromArray(pool);
-}
-
-function displayMonster(monster) {
-  currentMonster = monster;
-  const emptyMsg = document.getElementById("monsterEmptyMsg");
-  const card = document.getElementById("monsterCard");
-  if (!monster) {
-    card.classList.add("hidden");
-    emptyMsg.textContent = "No se encontró ninguna criatura con esos filtros.";
-    return;
-  }
-
-  card.classList.remove("hidden");
-  emptyMsg.textContent = "";
-
-  document.getElementById("displayMonsterName").textContent =
-    monster.name;
-  document.getElementById("displayMonsterType").textContent =
-    monster.type;
-  document.getElementById("displayMonsterCR").textContent =
-    monster.cr;
-  document.getElementById("displayMonsterXP").textContent =
-    monster.xp;
-  document.getElementById("displayMonsterAC").textContent =
-    monster.ac;
-  document.getElementById("displayMonsterHP").textContent =
-    monster.hp;
-  document.getElementById("displayMonsterSpeed").textContent =
-    monster.speed;
-  document.getElementById("displayMonsterAlignment").textContent =
-    monster.alignment || "-";
-  document.getElementById("displayMonsterEnv").textContent = (
-    monster.environments || []
-  ).join(", ");
-
-  // Stats criatura
-  const statsContainer = document.getElementById("monsterStats");
-  const stats = monster.stats || {};
-  const map = [
-    ["FUE", stats.str],
-    ["DES", stats.dex],
-    ["CON", stats.con],
-    ["INT", stats.int],
-    ["SAB", stats.wis],
-    ["CAR", stats.cha]
+function setupKonamiCode() {
+  const sequence = [
+    "ArrowUp",
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight",
+    "ArrowLeft",
+    "ArrowRight",
+    "b",
+    "a"
   ];
+  let position = 0;
 
-  statsContainer.innerHTML = map
-    .map(([label, value]) => {
-      if (value == null) return "";
-      const mod = calculateModifier(value);
-      return `
-      <div class="stat">
-        <span class="stat-label">${label}</span>
-        <span class="stat-score">${value}</span>
-        <span class="stat-mod">${mod >= 0 ? "+" : ""}${mod}</span>
-      </div>`;
-    })
-    .join("");
-
-  // Rasgos y acciones
-  const traitsUl = document.getElementById("monsterTraits");
-  const actionsUl = document.getElementById("monsterActions");
-
-  traitsUl.innerHTML = (monster.traits || [])
-    .map((t) => `<li>• ${t}</li>`)
-    .join("");
-  actionsUl.innerHTML = (monster.actions || [])
-    .map((a) => `<li>• ${a}</li>`)
-    .join("");
-}
-
-/* ====================== */
-/*    ENCUENTROS          */
-/* ====================== */
-
-function getTargetXP(level, partySize, difficulty) {
-  const basePerLevel = {
-    easy: 25,
-    medium: 50,
-    hard: 75,
-    deadly: 100
-  };
-  const base = basePerLevel[difficulty] || basePerLevel.medium;
-  return level * partySize * base;
-}
-
-function generateEncounter(params) {
-  const { level, partySize, difficulty } = params;
-  const targetXP = getTargetXP(level, partySize, difficulty);
-
-  const pool = Array.isArray(DND_MONSTERS) ? DND_MONSTERS.slice() : [];
-  if (!pool.length) {
-    return { monsters: [], xp: 0, targetXP, level, partySize, difficulty };
-  }
-
-  const monsters = [];
-  let xpSum = 0;
-  let safety = 1000;
-
-  while (xpSum < targetXP * 0.9 && safety-- > 0) {
-    const monster = randomFromArray(pool);
-    if (!monster) break;
-    const newXP = xpSum + monster.xp;
-    if (newXP <= targetXP * 1.4 || monsters.length === 0) {
-      monsters.push(monster);
-      xpSum = newXP;
+  document.addEventListener("keydown", e => {
+    const key = e.key;
+    if (key === sequence[position]) {
+      position++;
+      if (position === sequence.length) {
+        position = 0;
+        try {
+          const legendary = generateCharacter();
+          Object.keys(legendary.stats).forEach(stat => {
+            legendary.stats[stat] = 18;
+          });
+          legendary.name = "⭐ " + legendary.name + " el Legendario";
+          legendary.initiative = calculateInitiative(legendary.stats);
+          legendary.powerLevel = calculatePowerLevel(legendary);
+          legendary.backstory = generateBackstory(legendary);
+          displayCharacter(legendary);
+          alert(
+            "🎉 ¡Código Konami activado! Personaje legendario generado con todas las estadísticas a 18."
+          );
+        } catch (err) {
+          console.error("Error en Konami code:", err);
+        }
+      }
     } else {
-      // Quita esta criatura del pool para intentar variedad
-      const idx = pool.indexOf(monster);
-      if (idx >= 0) pool.splice(idx, 1);
-      if (!pool.length) break;
+      position = 0;
     }
-  }
-
-  return {
-    monsters,
-    xp: xpSum,
-    targetXP,
-    level,
-    partySize,
-    difficulty
-  };
+  });
 }
 
-function displayEncounter(encounter) {
-  currentEncounter = encounter;
-  const resultEl = document.getElementById("encounterResult");
-  const summaryEl = document.getElementById("encounterSummary");
-  const listEl = document.getElementById("encounterList");
-
-  if (!encounter || !encounter.monsters.length) {
-    resultEl.classList.add("hidden");
-    summaryEl.textContent =
-      "No se pudo generar un encuentro con los parámetros dados.";
-    return;
-  }
-
-  resultEl.classList.remove("hidden");
-
-  const diffLabelMap = {
-    easy: "Fácil",
-    medium: "Media",
-    hard: "Difícil",
-    deadly: "Mortal"
-  };
-
-  summaryEl.textContent = `Nivel grupo ${encounter.level}, ${encounter.partySize} PJ · Dificultad ${
-    diffLabelMap[encounter.difficulty] || encounter.difficulty
-  } · XP objetivo ${encounter.targetXP} · XP generado ${encounter.xp}`;
-
-  listEl.innerHTML = encounter.monsters
-    .map((m) => {
-      const env = (m.environments || []).join(", ");
-      return `<li>• ${m.name} (CR ${m.cr}, ${m.xp} XP) · CA ${m.ac}, PG ${m.hp} · ${m.type}${
-        env ? " · Entornos: " + env : ""
-      }</li>`;
-    })
-    .join("");
-}
-
-/* ====================== */
-/*   EVENTOS / INICIAL    */
-/* ====================== */
+/* =====================
+ * Event listeners iniciales
+ * ===================== */
 
 document.addEventListener("DOMContentLoaded", () => {
-  populateSelects();
-
-  // Cargar último personaje si existe
-  loadHistoryAndLastCharacter();
+  try {
+    populateSelects();
+    loadLastCharacter();
+  } catch (err) {
+    console.error("Error inicializando la app:", err);
+  }
 
   // Generar aleatorio
   document.getElementById("randomBtn").addEventListener("click", () => {
     try {
       const character = generateCharacter();
       displayCharacter(character);
-    } catch (error) {
-      console.error("Error generando personaje:", error);
-      alert("Error al generar personaje. Por favor, recarga la página.");
+    } catch (err) {
+      console.error("Error generando personaje aleatorio:", err);
+      alert("Ha ocurrido un error al generar el personaje.");
     }
   });
 
@@ -863,185 +603,53 @@ document.addEventListener("DOMContentLoaded", () => {
           name: document.getElementById("charName").value,
           race: document.getElementById("raceSelect").value,
           class: document.getElementById("classSelect").value,
-          background:
-            document.getElementById("backgroundSelect").value,
-          alignment:
-            document.getElementById("alignmentSelect").value
+          background: document.getElementById("backgroundSelect").value,
+          alignment: document.getElementById("alignmentSelect").value
         };
-
         const character = generateCharacter(customData);
         displayCharacter(character);
-      } catch (error) {
-        console.error("Error generando personaje personalizado:", error);
-        alert("Error al generar personaje. Verifica los datos.");
+      } catch (err) {
+        console.error("Error generando personaje personalizado:", err);
+        alert("Revisa los datos del formulario. Algo ha fallado.");
       }
     });
 
   // Descargar PDF
-  document
-    .getElementById("downloadBtn")
-    .addEventListener("click", generatePDF);
+  document.getElementById("downloadBtn").addEventListener("click", () => {
+    generatePDF();
+  });
 
-  // Mintear NFT
-  const nftBtn = document.getElementById("mintNFTBtn");
-  if (nftBtn) {
-    nftBtn.addEventListener("click", connectWalletAndMint);
-  }
-
-  // Nuevo personaje (oculta ficha)
+  // Nuevo personaje (scroll arriba y ocultar nombre si quieres)
   document.getElementById("newCharBtn").addEventListener("click", () => {
-    const sheet = document.getElementById("characterSheet");
-    sheet.classList.add("hidden");
-    const nftBtn = document.getElementById("mintNFTBtn");
-    if (nftBtn) {
-      nftBtn.style.display = "none";
-    }
     window.scrollTo({ top: 0, behavior: "smooth" });
-    currentCharacter = null;
+    const nameInput = document.getElementById("charName");
+    if (nameInput) nameInput.focus();
   });
 
   // Compartir
   document.getElementById("shareBtn").addEventListener("click", async () => {
-    if (!currentCharacter) return;
-
-    const text = [
-      `🧙 Personaje D&D: ${currentCharacter.name}`,
-      `${currentCharacter.race} ${currentCharacter.class}, nivel ${currentCharacter.level}`,
-      `Alineamiento: ${currentCharacter.alignment}`,
-      `Nivel de poder: ${currentCharacter.powerLevel}`,
-      "",
-      currentCharacter.backstory || ""
-    ].join("\n");
-
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "Mi personaje D&D",
-          text
-        });
-      } catch (e) {
-        console.log("Compartir cancelado");
-      }
-    } else if (navigator.clipboard) {
-      await navigator.clipboard.writeText(text);
-      alert("Texto copiado al portapapeles.");
-    } else {
-      alert(text);
+    if (!currentCharacter) {
+      alert("Primero genera un personaje.");
+      return;
     }
-  });
 
-  // Click en historial
-  const historyList = document.getElementById("historyList");
-  historyList.addEventListener("click", (e) => {
-    const item = e.target.closest(".history-item");
-    if (!item) return;
-    const index = Number(item.dataset.index);
+    const text = buildShareText(currentCharacter);
+
     try {
-      const savedCharacters = JSON.parse(
-        localStorage.getItem("dnd_characters") || "[]"
-      );
-      const entry = savedCharacters[index];
-      if (!entry) return;
-      const { savedAt, ...char } = entry;
-      displayCharacter(char, {
-        skipSave: true,
-        skipCelebrate: true
-      });
+      if (navigator.share) {
+        await navigator.share({ text });
+      } else if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+        alert("Texto copiado al portapapeles. ¡Pégalo donde quieras!");
+      } else {
+        alert(text);
+      }
     } catch (err) {
-      console.error("Error cargando personaje del historial:", err);
+      console.error("Error al compartir:", err);
+      alert("No se ha podido compartir el personaje.");
     }
   });
 
-  // Bestiario
-  document
-    .getElementById("generateMonsterBtn")
-    .addEventListener("click", () => {
-      const monster = generateRandomMonsterFromFilters();
-      displayMonster(monster);
-    });
-
-  // Encuentros
-  document
-    .getElementById("generateEncounterBtn")
-    .addEventListener("click", () => {
-      const level = Number(
-        document.getElementById("partyLevel").value || 1
-      );
-      const size = Number(
-        document.getElementById("partySize").value || 4
-      );
-      const difficulty =
-        document.getElementById("encounterDifficulty").value ||
-        "medium";
-
-      const encounter = generateEncounter({
-        level: Math.max(1, level),
-        partySize: Math.max(1, size),
-        difficulty
-      });
-      displayEncounter(encounter);
-    });
-
-  // Atajos de teclado
-  document.addEventListener("keydown", (e) => {
-    // Ctrl/Cmd + R = Generar aleatorio
-    if ((e.ctrlKey || e.metaKey) && e.key === "r") {
-      e.preventDefault();
-      const btn = document.getElementById("randomBtn");
-      if (btn) btn.click();
-    }
-    // Ctrl/Cmd + S = Descargar PDF
-    if ((e.ctrlKey || e.metaKey) && e.key === "s" && currentCharacter) {
-      e.preventDefault();
-      generatePDF();
-    }
-  });
-});
-
-// Easter egg: Konami code
-let konamiCode = [];
-const KONAMI_SEQUENCE = [
-  "ArrowUp",
-  "ArrowUp",
-  "ArrowDown",
-  "ArrowDown",
-  "ArrowLeft",
-  "ArrowRight",
-  "ArrowLeft",
-  "ArrowRight",
-  "b",
-  "a"
-];
-
-document.addEventListener("keydown", (e) => {
-  konamiCode.push(e.key);
-  if (konamiCode.length > KONAMI_SEQUENCE.length) {
-    konamiCode.shift();
-  }
-
-  const match = KONAMI_SEQUENCE.every(
-    (key, idx) =>
-      (konamiCode[idx] || "").toLowerCase() === key.toLowerCase()
-  );
-
-  if (match) {
-    konamiCode = [];
-    const legendaryChar = generateCharacter();
-    legendaryChar.stats = {
-      strength: 18,
-      dexterity: 18,
-      constitution: 18,
-      intelligence: 18,
-      wisdom: 18,
-      charisma: 18
-    };
-    legendaryChar.powerLevel = calculatePowerLevel(legendaryChar);
-    legendaryChar.backstory = generateBackstory(legendaryChar);
-    legendaryChar.name =
-      "⭐ " + legendaryChar.name + " el Legendario";
-    displayCharacter(legendaryChar);
-    alert(
-      "🎉 ¡Código Konami activado! Personaje legendario generado con stats máximos!"
-    );
-  }
+  // Huevo de pascua
+  setupKonamiCode();
 });
