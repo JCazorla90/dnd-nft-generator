@@ -49,14 +49,20 @@
             </h2>
 
             <div class="controls-grid">
-                <button id="randomBtn" class="btn btn-primary btn-large">
-                    🎲 Generar Personaje Aleatorio
-                </button>
-                
-                <button id="toggleCustom" class="btn btn-secondary">
-                    ⚙️ Personalizar Personaje
-                </button>
-            </div>
+                    <button id="wizardBtn" class="btn btn-primary btn-large">
+                🧙 WIZARD
+                <span class="btn-subtitle">Creación Paso a Paso</span>
+            </button>
+
+            <button id="randomBtn" class="btn btn-secondary btn-large">
+                🎲 RANDOM
+                <span class="btn-subtitle">Personaje Equilibrado</span>
+            </button>
+
+            <button id="chaosBtn" class="btn btn-accent btn-large">
+                🌀 CHAOS
+                <span class="btn-subtitle">¡Combinación Loca!</span>
+            </button>    </div>
 
             <!-- Panel de personalización (oculto inicialmente) -->
             <div id="customPanel" class="custom-panel hidden">
@@ -352,6 +358,10 @@
                     </button>
                 </div>
             </div>
+
+                        <button id="chaosBeastBtn" class="btn btn-accent">
+                🌀 BESTIA CHAOS
+            </button>
 
             <!-- Generador de encuentros -->
             <div class="encounter-generator">
