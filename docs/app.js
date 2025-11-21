@@ -1114,6 +1114,12 @@ document.getElementById('randomBtn').addEventListener('click', () => {
 // Toggle panel personalizado
 document.getElementById('toggleCustom').addEventListener('click', () => {
   const panel = document.getElementById('customPanel');
+
+  // Botón generar CHAOS
+document.getElementById('chaosBtn').addEventListener('click', () => {
+  console.log('🌀 Botón CHAOS presionado...');
+  generateChaosCharacter();
+});
   panel.classList.toggle('hidden');
   
   // Poblar selectores si están vacíos
@@ -1242,6 +1248,12 @@ document.getElementById('generateCreatureBtn').addEventListener('click', () => {
   } else {
     alert('❌ No se encontraron criaturas con esos filtros. Intenta con otros parámetros.');
   }
+});
+
+// Botón generar criatura CHAOS
+document.getElementById('chaosBeastBtn').addEventListener('click', () => {
+  console.log('🌀 Botón Criatura CHAOS presionado...');
+  generateChaosBeast();
 });
 
 // Generar desde API
@@ -1521,6 +1533,80 @@ console.log('   ✅ Modo oscuro');
 console.log('   ✅ Responsive design');
 console.log('');
 console.log('🐉 ¡Que comience la aventura!');
+
+  // ===== 🌀 GENERACIÓN CHAOS (TOTALMENTE ALEATORIA) =====
+
+// Función para generar un personaje CHAOS (combinaciones locas)
+function generateChaosCharacter() {
+  console.log('🌀 Generando personaje CHAOS...');
+  
+  const allRaces = Object.keys(DND_DATA.races);
+  const allClasses = Object.keys(DND_DATA.classes);
+  const allBackgrounds = Object.keys(DND_DATA.backgrounds);
+  const allAlignments = Object.keys(DND_DATA.alignments);
+  
+  // Selección completamente aleatoria sin restricciones
+  const randomRace = allRaces[Math.floor(Math.random() * allRaces.length)];
+  const randomClass = allClasses[Math.floor(Math.random() * allClasses.length)];
+  const randomBackground = allBackgrounds[Math.floor(Math.random() * allBackgrounds.length)];
+  const randomAlignment = allAlignments[Math.floor(Math.random() * allAlignments.length)];
+  
+  // Generar stats completamente aleatorios (3-18)
+  const chaosStats = {
+    strength: rollDice(6) + rollDice(6) + rollDice(6),
+    dexterity: rollDice(6) + rollDice(6) + rollDice(6),
+    constitution: rollDice(6) + rollDice(6) + rollDice(6),
+    intelligence: rollDice(6) + rollDice(6) + rollDice(6),
+    wisdom: rollDice(6) + rollDice(6) + rollDice(6),
+    charisma: rollDice(6) + rollDice(6) + rollDice(6)
+  };
+  
+  const character = {
+    name: generateEpicName(),
+    race: randomRace,
+    class: randomClass,
+    background: randomBackground,
+    alignment: randomAlignment,
+    level: Math.floor(Math.random() * 20) + 1,
+    stats: chaosStats,
+    hp: rollDice(20) * 10,
+    description: `Un ${randomRace} ${randomClass} ${randomAlignment} con un trasfondo de ${randomBackground}. ¡Una combinación COMPLETAMENTE ALEATORIA!`
+  };
+  
+  currentCharacter = character;
+  displayCharacter(character);
+  console.log('✅ Personaje CHAOS generado:', character);
+}
+
+// Función para generar una criatura CHAOS
+function generateChaosBeast() {
+  console.log('🌀 Generando criatura CHAOS...');
+  
+  const allTypes = ['Aberración', 'Bestia', 'Dragón', 'Demonio', 'Gigante', 'Humanoide', 'No-muerto', 'Monstruosidad'];
+  const allEnvironments = ['Mazmorra', 'Bosque', 'Montaña', 'Pantano', 'Subterráneo'];
+  
+  const randomType = allTypes[Math.floor(Math.random() * allTypes.length)];
+  const randomEnvironment = allEnvironments[Math.floor(Math.random() * allEnvironments.length)];
+  const randomCR = Math.floor(Math.random() * 30) + 1;
+  
+  const creature = {
+    name: `${generateEpicName()} el Terrible`,
+    type: randomType,
+    cr: randomCR,
+    environment: randomEnvironment,
+    hp: rollDice(20) * randomCR,
+    ac: 10 + Math.floor(Math.random() * 10),
+    attacks: [
+      `Ataque Caótico ${rollDice(6)}d${rollDice(12)}`,
+      `Habilidad Especial ${rollDice(4)}d${rollDice(8)}`
+    ],
+    description: `Una criatura ${randomType} de CR ${randomCR} que habita en ${randomEnvironment}. ¡TOTALMENTE IMPREDECIBLE!`
+  };
+  
+  currentCreature = creature;
+  displayCreature(creature);
+  console.log('✅ Criatura CHAOS generada:', creature);
+}
 
 // Exportar funciones globales para debugging
 window.DEBUG = {
