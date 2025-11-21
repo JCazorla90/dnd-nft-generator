@@ -1,665 +1,895 @@
 // ==========================================
-// 🎲 D&D 5E - DATOS COMPLETOS CON PROGRESIÓN
-// Sistema de habilidades desbloqueables por nivel
+// 🎲 D&D CHARACTER FORGE - SISTEMA COMPLETO
+// Hecho con ❤️ para la comunidad de D&D
 // ==========================================
 
-const DND_DATA = {
-  version: "5e",
+'use strict';
+
+// ===== ESTADO GLOBAL =====
+let currentCharacter = null;
+let currentCreature = null;
+let currentEncounter = [];
+let currentEdition = '5e';
+const STORAGE_KEY = 'dnd_character_history';
+
+// ===== 🎲 UTILIDADES BÁSICAS =====
+function randomFromArray(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function rollDice(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function calculateModifier(stat) {
+  return Math.floor((stat - 10) / 2);
+}
+
+// ===== 📊 GENERADOR DE ESTADÍSTICAS =====
+function generateStats() {
+  const rollStat = () => {
+    // Tirar 4d6, quitar el más bajo
+    const rolls = [rollDice(6), rollDice(6), rollDice(6), rollDice(6)];
+    rolls.sort((a, b) => a - b);
+    return rolls.slice(1).reduce((a, b) => a + b, 0);
+  };
   
-  // ===== RAZAS =====
-  races: {
-    "Humano": {
-      speed: 30,
-      traits: [
-        "Versátil: +1 a todas las características",
-        "Idioma adicional de tu elección",
-        "Dote adicional en nivel 1"
-      ]
-    },
-    "Elfo": {
-      speed: 30,
-      traits: [
-        "Visión en la oscuridad (60 ft)",
-        "Ventaja contra encantamiento",
-        "Inmune a sueño mágico",
-        "Percepción competente"
-      ],
-      subraces: {
-        "Alto": {
-          traits: [
-            "+2 Destreza, +1 Inteligencia",
-            "Truco de mago a elección",
-            "Armas élficas competente"
-          ]
-        },
-        "Bosque": {
-          traits: [
-            "+2 Destreza, +1 Sabiduría",
-            "Velocidad 35 ft",
-            "Puedes esconderte en follaje ligero"
-          ]
-        }
-      }
-    },
-    "Enano": {
-      speed: 25,
-      traits: [
-        "Visión en la oscuridad (60 ft)",
-        "Ventaja contra veneno",
-        "Competente con herramientas de artesano",
-        "Conocimiento de piedra"
-      ],
-      subraces: {
-        "Montaña": {
-          traits: [
-            "+2 Constitución, +2 Fuerza",
-            "Competente con armaduras ligeras y medias"
-          ]
-        },
-        "Colina": {
-          traits: [
-            "+2 Constitución, +1 Sabiduría",
-            "+1 HP por nivel"
-          ]
-        }
-      }
-    },
-    "Mediano": {
-      speed: 25,
-      traits: [
-        "+2 Destreza",
-        "Afortunado: repite 1s en dados",
-        "Valiente: ventaja contra miedo",
-        "Agilidad mediana: atraviesar criaturas grandes"
-      ]
-    },
-    "Orco": {
-      speed: 30,
-      traits: [
-        "+2 Fuerza, +1 Constitución",
-        "Visión en la oscuridad (60 ft)",
-        "Agresivo: bonus action para moverse",
-        "Amenazador: competente en Intimidación"
-      ]
-    },
-    "Tiefling": {
-      speed: 30,
-      traits: [
-        "+2 Carisma, +1 Inteligencia",
-        "Visión en la oscuridad (60 ft)",
-        "Resistencia infernal: resistencia a fuego",
-        "Legado infernal: magia innata (Taumaturgia, Reprender infernal, Oscuridad)"
-      ]
-    },
-    "Dracónido": {
-      speed: 30,
-      traits: [
-        "+2 Fuerza, +1 Carisma",
-        "Ancestro dracónico: resistencia elemental",
-        "Arma de aliento (1 uso, recarga descanso corto)",
-        "Daño del aliento: 2d6 (mejora por nivel)"
-      ]
-    },
-    "Gnomo": {
-      speed: 25,
-      traits: [
-        "+2 Inteligencia",
-        "Visión en la oscuridad (60 ft)",
-        "Astucia gnómica: ventaja vs magia INT/SAB/CAR",
-        "Pequeño pero valiente"
-      ]
-    },
-    "Semielfo": {
-      speed: 30,
-      traits: [
-        "+2 Carisma, +1 a otras dos características",
-        "Visión en la oscuridad (60 ft)",
-        "Ventaja contra encantamiento",
-        "Dos habilidades adicionales competentes"
-      ]
-    },
-    "Semiorco": {
-      speed: 30,
-      traits: [
-        "+2 Fuerza, +1 Constitución",
-        "Visión en la oscuridad (60 ft)",
-        "Amenazador: competente en Intimidación",
-        "Resistencia implacable: quedar con 1 HP en vez de 0 (1/día)"
-      ]
-    }
-  },
+  return {
+    strength: rollStat(),
+    dexterity: rollStat(),
+    constitution: rollStat(),
+    intelligence: rollStat(),
+    wisdom: rollStat(),
+    charisma: rollStat()
+  };
+}
 
-  // ===== CLASES CON PROGRESIÓN =====
-  classes: {
-    "Guerrero": {
-      hitDie: 10,
-      proficiencies: {
-        armor: ["Todas las armaduras", "Escudos"],
-        weapons: ["Armas simples", "Armas marciales"],
-        savingThrows: ["Fuerza", "Constitución"],
-        tools: []
-      },
-      skills: {
-        choose: 2,
-        from: ["Acrobacias", "Trato con animales", "Atletismo", "Historia", "Perspicacia", "Intimidación", "Percepción", "Supervivencia"]
-      },
-      equipment: [
-        "Cota de mallas",
-        "Espada larga y escudo",
-        "Dos hachas de mano",
-        "Ballesta ligera y 20 virotes",
-        "Mochila de explorador"
-      ],
-      // 🆕 PROGRESIÓN POR NIVEL
-      progression: {
-        1: {
-          features: [
-            "Segundo aliento (recuperar 1d10 + nivel HP como acción bonus, 1/descanso corto)",
-            "Estilo de lucha (elige uno: Defensa +1 AC, Duelista +2 daño, Gran arma, Lucha con dos armas, Protección, Arquería +2 ataque)"
-          ]
-        },
-        2: {
-          features: [
-            "Oleada de acción (acción adicional, 1/descanso corto)",
-            "2 usos de Segundo aliento"
-          ]
-        },
-        3: {
-          features: [
-            "Arquetipo marcial (Campeón, Maestro de batalla, Caballero arcano)",
-            "Mejora crítica (19-20) si Campeón"
-          ]
-        },
-        4: {
-          features: ["Mejora de característica (+2 total o dote)"]
-        },
-        5: {
-          features: [
-            "Ataque extra (2 ataques por acción)",
-            "Competencia adicional"
-          ]
-        },
-        6: {
-          features: ["Mejora de característica"]
-        },
-        7: {
-          features: ["Característica de arquetipo"]
-        },
-        9: {
-          features: ["Indomable (repetir salvación fallida, 1/día)"]
-        },
-        10: {
-          features: ["Característica de arquetipo"]
-        },
-        11: {
-          features: ["Ataque extra (3 ataques)"]
-        },
-        15: {
-          features: ["Característica de arquetipo"]
-        },
-        17: {
-          features: ["Oleada de acción (2 usos)", "Indomable (2 usos)"]
-        },
-        18: {
-          features: ["Característica de arquetipo"]
-        },
-        20: {
-          features: ["Ataque extra (4 ataques)"]
-        }
-      }
+// ===== ✨ GENERADOR DE NOMBRES ÉPICOS =====
+function generateRandomName(race, charClass) {
+  const names = {
+    'Humano': {
+      'Guerrero': ['Aric Valorheart', 'Brendan Stormborn', 'Marcus Ironforge'],
+      'Mago': ['Cassandra Moonshadow', 'Eldrin Starweaver', 'Lysander Flameheart'],
+      'Pícaro': ['Diana Nightblade', 'Raven Shadowstep', 'Silas Quickfingers'],
+      'Clérigo': ['Helena Lightbringer', 'Thomas Dawnkeeper', 'Althea Holyshield'],
+      'default': ['Erik Dragonbane', 'Fiona Lightbringer', 'Gareth Stormwind']
     },
-
-    "Mago": {
-      hitDie: 6,
-      proficiencies: {
-        armor: [],
-        weapons: ["Dagas", "Dardos", "Hondas", "Bastones", "Ballestas ligeras"],
-        savingThrows: ["Inteligencia", "Sabiduría"],
-        tools: []
-      },
-      skills: {
-        choose: 2,
-        from: ["Arcana", "Historia", "Perspicacia", "Investigación", "Medicina", "Religión"]
-      },
-      equipment: [
-        "Bastón o daga",
-        "Bolsa de componentes",
-        "Libro de conjuros",
-        "Mochila de erudito"
-      ],
-      progression: {
-        1: {
-          features: [
-            "Lanzamiento de conjuros (Inteligencia)",
-            "Libro de conjuros (6 conjuros nivel 1)",
-            "Preparar INT mod + nivel conjuros",
-            "Recuperación arcana (recuperar espacios de conjuro 1/día)"
-          ],
-          spellSlots: { 1: 2 },
-          cantrips: 3
-        },
-        2: {
-          features: ["Tradición arcana (Abjuración, Conjuración, Adivinación, Encantamiento, Evocación, Ilusión, Nigromancia, Transmutación)"],
-          spellSlots: { 1: 3 }
-        },
-        3: {
-          features: ["Conjuros de nivel 2"],
-          spellSlots: { 1: 4, 2: 2 },
-          cantrips: 3
-        },
-        4: {
-          features: ["Mejora de característica"],
-          spellSlots: { 1: 4, 2: 3 },
-          cantrips: 4
-        },
-        5: {
-          features: ["Conjuros de nivel 3"],
-          spellSlots: { 1: 4, 2: 3, 3: 2 },
-          cantrips: 4
-        },
-        6: {
-          features: ["Característica de tradición arcana"],
-          spellSlots: { 1: 4, 2: 3, 3: 3 },
-          cantrips: 4
-        },
-        9: {
-          features: ["Conjuros de nivel 5"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 1 },
-          cantrips: 5
-        },
-        10: {
-          features: ["Característica de tradición arcana"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 2 },
-          cantrips: 5
-        },
-        11: {
-          features: ["Conjuros de nivel 6"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 2, 6: 1 },
-          cantrips: 5
-        },
-        13: {
-          features: ["Conjuros de nivel 7"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 2, 6: 1, 7: 1 },
-          cantrips: 5
-        },
-        17: {
-          features: ["Conjuros de nivel 9", "Maestría de conjuros (2 conjuros nivel 1-2 a voluntad)"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 1, 7: 1, 8: 1, 9: 1 },
-          cantrips: 5
-        },
-        18: {
-          features: ["Maestría de hechizos (1 conjuro nivel 3 a voluntad)"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 1, 7: 1, 8: 1, 9: 1 },
-          cantrips: 5
-        },
-        20: {
-          features: ["Mejora de firma (2 conjuros nivel 3 sin gastar espacios)"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 2, 7: 2, 8: 1, 9: 1 },
-          cantrips: 5
-        }
-      }
+    'Elfo': {
+      'Mago': ['Aelrindel Starweaver', 'Eldacar Moonwhisper', 'Galadriel Silvermoon'],
+      'Explorador': ['Legolas Greenleaf', 'Thranduil Oakenshield', 'Faelyn Windrunner'],
+      'default': ['Elaria Dawnstrider', 'Thalorien Sunseeker', 'Sylvanas Whisperwind']
     },
-
-    "Pícaro": {
-      hitDie: 8,
-      proficiencies: {
-        armor: ["Armadura ligera"],
-        weapons: ["Armas simples", "Ballestas de mano", "Espadas largas", "Estoques", "Espadas cortas"],
-        savingThrows: ["Destreza", "Inteligencia"],
-        tools: ["Herramientas de ladrón"]
-      },
-      skills: {
-        choose: 4,
-        from: ["Acrobacias", "Atletismo", "Engaño", "Perspicacia", "Intimidación", "Investigación", "Percepción", "Interpretación", "Persuasión", "Juego de manos", "Sigilo"]
-      },
-      equipment: [
-        "Estoques",
-        "Arco corto y carcaj con 20 flechas",
-        "Herramientas de ladrón",
-        "Armadura de cuero",
-        "Dos dagas",
-        "Mochila de asaltante"
-      ],
-      progression: {
-        1: {
-          features: [
-            "Pericia (doble bonificador en 2 habilidades)",
-            "Ataque furtivo (+1d6 daño extra con ventaja o aliado cerca)",
-            "Argot de ladrones"
-          ]
-        },
-        2: {
-          features: ["Acción astuta (Bonus action: Dash, Disengage, Hide)"]
-        },
-        3: {
-          features: [
-            "Arquetipo de pícaro (Ladrón, Asesino, Embaucador arcano, Inquisidor)",
-            "Ladrón: Manos rápidas, Pies ligeros",
-            "Asesino: Asesinar (+2d6 vs sorprendido)"
-          ]
-        },
-        5: {
-          features: ["Esquiva asombrosa (ataque con ventaja contra ti no tiene ventaja)", "Ataque furtivo +3d6"]
-        },
-        7: {
-          features: ["Evasión (salvación DES exitosa = 0 daño, fallida = mitad)"]
-        },
-        9: {
-          features: ["Característica de arquetipo", "Ataque furtivo +5d6"]
-        },
-        11: {
-          features: ["Talento confiable (habilidades competentes mínimo 10)", "Ataque furtivo +6d6"]
-        },
-        13: {
-          features: ["Característica de arquetipo", "Ataque furtivo +7d6"]
-        },
-        15: {
-          features: ["Mente resbaladiza (ventaja vs encantamiento)", "Ataque furtivo +8d6"]
-        },
-        17: {
-          features: ["Característica de arquetipo", "Ataque furtivo +9d6"]
-        },
-        18: {
-          features: ["Escurridizo (atacantes sin ventaja vs ti)"]
-        },
-        20: {
-          features: ["Golpe de suerte (convertir fallo en éxito, 1/descanso corto)", "Ataque furtivo +10d6"]
-        }
-      }
+    'Enano': {
+      'Guerrero': ['Balin Ironhelm', 'Dwalin Stonebreaker', 'Thorin Oakenshield'],
+      'Clérigo': ['Gimli Axebearer', 'Bruenor Battlehammer', 'Tordek Ironfoot'],
+      'default': ['Dolgrin Forgehammer', 'Harbek Stonemender', 'Rurik Goldbeard']
     },
+    'Orco': ['Grunk Skullcrusher', 'Thrak Bloodfist', 'Urgak Bonegrinder', 'Mog the Terrible'],
+    'Mediano': ['Bilbo Baggins', 'Frodo Underhill', 'Samwise Gamgee', 'Pippin Took', 'Merry Brandybuck'],
+    'Tiefling': ['Akta Hellborn', 'Damakos Nightfire', 'Iados Darkflame', 'Kairon Shadowhorn'],
+    'Dracónido': ['Arjhan Firebreath', 'Balasar Dragonheart', 'Donaar Scalebane', 'Heskan Wyrmclaw'],
+    'Gnomo': ['Eldon Tinkertop', 'Brocc Nackle', 'Sindri Fastspring', 'Zook Beren'],
+    'Semielfo': ['Tanis Half-Elven', 'Solamnia Brightblade', 'Laurana Kanan'],
+    'Semiorco': ['Grog Strongjaw', 'Durotan', 'Orgrim Doomhammer']
+  };
+  
+  // Intentar obtener nombre específico por raza y clase
+  if (names[race] && typeof names[race] === 'object' && !Array.isArray(names[race])) {
+    const classNames = names[race][charClass] || names[race]['default'];
+    return randomFromArray(classNames);
+  }
+  
+  // Nombre por raza genérico
+  if (names[race] && Array.isArray(names[race])) {
+    return randomFromArray(names[race]);
+  }
+  
+  // Fallback a humano
+  return randomFromArray(names['Humano']['default']);
+}
 
-    "Clérigo": {
-      hitDie: 8,
-      proficiencies: {
-        armor: ["Armadura ligera", "Armadura media", "Escudos"],
-        weapons: ["Armas simples"],
-        savingThrows: ["Sabiduría", "Carisma"],
-        tools: []
-      },
-      skills: {
-        choose: 2,
-        from: ["Historia", "Perspicacia", "Medicina", "Persuasión", "Religión"]
-      },
-      equipment: [
-        "Maza",
-        "Cota de escamas o armadura de cuero",
-        "Ballesta ligera y 20 virotes",
-        "Símbolo sagrado",
-        "Mochila de sacerdote"
-      ],
-      progression: {
-        1: {
-          features: [
-            "Lanzamiento de conjuros divinos (Sabiduría)",
-            "Dominio divino (Vida, Luz, Conocimiento, Naturaleza, Tempestad, Engaño, Guerra)",
-            "Canalizar divinidad (1/descanso corto)"
-          ],
-          spellSlots: { 1: 2 },
-          cantrips: 3
-        },
-        2: {
-          features: [
-            "Canalizar divinidad: Expulsar muertos (30 ft, SAB CD)",
-            "Característica de dominio"
-          ],
-          spellSlots: { 1: 3 },
-          cantrips: 3
-        },
-        5: {
-          features: ["Destruir muertos (CR 1/2 o menos)"],
-          spellSlots: { 1: 4, 2: 3, 3: 2 },
-          cantrips: 3
-        },
-        8: {
-          features: ["Destruir muertos (CR 1)", "Golpe divino (+1d8 radiante en arma)"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 2 },
-          cantrips: 4
-        },
-        10: {
-          features: ["Intervención divina (SAB% de éxito, ayuda directa de deidad)"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 2 },
-          cantrips: 5
-        },
-        17: {
-          features: ["Destruir muertos (CR 4)", "Característica de dominio"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 1, 7: 1, 8: 1, 9: 1 },
-          cantrips: 5
-        },
-        20: {
-          features: ["Intervención divina garantizada"],
-          spellSlots: { 1: 4, 2: 3, 3: 3, 4: 3, 5: 3, 6: 2, 7: 2, 8: 1, 9: 1 },
-          cantrips: 5
-        }
-      }
-    },
+// ===== 🎨 GENERADOR DE PERSONAJES =====
+function generateCharacter(customData = {}) {
+  console.log('🎲 Generando personaje épico...');
+  
+  const race = customData.race || randomFromArray(Object.keys(DND_DATA.races));
+  const charClass = customData.class || randomFromArray(Object.keys(DND_DATA.classes));
+  const background = customData.background || randomFromArray(Object.keys(DND_DATA.backgrounds));
+  const alignment = customData.alignment || randomFromArray(DND_DATA.alignments);
+  
+  const stats = generateStats();
+  const classData = DND_DATA.classes[charClass];
+  
+  // Manejar subrazas
+  let raceData = DND_DATA.races[race];
+  if (raceData.subraces) {
+    const subraceKey = randomFromArray(Object.keys(raceData.subraces));
+    raceData = { ...raceData, ...raceData.subraces[subraceKey] };
+  }
+  
+  const backgroundData = DND_DATA.backgrounds[background];
+  
+  // Calcular HP y AC
+  const hp = classData.hitDie + calculateModifier(stats.constitution);
+  const ac = 10 + calculateModifier(stats.dexterity);
+  
+  const character = {
+    name: customData.name || generateRandomName(race, charClass),
+    race,
+    class: charClass,
+    background,
+    alignment,
+    level: 1,
+    edition: currentEdition,
+    stats,
+    hp,
+    ac,
+    speed: raceData.speed,
+    racialTraits: raceData.traits,
+    classProficiencies: formatProficiencies(classData.proficiencies),
+    classFeatures: classData.features,
+    savingThrows: classData.proficiencies.savingThrows,
+    skills: classData.skills.from ? 
+      `Elige ${classData.skills.choose}: ${classData.skills.from.join(', ')}` : 
+      'Ver clase',
+    equipment: classData.equipment,
+    backgroundData: backgroundData
+  };
+  
+  console.log('✅ Personaje generado:', character.name);
+  return character;
+}
 
-    // 🆕 RESTO DE CLASES CON PROGRESIÓN (resumen)
-    "Paladín": {
-      hitDie: 10,
-      proficiencies: {
-        armor: ["Todas las armaduras", "Escudos"],
-        weapons: ["Armas simples", "Armas marciales"],
-        savingThrows: ["Sabiduría", "Carisma"],
-        tools: []
-      },
-      skills: { choose: 2, from: ["Atletismo", "Perspicacia", "Intimidación", "Medicina", "Persuasión", "Religión"] },
-      equipment: ["Armadura completa", "Espada larga", "Escudo", "5 jabalinas", "Símbolo sagrado"],
-      features: ["Sentido divino", "Imposición de manos", "Juramento sagrado (nivel 3)", "Golpe divino", "Aura protectora"],
-      progression: {
-        1: { features: ["Sentido divino (detectar celestial/demonio/no-muerto 60 ft)", "Imposición de manos (curar nivel×5 HP/día)"] },
-        2: { features: ["Estilo de lucha", "Lanzamiento de conjuros (Carisma)"], spellSlots: { 1: 2 } },
-        3: { features: ["Juramento sagrado (Devoción, Antiguos, Venganza)", "Salud divina (inmune a enfermedad)"] },
-        5: { features: ["Ataque extra"] },
-        6: { features: ["Aura de protección (+CAR mod a salvaciones aliados 10 ft)"] },
-        11: { features: ["Golpe divino mejorado (2d8 extra)"] },
-        20: { features: ["Transformación sagrada (avatar divino)"] }
-      }
-    },
+function formatProficiencies(prof) {
+  const parts = [];
+  if (prof.armor && prof.armor.length) parts.push(`Armaduras: ${prof.armor.join(', ')}`);
+  if (prof.weapons && prof.weapons.length) parts.push(`Armas: ${prof.weapons.join(', ')}`);
+  if (prof.tools && prof.tools.length) parts.push(`Herramientas: ${prof.tools.join(', ')}`);
+  return parts;
+}
 
-    "Bárbaro": {
-      hitDie: 12,
-      proficiencies: {
-        armor: ["Armadura ligera", "Armadura media", "Escudos"],
-        weapons: ["Armas simples", "Armas marciales"],
-        savingThrows: ["Fuerza", "Constitución"],
-        tools: []
-      },
-      skills: { choose: 2, from: ["Trato con animales", "Atletismo", "Intimidación", "Naturaleza", "Percepción", "Supervivencia"] },
-      equipment: ["Hacha grande", "Dos hachas de mano", "4 jabalinas", "Mochila de explorador"],
-      features: ["Furia", "Defensa sin armadura", "Ataque temerario", "Sentido del peligro"],
-      progression: {
-        1: { features: ["Furia (2/día, +2 daño, ventaja FUE, resistencia físico)", "Defensa sin armadura (AC = 10 + DES + CON)"] },
-        2: { features: ["Ataque temerario (ventaja en ataque, enemigos ventaja vs ti)", "Sentido del peligro (ventaja vs trampas)"] },
-        3: { features: ["Senda primaria (Berserker, Tótem, Ancestral)"] },
-        5: { features: ["Ataque extra", "Movimiento rápido (+10 ft sin armadura pesada)"] },
-        9: { features: ["Crítico brutal (+1 dado de arma en crítico)"] },
-        11: { features: ["Furia implacable (si furia cae a 0 HP, quedar con 1 HP una vez)"] },
-        20: { features: ["Campeón primitivo (FUE y CON +4, máximo 24)"] }
-      }
-    },
+// ===== 🎨 AVATAR ÉPICO SVG (MEJORADO) =====
+function drawAvatar(name, race, charClass) {
+  console.log('🎨 Dibujando avatar épico...');
+  const avatarSvg = document.getElementById('charAvatar');
+  if (!avatarSvg) return;
 
-    "Druida": {
-      hitDie: 8,
-      proficiencies: {
-        armor: ["Armadura ligera (no metal)", "Armadura media (no metal)", "Escudos (no metal)"],
-        weapons: ["Garrotes", "Dagas", "Dardos", "Jabalinas", "Mazas", "Bastones", "Cimitarras", "Hoces", "Hondas", "Lanzas"],
-        savingThrows: ["Inteligencia", "Sabiduría"],
-        tools: ["Kit de herbolario"]
-      },
-      skills: { choose: 2, from: ["Arcana", "Trato con animales", "Perspicacia", "Medicina", "Naturaleza", "Percepción", "Religión", "Supervivencia"] },
-      equipment: ["Escudo de madera", "Cimitarra", "Armadura de cuero", "Mochila de explorador", "Foco druídico"],
-      features: ["Druídico (lenguaje secreto)", "Lanzamiento de conjuros"],
-      progression: {
-        1: { features: ["Druídico", "Lanzamiento de conjuros (Sabiduría)"], spellSlots: { 1: 2 }, cantrips: 2 },
-        2: { features: ["Forma salvaje (2/descanso corto, CR 1/4)", "Círculo druídico (Luna, Tierra, Sueños)"] },
-        4: { features: ["Forma salvaje (CR 1/2, nadar)"] },
-        8: { features: ["Forma salvaje (CR 1, volar)"] },
-        18: { features: ["Cuerpo atemporal (1 año = 10 años)", "Conjuros bestia"] },
-        20: { features: ["Archidruida (Forma salvaje ilimitada)"] }
-      }
-    },
+  // Paletas de color épicas por clase
+  const classColors = {
+    'Guerrero': { primary: '#8b0000', secondary: '#c0c0c0', accent: '#d4af37' },
+    'Mago': { primary: '#4169e1', secondary: '#9370db', accent: '#ffd700' },
+    'Pícaro': { primary: '#1a1a1a', secondary: '#696969', accent: '#ff4500' },
+    'Clérigo': { primary: '#daa520', secondary: '#f5f5dc', accent: '#ffffff' },
+    'Paladín': { primary: '#ffd700', secondary: '#ffffff', accent: '#4169e1' },
+    'Bárbaro': { primary: '#654321', secondary: '#dc143c', accent: '#d4a574' },
+    'Druida': { primary: '#228b22', secondary: '#7cb342', accent: '#8b4513' },
+    'Bardo': { primary: '#8b3a8b', secondary: '#ff69b4', accent: '#ffd700' },
+    'Monje': { primary: '#8b6914', secondary: '#ff8c00', accent: '#654321' },
+    'Explorador': { primary: '#5d4037', secondary: '#8d6e63', accent: '#7cb342' },
+    'Brujo': { primary: '#1a0033', secondary: '#9370db', accent: '#8b008b' },
+    'Hechicero': { primary: '#4b0082', secondary: '#9370db', accent: '#ba55d3' }
+  };
 
-    "Bardo": {
-      hitDie: 8,
-      proficiencies: {
-        armor: ["Armadura ligera"],
-        weapons: ["Armas simples", "Ballestas de mano", "Espadas largas", "Estoques", "Espadas cortas"],
-        savingThrows: ["Destreza", "Carisma"],
-        tools: ["Tres instrumentos musicales"]
-      },
-      skills: { choose: 3, from: ["Todas"] },
-      equipment: ["Estoques", "Mochila de diplomático", "Laúd", "Armadura de cuero", "Daga"],
-      features: ["Lanzamiento de conjuros", "Inspiración bárdica"],
-      progression: {
-        1: { features: ["Lanzamiento de conjuros (Carisma)", "Inspiración bárdica (d6, CAR mod veces/día)"], spellSlots: { 1: 2 }, cantrips: 2 },
-        2: { features: ["Canción de descanso (aliados recuperan +d6 HP en descanso corto)", "Aprendiz de todo (+1/2 bonus competencia sin competencia)"] },
-        3: { features: ["Colegio de bardos (Tradición, Valor, Glamour)", "Pericia (2 habilidades doble bonus)"] },
-        5: { features: ["Inspiración bárdica (d8)", "Fuente de inspiración (descanso corto)"] },
-        6: { features: ["Contrahechizo (reacción, gastar inspiración para interrumpir conjuro)"] },
-        10: { features: ["Inspiración bárdica (d10)", "Secretos mágicos (2 conjuros de cualquier clase)"] },
-        20: { features: ["Inspiración superior (d12, regenera si tiene 0)"] }
-      }
-    },
+  const colors = classColors[charClass] || classColors['Guerrero'];
 
-    "Monje": {
-      hitDie: 8,
-      proficiencies: {
-        armor: [],
-        weapons: ["Armas simples", "Espadas cortas"],
-        savingThrows: ["Fuerza", "Destreza"],
-        tools: ["Herramienta de artesano o instrumento musical"]
-      },
-      skills: { choose: 2, from: ["Acrobacias", "Atletismo", "Historia", "Perspicacia", "Religión", "Sigilo"] },
-      equipment: ["Espada corta", "10 dardos", "Mochila de explorador"],
-      features: ["Defensa sin armadura", "Artes marciales", "Ki"],
-      progression: {
-        1: { features: ["Defensa sin armadura (AC = 10 + DES + SAB)", "Artes marciales (d4 desarmado)"] },
-        2: { features: ["Ki (2 puntos, recupera en descanso corto)", "Ráfaga de golpes", "Defensa paciente", "Paso del viento", "Movimiento sin armadura (+10 ft)"] },
-        3: { features: ["Tradición monástica (Mano abierta, Sombra, Elementos, Kensei)"] },
-        5: { features: ["Ataque extra", "Golpe aturdidor (gastar 1 Ki, CON CD o aturdido)"] },
-        6: { features: ["Golpes potenciados con Ki (superan resistencia)"] },
-        7: { features: ["Evasión", "Quietud mental (bonus action fin encanto/miedo)"] },
-        9: { features: ["Mejora de movimiento sin armadura (+15 ft total)"] },
-        10: { features: ["Pureza de cuerpo (inmune a enfermedad y veneno)"] },
-        14: { features: ["Alma de diamante (competente en todas las salvaciones)"] },
-        18: { features: ["Cuerpo vacío (invisible, resistencia vs todos excepto fuerza)"] },
-        20: { features: ["Autoperfección (inicio turno sin Ki = 4 Ki)"] }
-      }
-    },
+  // SVG épico con detalles por clase
+  const svg = `
+    <defs>
+      <radialGradient id="bgGrad">
+        <stop offset="0%" stop-color="${colors.primary}" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="${colors.primary}" stop-opacity="0.8"/>
+      </radialGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+      <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#f5f5f5"/>
+        <stop offset="50%" stop-color="${colors.secondary}"/>
+        <stop offset="100%" stop-color="${colors.primary}"/>
+      </linearGradient>
+    </defs>
 
-    "Explorador": {
-      hitDie: 10,
-      proficiencies: {
-        armor: ["Armadura ligera", "Armadura media", "Escudos"],
-        weapons: ["Armas simples", "Armas marciales"],
-        savingThrows: ["Fuerza", "Destreza"],
-        tools: []
-      },
-      skills: { choose: 3, from: ["Trato con animales", "Atletismo", "Perspicacia", "Investigación", "Naturaleza", "Percepción", "Sigilo", "Supervivencia"] },
-      equipment: ["Cota de escamas", "Dos espadas cortas", "Arco largo y 20 flechas", "Mochila de explorador"],
-      features: ["Enemigo predilecto", "Explorador nato"],
-      progression: {
-        1: { features: ["Enemigo predilecto (+2 daño, ventaja seguir)", "Explorador nato (terreno favorito, ventaja supervivencia)"] },
-        2: { features: ["Estilo de lucha", "Lanzamiento de conjuros (Sabiduría)"], spellSlots: { 1: 2 } },
-        3: { features: ["Arquetipo (Cazador, Maestro bestias, Acechador sombrío)"] },
-        5: { features: ["Ataque extra"] },
-        8: { features: ["Paso firme (terreno difícil no cuesta extra)", "Caminar sobre tierra"] },
-        10: { features: ["Ocultarse a plena vista (bonus action esconderse si no te mueves)"] },
-        14: { features: ["Desvanecerse (bonus action invisible hasta atacar)"] },
-        20: { features: ["Asesino de enemigos (1 ataque automático crítico vs enemigo predilecto/día)"] }
-      }
-    },
+    <!-- Fondo circular épico -->
+    <circle cx="60" cy="60" r="58" fill="url(#bgGrad)" filter="url(#glow)"/>
+    <circle cx="60" cy="60" r="55" fill="none" stroke="${colors.accent}" stroke-width="2" opacity="0.5"/>
 
-    "Hechicero": {
-      hitDie: 6,
-      proficiencies: {
-        armor: [],
-        weapons: ["Dagas", "Dardos", "Hondas", "Bastones", "Ballestas ligeras"],
-        savingThrows: ["Constitución", "Carisma"],
-        tools: []
-      },
-      skills: { choose: 2, from: ["Arcana", "Engaño", "Perspicacia", "Intimidación", "Persuasión", "Religión"] },
-      equipment: ["Ballesta ligera y 20 virotes", "Bolsa de componentes", "Daga", "Mochila de explorador"],
-      features: ["Lanzamiento de conjuros", "Origen hechicero"],
-      progression: {
-        1: { features: ["Lanzamiento de conjuros (Carisma)", "Origen hechicero (Dracónico, Magia salvaje, Divino, Sombra)"], spellSlots: { 1: 2 }, cantrips: 4 },
-        2: { features: ["Fuente de magia (Puntos hechicería = nivel)", "Metamagia (2 opciones: Gemelo, Potenciado, Acelerado, Sutil, etc)"] },
-        3: { features: ["Metamagia mejora"], spellSlots: { 1: 4, 2: 2 } },
-        6: { features: ["Característica de origen"] },
-        17: { features: ["Metamagia (3 opciones)"] },
-        20: { features: ["Restauración hechicera (recuperar 4 puntos si 0 en turno)"] }
-      }
-    },
+    <!-- Cabeza/Rostro base -->
+    <ellipse cx="60" cy="55" rx="20" ry="24" fill="#d4a574" stroke="${colors.primary}" stroke-width="2"/>
 
-    "Brujo": {
-      hitDie: 8,
-      proficiencies: {
-        armor: ["Armadura ligera"],
-        weapons: ["Armas simples"],
-        savingThrows: ["Sabiduría", "Carisma"],
-        tools: []
-      },
-      skills: { choose: 2, from: ["Arcana", "Engaño", "Historia", "Intimidación", "Investigación", "Naturaleza", "Religión"] },
-      equipment: ["Ballesta ligera y 20 virotes", "Bolsa de componentes", "Armadura de cuero", "Daga", "Mochila de erudito"],
-      features: ["Pacto de otro mundo", "Lanzamiento de conjuros"],
-      progression: {
-        1: { features: ["Pacto de otro mundo (Archifey, Demonio, Gran Antiguo, Celestial, Hexblade)", "Lanzamiento de conjuros (Carisma, espacios recuperan descanso corto)"], spellSlots: { 1: 1 }, cantrips: 2 },
-        2: { features: ["Invocaciones arcanas (2 opciones)"], spellSlots: { 1: 2 } },
-        3: { features: ["Dádiva del pacto (Tomo, Hoja, Cadena)"], spellSlots: { 2: 2 } },
-        11: { features: ["Arcanum místico (1 conjuro nivel 6 gratis/día)"] },
-        17: { features: ["Arcanum místico mejorado (nivel 7-9)"] },
-        20: { features: ["Maestro arcano (recuperar 1 espacio con acción)"] }
+    <!-- Clase: Guerrero - Casco -->
+    ${charClass === 'Guerrero' ? `
+      <ellipse cx="60" cy="45" rx="22" ry="20" fill="url(#metalGrad)" stroke="#2a2a2a" stroke-width="2"/>
+      <rect x="52" y="50" width="16" height="6" rx="2" fill="#3a3a3a"/>
+      <path d="M 45,45 L 40,38" stroke="#c0c0c0" stroke-width="2"/>
+      <path d="M 75,45 L 80,38" stroke="#c0c0c0" stroke-width="2"/>
+    ` : ''}
+
+    <!-- Clase: Mago - Sombrero -->
+    ${charClass === 'Mago' ? `
+      <path d="M 60,25 L 50,50 L 70,50 Z" fill="${colors.primary}" stroke="${colors.secondary}" stroke-width="2"/>
+      <ellipse cx="60" cy="50" rx="12" ry="4" fill="${colors.primary}"/>
+      <circle cx="60" cy="35" r="3" fill="${colors.accent}">
+        <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/>
+      </circle>
+    ` : ''}
+
+    <!-- Clase: Pícaro - Capucha -->
+    ${charClass === 'Pícaro' ? `
+      <path d="M 60,30 L 42,55 L 78,55 Z" fill="${colors.primary}" stroke="${colors.secondary}" stroke-width="2"/>
+      <ellipse cx="55" cy="52" rx="3" ry="4" fill="${colors.accent}"/>
+      <ellipse cx="65" cy="52" rx="3" ry="4" fill="${colors.accent}"/>
+    ` : ''}
+
+    <!-- Clase: Clérigo - Corona santa -->
+    ${charClass === 'Clérigo' ? `
+      <path d="M 52,35 L 60,25 L 68,35" fill="${colors.primary}" stroke="${colors.accent}" stroke-width="2"/>
+      <circle cx="60" cy="30" r="4" fill="${colors.accent}" opacity="0.8"/>
+    ` : ''}
+
+    <!-- Clase: Paladín - Halo -->
+    ${charClass === 'Paladín' ? `
+      <circle cx="60" cy="40" r="30" fill="none" stroke="${colors.accent}" stroke-width="2" opacity="0.5">
+        <animate attributeName="r" values="28;32;28" dur="3s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="60" cy="38" r="6" fill="${colors.accent}" opacity="0.6"/>
+    ` : ''}
+
+    <!-- Clase: Bárbaro - Pelo salvaje -->
+    ${charClass === 'Bárbaro' ? `
+      <path d="M 42,45 Q 38,35 40,30" stroke="${colors.primary}" stroke-width="3" fill="none"/>
+      <path d="M 78,45 Q 82,35 80,30" stroke="${colors.primary}" stroke-width="3" fill="none"/>
+      <path d="M 50,60 Q 48,68 50,75" stroke="${colors.primary}" stroke-width="2" fill="none"/>
+      <path d="M 70,60 Q 72,68 70,75" stroke="${colors.primary}" stroke-width="2" fill="none"/>
+    ` : ''}
+
+    <!-- Clase: Druida - Hojas -->
+    ${charClass === 'Druida' ? `
+      <circle cx="60" cy="50" rx="22" ry="20" fill="${colors.primary}" opacity="0.5"/>
+      <path d="M 45,45 Q 42,38 45,32" fill="${colors.secondary}" stroke="${colors.accent}" stroke-width="1"/>
+      <path d="M 55,42 Q 52,35 55,30" fill="${colors.secondary}" stroke="${colors.accent}" stroke-width="1"/>
+      <path d="M 65,42 Q 68,35 65,30" fill="${colors.secondary}" stroke="${colors.accent}" stroke-width="1"/>
+      <path d="M 75,45 Q 78,38 75,32" fill="${colors.secondary}" stroke="${colors.accent}" stroke-width="1"/>
+    ` : ''}
+
+    <!-- Torso/Cuerpo -->
+    <path d="M 38,70 L 60,65 L 82,70 L 82,100 L 38,100 Z" fill="url(#metalGrad)" stroke="${colors.primary}" stroke-width="2" opacity="0.9"/>
+
+    <!-- Símbolo de clase en el pecho -->
+    <circle cx="60" cy="82" r="8" fill="${colors.accent}" opacity="0.7"/>
+    <text x="60" y="87" text-anchor="middle" font-size="12" fill="${colors.primary}" font-weight="bold">
+      ${charClass.charAt(0)}
+    </text>
+
+    <!-- Marco ornamental -->
+    <circle cx="60" cy="60" r="58" fill="none" stroke="${colors.accent}" stroke-width="2" opacity="0.7"/>
+    <circle cx="60" cy="60" r="56" fill="none" stroke="${colors.primary}" stroke-width="1" stroke-dasharray="5,5" opacity="0.5"/>
+
+    <!-- Etiqueta inferior -->
+    <rect x="25" y="100" width="70" height="14" rx="4" fill="${colors.primary}" opacity="0.8"/>
+    <text x="60" y="110" text-anchor="middle" font-size="9" font-weight="bold" fill="${colors.accent}" font-family="serif">
+      ${charClass.toUpperCase()}
+    </text>
+  `;
+
+  avatarSvg.innerHTML = svg;
+  avatarSvg.setAttribute('viewBox', '0 0 120 120');
+  console.log('✅ Avatar dibujado con amor');
+}
+
+// ===== 🖼️ SISTEMA DE RETRATOS IA MEJORADO (CON AMOR) =====
+async function fetchAIPortrait(race, charClass) {
+  console.log(`🎨 Buscando retrato épico para ${race} ${charClass}...`);
+  const portraitImg = document.getElementById('aiPortrait');
+  if (!portraitImg) return;
+
+  // Placeholder mientras carga
+  portraitImg.src = "https://placehold.co/320x420/3e2723/ffd700?text=⚔️+Generando...";
+  portraitImg.alt = "Generando retrato épico...";
+
+  // Prompts ULTRA específicos estilo Baldur's Gate 3 / Pathfinder
+  const epicPrompts = {
+    // GUERREROS
+    'Guerrero-Humano': 'human knight in ornate plate armor wielding longsword fantasy portrait oil painting by Larry Elmore dramatic lighting heroic pose dnd 5e character art',
+    'Guerrero-Enano': 'dwarf warrior massive braided beard battleaxe heavy armor fantasy portrait realistic painting by Keith Parkinson forgotten realms art style',
+    'Guerrero-Elfo': 'elven warrior elegant mithril armor graceful longsword silver hair fantasy portrait by Todd Lockwood high fantasy',
+    'Guerrero-Orco': 'orc warrior brutal armor war paint fierce expression battleaxe fantasy portrait by Wayne Reynolds',
+    
+    // MAGOS
+    'Mago-Humano': 'human wizard blue robes arcane staff glowing spell casting fantasy portrait dramatic lighting by Clyde Caldwell magic aura',
+    'Mago-Elfo': 'elven archmage ancient spellbook mystical runes ethereal beauty fantasy portrait by Jeff Easley high elf wizard',
+    'Mago-Gnomo': 'gnome wizard spectacles pointy hat magical laboratory fantasy portrait whimsical art style',
+    
+    // PÍCAROS
+    'Pícaro-Mediano': 'halfling rogue leather armor twin daggers sneaking shadows dark fantasy portrait by Wayne Reynolds thief',
+    'Pícaro-Elfo': 'elven rogue dark hood bow arrows mysterious fantasy portrait stealth by Larry Elmore',
+    'Pícaro-Humano': 'human assassin hooded cloak daggers mysterious shadows noir fantasy portrait',
+    
+    // CLÉRIGOS
+    'Clérigo-Humano': 'human cleric holy vestments divine light blessing gesture religious fantasy portrait by Keith Parkinson priest',
+    'Clérigo-Enano': 'dwarf cleric war hammer holy symbol divine radiance fantasy portrait battle priest',
+    
+    // PALADINES
+    'Paladín-Humano': 'human paladin shining golden plate armor holy avenger sword divine aura heroic fantasy portrait by Larry Elmore righteous knight',
+    'Paladín-Dracónido': 'dragonborn paladin scaled golden armor holy power breath weapon fantasy portrait epic',
+    
+    // BÁRBAROS
+    'Bárbaro-Humano': 'human barbarian muscular wielding greataxe rage tribal tattoos savage fantasy portrait by Wayne Reynolds',
+    'Bárbaro-Orco': 'orc barbarian tusks massive muscles brutal fury fantasy portrait dark gritty',
+    'Bárbaro-Semiorco': 'half-orc barbarian powerful build rage tribal warrior fantasy portrait',
+    
+    // DRUIDAS
+    'Druida-Humano': 'human druid nature magic green aura animal companions staff mystical fantasy portrait organic',
+    'Druida-Elfo': 'elven druid forest communion wild shape deer companion fantasy portrait by Todd Lockwood',
+    
+    // BARDOS
+    'Bardo-Humano': 'human bard elegant clothes lute magical performance charismatic fantasy portrait colorful by Larry Elmore',
+    'Bardo-Semielfo': 'half-elf bard charismatic performer musical magic fantasy portrait',
+    
+    // MONJES
+    'Monje-Humano': 'human monk martial arts robes meditation ki energy spiritual fantasy portrait eastern style',
+    
+    // EXPLORADORES
+    'Explorador-Humano': 'human ranger wilderness gear longbow wolf companion tracking fantasy portrait by Keith Parkinson',
+    'Explorador-Elfo': 'elven ranger forest hunter bow hawk companion nature fantasy portrait',
+    
+    // HECHICEROS
+    'Hechicero-Humano': 'human sorcerer wild magic draconic bloodline chaos energy fantasy portrait dramatic by Clyde Caldwell',
+    'Hechicero-Tiefling': 'tiefling sorcerer red skin horns tail infernal magic fire fantasy portrait demonic',
+    
+    // BRUJOS
+    'Brujo-Humano': 'human warlock eldritch power dark pact mysterious entity gothic fantasy portrait by Wayne Reynolds',
+    'Brujo-Tiefling': 'tiefling warlock horns dark magic sinister patron infernal fantasy portrait'
+  };
+
+  const key = `${charClass}-${race}`;
+  let prompt = epicPrompts[key];
+  
+  // Fallback genérico pero épico
+  if (!prompt) {
+    prompt = `${race} ${charClass} fantasy character portrait professional dnd art style by Larry Elmore Keith Parkinson dramatic lighting heroic detailed face armor weapons`;
+  }
+
+  console.log(`🔍 Prompt: ${prompt}`);
+
+  // INTENTO 1: Lexica.art (Stable Diffusion - MEJOR CALIDAD)
+  try {
+    const res = await fetch(`https://lexica.art/api/v1/search?q=${encodeURIComponent(prompt)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.images && data.images.length > 0) {
+        // Elegir imagen aleatoria de las primeras 15
+        const idx = Math.floor(Math.random() * Math.min(data.images.length, 15));
+        portraitImg.src = data.images[idx].src;
+        portraitImg.alt = `${race} ${charClass} - Arte épico D&D`;
+        console.log('✅ Retrato épico cargado desde Lexica');
+        return;
       }
     }
-  },
+  } catch(e) {
+    console.warn('⚠️ Lexica no disponible:', e.message);
+  }
 
-  // ===== TRASFONDOS =====
-  backgrounds: {
-    "Acólito": {
-      skills: ["Perspicacia", "Religión"],
-      feature: "Refugio de los fieles: Apoyo de templos de tu fe",
-      equipment: ["Símbolo sagrado", "Libro de plegarias", "5 varitas de incienso", "Ropa de ceremonia", "15 po"]
+  // INTENTO 2: DiceBear Avataaars (Estilo cartoon pero temático)
+  try {
+    const styles = ['avataaars', 'adventurer', 'big-smile'];
+    const style = randomFromArray(styles);
+    const seed = encodeURIComponent(`${race}-${charClass}-${name}-${Date.now()}`);
+    const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}&backgroundColor=3e2723,5d4037,8b7355&radius=12&size=96`;
+    
+    portraitImg.src = url;
+    portraitImg.alt = `${race} ${charClass} - Avatar artístico`;
+    console.log('✅ Avatar artístico generado');
+  } catch(e) {
+    console.warn('⚠️ DiceBear falló:', e.message);
+    
+    // FALLBACK FINAL: Placeholder temático
+    const emojis = {
+      'Guerrero': '⚔️',
+      'Mago': '🧙',
+      'Pícaro': '🗡️',
+      'Clérigo': '✝️',
+      'Paladín': '🛡️',
+      'Bárbaro': '⚡',
+      'Druida': '🌿',
+      'Bardo': '🎵',
+      'Monje': '☯️',
+      'Explorador': '🏹',
+      'Brujo': '🌙',
+      'Hechicero': '✨'
+    };
+    
+    const emoji = emojis[charClass] || '⚔️';
+    portraitImg.src = `https://placehold.co/320x420/3e2723/ffd700?text=${encodeURIComponent(emoji + ' ' + race + ' ' + charClass)}`;
+  }
+}
+
+function regeneratePortrait() {
+  if (!currentCharacter) {
+    alert('❌ Primero genera un personaje');
+    return;
+  }
+  console.log('🔄 Regenerando retrato...');
+  fetchAIPortrait(currentCharacter.race, currentCharacter.class);
+}
+
+// ===== ⚡ POWER LEVEL =====
+function updatePowerLevel(stats) {
+  const powerBar = document.getElementById('powerBar');
+  const powerLevel = document.getElementById('powerLevel');
+  if (!powerBar || !powerLevel) return;
+  
+  const avg = Object.values(stats).reduce((a,b)=>a+b,0)/6;
+  let lvl = "⭐ Novato";
+  let gradient = "linear-gradient(90deg, #e8d5b7, #b89560)";
+  
+  if(avg >= 17){
+    lvl="⭐⭐⭐⭐⭐ Legendario";
+    gradient="linear-gradient(90deg, #ffd700, #ff8c00, #ffd700)";
+  } else if(avg >= 15){
+    lvl="⭐⭐⭐⭐ Épico";
+    gradient="linear-gradient(90deg, #d4af37, #f4d03f, #d4af37)";
+  } else if(avg >= 13){
+    lvl="⭐⭐⭐ Heroico";
+    gradient="linear-gradient(90deg, #c0c0c0, #e8e8e8, #c0c0c0)";
+  } else if(avg >= 11){
+    lvl="⭐⭐ Promedio";
+    gradient="linear-gradient(90deg, #cd7f32, #e8a87c, #cd7f32)";
+  }
+  
+  powerLevel.textContent = lvl;
+  powerBar.style.background = gradient;
+  
+  console.log(`⚡ Power Level: ${lvl} (${avg.toFixed(1)} avg)`);
+}
+
+// ===== 📋 MOSTRAR PERSONAJE EN UI =====
+function displayCharacter(character) {
+  console.log('📋 Mostrando ficha de personaje...');
+  currentCharacter = character;
+  
+  // Info básica
+  document.getElementById('displayName').textContent = character.name;
+  document.getElementById('displayRace').textContent = character.race;
+  document.getElementById('displayClass').textContent = character.class;
+  document.getElementById('displayLevel').textContent = character.level;
+  document.getElementById('displayBackground').textContent = character.background;
+  document.getElementById('displayAlignment').textContent = character.alignment;
+  
+  // Características
+  const stats = [
+    { id: 'Str', value: character.stats.strength },
+    { id: 'Dex', value: character.stats.dexterity },
+    { id: 'Con', value: character.stats.constitution },
+    { id: 'Int', value: character.stats.intelligence },
+    { id: 'Wis', value: character.stats.wisdom },
+    { id: 'Cha', value: character.stats.charisma }
+  ];
+  
+  stats.forEach(stat => {
+    const modifier = calculateModifier(stat.value);
+    document.getElementById(`stat${stat.id}`).textContent = stat.value;
+    document.getElementById(`mod${stat.id}`).textContent = 
+      (modifier >= 0 ? '+' : '') + modifier;
+  });
+  
+  // Combate
+  document.getElementById('displayHP').textContent = character.hp;
+  document.getElementById('displayAC').textContent = character.ac;
+  document.getElementById('displaySpeed').textContent = `${character.speed} ft`;
+  document.getElementById('displayInit').textContent = 
+    (calculateModifier(character.stats.dexterity) >= 0 ? '+' : '') + 
+    calculateModifier(character.stats.dexterity);
+  
+  // Salvaciones y habilidades
+  document.getElementById('displaySavingThrows').textContent = 
+    Array.isArray(character.savingThrows) ? character.savingThrows.join(', ') : character.savingThrows;
+  document.getElementById('displaySkills').textContent = character.skills;
+  
+  // Equipo
+  document.getElementById('equipment').innerHTML = character.equipment
+    .map(item => `<li>${item}</li>`).join('');
+  
+  // Trasfondo
+  document.getElementById('backgroundName').textContent = character.background;
+  document.getElementById('backgroundSkills').textContent = character.backgroundData.skills.join(', ');
+  document.getElementById('backgroundFeature').textContent = character.backgroundData.feature;
+  document.getElementById('backgroundEquipment').innerHTML = character.backgroundData.equipment
+    .map(item => `<li>${item}</li>`).join('');
+  
+  // Rasgos y características
+  document.getElementById('racialTraits').innerHTML = character.racialTraits
+    .map(trait => `<li>${trait}</li>`).join('');
+  
+  document.getElementById('classProficiencies').innerHTML = character.classProficiencies
+    .map(prof => `<li>${prof}</li>`).join('');
+  
+  document.getElementById('classFeatures').innerHTML = character.classFeatures
+    .map(feature => `<li>${feature}</li>`).join('');
+  
+  // Power level
+  updatePowerLevel(character.stats);
+  
+  // Avatar y retrato
+  drawAvatar(character.name, character.race, character.class);
+  fetchAIPortrait(character.race, character.class);
+  
+  // Mostrar ficha
+  document.getElementById('characterSheet').classList.remove('hidden');
+  document.getElementById('characterSheet').scrollIntoView({ behavior: 'smooth' });
+  
+  // Guardar en historial
+  saveToHistory(character);
+  
+  console.log('✅ Ficha mostrada con éxito');
+}
+
+// ==========================================
+// 🎲 D&D CHARACTER FORGE - SISTEMA COMPLETO FINAL
+// Versión con progresión de habilidades y bestiario funcional
+// ==========================================
+
+'use strict';
+
+// ===== ESTADO GLOBAL =====
+let currentCharacter = null;
+let currentCreature = null;
+let currentEncounter = [];
+let currentEdition = '5e';
+const STORAGE_KEY = 'dnd_character_history';
+
+// ===== 🎲 UTILIDADES BÁSICAS =====
+function randomFromArray(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function rollDice(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function calculateModifier(stat) {
+  return Math.floor((stat - 10) / 2);
+}
+
+// ===== 📊 GENERADOR DE ESTADÍSTICAS =====
+function generateStats() {
+  const rollStat = () => {
+    const rolls = [rollDice(6), rollDice(6), rollDice(6), rollDice(6)];
+    rolls.sort((a, b) => a - b);
+    return rolls.slice(1).reduce((a, b) => a + b, 0);
+  };
+  
+  return {
+    strength: rollStat(),
+    dexterity: rollStat(),
+    constitution: rollStat(),
+    intelligence: rollStat(),
+    wisdom: rollStat(),
+    charisma: rollStat()
+  };
+}
+
+// ===== ✨ GENERADOR DE NOMBRES ÉPICOS =====
+function generateRandomName(race, charClass) {
+  const names = {
+    'Humano': {
+      'Guerrero': ['Aric Valorheart', 'Brendan Stormborn', 'Marcus Ironforge'],
+      'Mago': ['Cassandra Moonshadow', 'Eldrin Starweaver', 'Lysander Flameheart'],
+      'Pícaro': ['Diana Nightblade', 'Raven Shadowstep', 'Silas Quickfingers'],
+      'Clérigo': ['Helena Lightbringer', 'Thomas Dawnkeeper', 'Althea Holyshield'],
+      'default': ['Erik Dragonbane', 'Fiona Lightbringer', 'Gareth Stormwind']
     },
-    "Criminal": {
-      skills: ["Engaño", "Sigilo"],
-      feature: "Contacto criminal: Conexión con red de criminales",
-      equipment: ["Palanca", "Ropa oscura con capucha", "15 po"]
+    'Elfo': {
+      'Mago': ['Aelrindel Starweaver', 'Eldacar Moonwhisper', 'Galadriel Silvermoon'],
+      'Explorador': ['Legolas Greenleaf', 'Thranduil Oakenshield', 'Faelyn Windrunner'],
+      'default': ['Elaria Dawnstrider', 'Thalorien Sunseeker', 'Sylvanas Whisperwind']
     },
-    "Héroe popular": {
-      skills: ["Trato con animales", "Supervivencia"],
-      feature: "Hospitalidad rústica: Refugio gratis entre gente común",
-      equipment: ["Herramientas de artesano", "Pala", "Olla de hierro", "10 po"]
+    'Enano': {
+      'Guerrero': ['Balin Ironhelm', 'Dwalin Stonebreaker', 'Thorin Oakenshield'],
+      'Clérigo': ['Gimli Axebearer', 'Bruenor Battlehammer', 'Tordek Ironfoot'],
+      'default': ['Dolgrin Forgehammer', 'Harbek Stonemender', 'Rurik Goldbeard']
     },
-    "Noble": {
-      skills: ["Historia", "Persuasión"],
-      feature: "Posición de privilegio: Acceso a alta sociedad",
-      equipment: ["Ropa fina", "Anillo con sello", "Pergamino de linaje", "25 po"]
-    },
-    "Sabio": {
-      skills: ["Arcana", "Historia"],
-      feature: "Investigador: Sabes dónde encontrar información",
-      equipment: ["Tinta y pluma", "Carta de mentor", "Ropa común", "10 po"]
-    },
-    "Soldado": {
-      skills: ["Atletismo", "Intimidación"],
-      feature: "Rango militar: Autoridad sobre soldados de tu ejército",
-      equipment: ["Insignia de rango", "Trofeo de guerra", "Dados", "10 po"]
+    'Orco': ['Grunk Skullcrusher', 'Thrak Bloodfist', 'Urgak Bonegrinder', 'Mog the Terrible'],
+    'Mediano': ['Bilbo Baggins', 'Frodo Underhill', 'Samwise Gamgee', 'Pippin Took'],
+    'Tiefling': ['Akta Hellborn', 'Damakos Nightfire', 'Iados Darkflame', 'Kairon Shadowhorn'],
+    'Dracónido': ['Arjhan Firebreath', 'Balasar Dragonheart', 'Donaar Scalebane'],
+    'Gnomo': ['Eldon Tinkertop', 'Brocc Nackle', 'Sindri Fastspring'],
+    'Semielfo': ['Tanis Half-Elven', 'Solamnia Brightblade', 'Laurana Kanan'],
+    'Semiorco': ['Grog Strongjaw', 'Durotan', 'Orgrim Doomhammer']
+  };
+  
+  if (names[race] && typeof names[race] === 'object' && !Array.isArray(names[race])) {
+    const classNames = names[race][charClass] || names[race]['default'];
+    return randomFromArray(classNames);
+  }
+  
+  if (names[race] && Array.isArray(names[race])) {
+    return randomFromArray(names[race]);
+  }
+  
+  return randomFromArray(names['Humano']['default']);
+}
+
+// ===== 🎨 GENERADOR DE PERSONAJES =====
+function generateCharacter(customData = {}) {
+  console.log('🎲 Generando personaje épico...');
+  
+  const race = customData.race || randomFromArray(Object.keys(DND_DATA.races));
+  const charClass = customData.class || randomFromArray(Object.keys(DND_DATA.classes));
+  const background = customData.background || randomFromArray(Object.keys(DND_DATA.backgrounds));
+  const alignment = customData.alignment || randomFromArray(DND_DATA.alignments);
+  
+  const stats = generateStats();
+  const classData = DND_DATA.classes[charClass];
+  
+  let raceData = DND_DATA.races[race];
+  if (raceData.subraces) {
+    const subraceKey = randomFromArray(Object.keys(raceData.subraces));
+    raceData = { ...raceData, ...raceData.subraces[subraceKey] };
+  }
+  
+  const backgroundData = DND_DATA.backgrounds[background];
+  
+  const hp = classData.hitDie + calculateModifier(stats.constitution);
+  const ac = 10 + calculateModifier(stats.dexterity);
+  
+  const character = {
+    name: customData.name || generateRandomName(race, charClass),
+    race,
+    class: charClass,
+    background,
+    alignment,
+    level: 1,
+    edition: currentEdition,
+    stats,
+    hp,
+    ac,
+    speed: raceData.speed,
+    racialTraits: raceData.traits,
+    classProficiencies: formatProficiencies(classData.proficiencies),
+    classFeatures: classData.features || (classData.progression && classData.progression[1]?.features) || [],
+    savingThrows: classData.proficiencies.savingThrows,
+    skills: classData.skills.from ? 
+      `Elige ${classData.skills.choose}: ${classData.skills.from.join(', ')}` : 
+      'Ver clase',
+    equipment: classData.equipment,
+    backgroundData: backgroundData,
+    progression: classData.progression // 🆕 Sistema de progresión
+  };
+  
+  console.log('✅ Personaje generado:', character.name);
+  return character;
+}
+
+function formatProficiencies(prof) {
+  const parts = [];
+  if (prof.armor && prof.armor.length) parts.push(`Armaduras: ${prof.armor.join(', ')}`);
+  if (prof.weapons && prof.weapons.length) parts.push(`Armas: ${prof.weapons.join(', ')}`);
+  if (prof.tools && prof.tools.length) parts.push(`Herramientas: ${prof.tools.join(', ')}`);
+  return parts;
+}
+
+// ===== 🎨 AVATAR ÉPICO SVG =====
+function drawAvatar(name, race, charClass) {
+  console.log('🎨 Dibujando avatar épico...');
+  const avatarSvg = document.getElementById('charAvatar');
+  if (!avatarSvg) return;
+
+  const classColors = {
+    'Guerrero': { primary: '#8b0000', secondary: '#c0c0c0', accent: '#d4af37' },
+    'Mago': { primary: '#4169e1', secondary: '#9370db', accent: '#ffd700' },
+    'Pícaro': { primary: '#1a1a1a', secondary: '#696969', accent: '#ff4500' },
+    'Clérigo': { primary: '#daa520', secondary: '#f5f5dc', accent: '#ffffff' },
+    'Paladín': { primary: '#ffd700', secondary: '#ffffff', accent: '#4169e1' },
+    'Bárbaro': { primary: '#654321', secondary: '#dc143c', accent: '#d4a574' },
+    'Druida': { primary: '#228b22', secondary: '#7cb342', accent: '#8b4513' },
+    'Bardo': { primary: '#8b3a8b', secondary: '#ff69b4', accent: '#ffd700' },
+    'Monje': { primary: '#8b6914', secondary: '#ff8c00', accent: '#654321' },
+    'Explorador': { primary: '#5d4037', secondary: '#8d6e63', accent: '#7cb342' },
+    'Brujo': { primary: '#1a0033', secondary: '#9370db', accent: '#8b008b' },
+    'Hechicero': { primary: '#4b0082', secondary: '#9370db', accent: '#ba55d3' }
+  };
+
+  const colors = classColors[charClass] || classColors['Guerrero'];
+
+  const svg = `
+    <defs>
+      <radialGradient id="bgGrad">
+        <stop offset="0%" stop-color="${colors.primary}" stop-opacity="0.3"/>
+        <stop offset="100%" stop-color="${colors.primary}" stop-opacity="0.8"/>
+      </radialGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <linearGradient id="metalGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#f5f5f5"/>
+        <stop offset="50%" stop-color="${colors.secondary}"/>
+        <stop offset="100%" stop-color="${colors.primary}"/>
+      </linearGradient>
+    </defs>
+    <circle cx="60" cy="60" r="58" fill="url(#bgGrad)" filter="url(#glow)"/>
+    <circle cx="60" cy="60" r="55" fill="none" stroke="${colors.accent}" stroke-width="2" opacity="0.5"/>
+    <ellipse cx="60" cy="55" rx="20" ry="24" fill="#d4a574" stroke="${colors.primary}" stroke-width="2"/>
+    ${charClass === 'Guerrero' ? `<ellipse cx="60" cy="45" rx="22" ry="20" fill="url(#metalGrad)" stroke="#2a2a2a" stroke-width="2"/><rect x="52" y="50" width="16" height="6" rx="2" fill="#3a3a3a"/>` : ''}
+    ${charClass === 'Mago' ? `<path d="M 60,25 L 50,50 L 70,50 Z" fill="${colors.primary}" stroke="${colors.secondary}" stroke-width="2"/><circle cx="60" cy="35" r="3" fill="${colors.accent}"><animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite"/></circle>` : ''}
+    ${charClass === 'Pícaro' ? `<path d="M 60,30 L 42,55 L 78,55 Z" fill="${colors.primary}" stroke="${colors.secondary}" stroke-width="2"/><ellipse cx="55" cy="52" rx="3" ry="4" fill="${colors.accent}"/>` : ''}
+    ${charClass === 'Clérigo' ? `<path d="M 52,35 L 60,25 L 68,35" fill="${colors.primary}" stroke="${colors.accent}" stroke-width="2"/><circle cx="60" cy="30" r="4" fill="${colors.accent}" opacity="0.8"/>` : ''}
+    ${charClass === 'Bárbaro' ? `<path d="M 42,45 Q 38,35 40,30" stroke="${colors.primary}" stroke-width="3" fill="none"/><path d="M 78,45 Q 82,35 80,30" stroke="${colors.primary}" stroke-width="3" fill="none"/>` : ''}
+    <path d="M 38,70 L 60,65 L 82,70 L 82,100 L 38,100 Z" fill="url(#metalGrad)" stroke="${colors.primary}" stroke-width="2" opacity="0.9"/>
+    <circle cx="60" cy="82" r="8" fill="${colors.accent}" opacity="0.7"/>
+    <text x="60" y="87" text-anchor="middle" font-size="12" fill="${colors.primary}" font-weight="bold">${charClass.charAt(0)}</text>
+    <circle cx="60" cy="60" r="58" fill="none" stroke="${colors.accent}" stroke-width="2" opacity="0.7"/>
+    <rect x="25" y="100" width="70" height="14" rx="4" fill="${colors.primary}" opacity="0.8"/>
+    <text x="60" y="110" text-anchor="middle" font-size="9" font-weight="bold" fill="${colors.accent}" font-family="serif">${charClass.toUpperCase()}</text>
+  `;
+
+  avatarSvg.innerHTML = svg;
+  avatarSvg.setAttribute('viewBox', '0 0 120 120');
+  console.log('✅ Avatar dibujado');
+}
+
+// ===== 🖼️ SISTEMA DE RETRATOS IA MEJORADO =====
+async function fetchAIPortrait(race, charClass) {
+  console.log(`🎨 Buscando retrato épico para ${race} ${charClass}...`);
+  const portraitImg = document.getElementById('aiPortrait');
+  if (!portraitImg) return;
+
+  portraitImg.src = "https://placehold.co/320x420/3e2723/ffd700?text=⚔️+Generando...";
+  portraitImg.alt = "Generando retrato épico...";
+
+  const epicPrompts = {
+    'Guerrero-Humano': 'human knight ornate plate armor longsword fantasy portrait oil painting Larry Elmore heroic dnd 5e',
+    'Guerrero-Enano': 'dwarf warrior braided beard battleaxe heavy armor fantasy portrait Keith Parkinson',
+    'Guerrero-Elfo': 'elven warrior elegant mithril armor silver hair fantasy portrait Todd Lockwood',
+    'Mago-Humano': 'human wizard blue robes arcane staff glowing spell fantasy portrait Clyde Caldwell',
+    'Mago-Elfo': 'elven archmage spellbook mystical runes fantasy portrait Jeff Easley high elf',
+    'Pícaro-Mediano': 'halfling rogue leather armor daggers sneaking fantasy portrait Wayne Reynolds',
+    'Pícaro-Elfo': 'elven rogue dark hood bow arrows fantasy portrait stealth',
+    'Clérigo-Humano': 'human cleric holy vestments divine light fantasy portrait Keith Parkinson priest',
+    'Paladín-Humano': 'human paladin golden plate armor holy sword divine aura fantasy portrait Larry Elmore',
+    'Bárbaro-Humano': 'human barbarian muscular greataxe tribal tattoos fantasy portrait Wayne Reynolds',
+    'Druida-Elfo': 'elven druid forest communion wild shape fantasy portrait Todd Lockwood',
+    'Bardo-Humano': 'human bard elegant lute magical performance fantasy portrait colorful',
+    'Monje-Humano': 'human monk martial arts robes ki energy fantasy portrait eastern style',
+    'Explorador-Elfo': 'elven ranger forest hunter bow hawk companion fantasy portrait',
+    'Hechicero-Tiefling': 'tiefling sorcerer red skin horns infernal magic fantasy portrait',
+    'Brujo-Humano': 'human warlock eldritch power dark pact gothic fantasy portrait'
+  };
+
+  const key = `${charClass}-${race}`;
+  let prompt = epicPrompts[key] || `${race} ${charClass} fantasy character portrait dnd art Larry Elmore heroic detailed`;
+
+  console.log(`🔍 Prompt: ${prompt}`);
+
+  try {
+    const res = await fetch(`https://lexica.art/api/v1/search?q=${encodeURIComponent(prompt)}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.images && data.images.length > 0) {
+        const idx = Math.floor(Math.random() * Math.min(data.images.length, 15));
+        portraitImg.src = data.images[idx].src;
+        portraitImg.alt = `${race} ${charClass} - Arte épico D&D`;
+        console.log('✅ Retrato cargado desde Lexica');
+        return;
+      }
     }
-  },
+  } catch(e) {
+    console.warn('⚠️ Lexica no disponible');
+  }
 
-  // ===== ALINEAMIENTOS =====
-  alignments: [
-    "Legal bueno",
-    "Neutral bueno",
-    "Caótico bueno",
-    "Legal neutral",
-    "Neutral",
-    "Caótico neutral",
-    "Legal malvado",
-    "Neutral malvado",
-    "Caótico malvado"
-  ]
-};
+  try {
+    const styles = ['avataaars', 'adventurer', 'big-smile'];
+    const style = randomFromArray(styles);
+    const seed = encodeURIComponent(`${race}-${charClass}-${Date.now()}`);
+    const url = `https://api.dicebear.com/7.x/${style}/svg?seed=${seed}&backgroundColor=3e2723&radius=12`;
+    portraitImg.src = url;
+    portraitImg.alt = `${race} ${charClass} - Avatar`;
+    console.log('✅ Avatar generado');
+  } catch(e) {
+    const emojis = { 'Guerrero': '⚔️', 'Mago': '🧙', 'Pícaro': '🗡️', 'Clérigo': '✝️', 'Paladín': '🛡️', 'Bárbaro': '⚡', 'Druida': '🌿', 'Bardo': '🎵', 'Monje': '☯️', 'Explorador': '🏹', 'Brujo': '🌙', 'Hechicero': '✨' };
+    const emoji = emojis[charClass] || '⚔️';
+    portraitImg.src = `https://placehold.co/320x420/3e2723/ffd700?text=${encodeURIComponent(emoji + ' ' + race)}`;
+  }
+}
 
-// Exportar globalmente
-window.DND_DATA = DND_DATA;
+function regeneratePortrait() {
+  if (!currentCharacter) {
+    alert('❌ Primero genera un personaje');
+    return;
+  }
+  fetchAIPortrait(currentCharacter.race, currentCharacter.class);
+}
+
+// ===== ⚡ POWER LEVEL =====
+function updatePowerLevel(stats) {
+  const powerBar = document.getElementById('powerBar');
+  const powerLevel = document.getElementById('powerLevel');
+  if (!powerBar || !powerLevel) return;
+  
+  const avg = Object.values(stats).reduce((a,b)=>a+b,0)/6;
+  let lvl = "⭐ Novato";
+  let gradient = "linear-gradient(90deg, #e8d5b7, #b89560)";
+  
+  if(avg >= 17) {
+    lvl="⭐⭐⭐⭐⭐ Legendario";
+    gradient="linear-gradient(90deg, #ffd700, #ff8c00, #ffd700)";
+  } else if(avg >= 15) {
+    lvl="⭐⭐⭐⭐ Épico";
+    gradient="linear-gradient(90deg, #d4af37, #f4d03f, #d4af37)";
+  } else if(avg >= 13) {
+    lvl="⭐⭐⭐ Heroico";
+    gradient="linear-gradient(90deg, #c0c0c0, #e8e8e8, #c0c0c0)";
+  } else if(avg >= 11) {
+    lvl="⭐⭐ Promedio";
+    gradient="linear-gradient(90deg, #cd7f32, #e8a87c, #cd7f32)";
+  }
+  
+  powerLevel.textContent = lvl;
+  powerBar.style.background = gradient;
+}
+
+// ===== 📋 MOSTRAR PERSONAJE EN UI =====
+function displayCharacter(character) {
+  console.log('📋 Mostrando ficha...');
+  currentCharacter = character;
+  
+  document.getElementById('displayName').textContent = character.name;
+  document.getElementById('displayRace').textContent = character.race;
+  document.getElementById('displayClass').textContent = character.class;
+  document.getElementById('displayLevel').textContent = character.level;
+  document.getElementById('displayBackground').textContent = character.background;
+  document.getElementById('displayAlignment').textContent = character.alignment;
+  
+  const stats = [
+    { id: 'Str', value: character.stats.strength },
+    { id: 'Dex', value: character.stats.dexterity },
+    { id: 'Con', value: character.stats.constitution },
+    { id: 'Int', value: character.stats.intelligence },
+    { id: 'Wis', value: character.stats.wisdom },
+    { id: 'Cha', value: character.stats.charisma }
+  ];
+  
+  stats.forEach(stat => {
+    const modifier = calculateModifier(stat.value);
+    document.getElementById(`stat${stat.id}`).textContent = stat.value;
+    document.getElementById(`mod${stat.id}`).textContent = (modifier >= 0 ? '+' : '') + modifier;
+  });
+  
+  document.getElementById('displayHP').textContent = character.hp;
+  document.getElementById('displayAC').textContent = character.ac;
+  document.getElementById('displaySpeed').textContent = `${character.speed} ft`;
+  document.getElementById('displayInit').textContent = 
+    (calculateModifier(character.stats.dexterity) >= 0 ? '+' : '') + calculateModifier(character.stats.dexterity);
+  
+  document.getElementById('displaySavingThrows').textContent = 
+    Array.isArray(character.savingThrows) ? character.savingThrows.join(', ') : character.savingThrows;
+  document.getElementById('displaySkills').textContent = character.skills;
+  
+  document.getElementById('equipment').innerHTML = character.equipment.map(item => `<li>${item}</li>`).join('');
+  
+  document.getElementById('backgroundName').textContent = character.background;
+  document.getElementById('backgroundSkills').textContent = character.backgroundData.skills.join(', ');
+  document.getElementById('backgroundFeature').textContent = character.backgroundData.feature;
+  document.getElementById('backgroundEquipment').innerHTML = character.backgroundData.equipment.map(item => `<li>${item}</li>`).join('');
+  
+  document.getElementById('racialTraits').innerHTML = character.racialTraits.map(trait => `<li>${trait}</li>`).join('');
+  document.getElementById('classProficiencies').innerHTML = character.classProficiencies.map(prof => `<li>${prof}</li>`).join('');
+  document.getElementById('classFeatures').innerHTML = character.classFeatures.map(feature => `<li>${feature}</li>`).join('');
+  
+  updatePowerLevel(character.stats);
+  drawAvatar(character.name, character.race, character.class);
+  fetchAIPortrait(character.race, character.class);
+  
+  document.getElementById('characterSheet').classList.remove('hidden');
+  document.getElementById('characterSheet').scrollIntoView({ behavior: 'smooth' });
+  
+  saveToHistory(character);
+  console.log('✅ Ficha mostrada');
+}
+
+// ===== 📚 CONTINÚA CON BESTIARIO Y PDF EN EL SIGUIENTE MENSAJE =====
+
