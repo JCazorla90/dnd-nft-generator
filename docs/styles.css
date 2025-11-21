@@ -1117,3 +1117,73 @@ input:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--gold-light);
 }
+
+
+/* ===== CONTROLS GRID ===== */
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md);
+  margin: var(--spacing-lg) 0;
+}
+
+/* ===== BOTÓN SUBTITLE ===== */
+.btn-subtitle {
+  display: block;
+  font-size: 0.85rem;
+  font-family: var(--font-body);
+  color: var(--parchment-light);
+  margin-top: 8px;
+  opacity: 0.9;
+  font-style: italic;
+}
+
+/* ===== BOTÓN ACCENT (CHAOS) ===== */
+.btn-accent {
+  background: linear-gradient(135deg, var(--royal-purple) 0%, var(--blood-red) 50%, var(--gold) 100%);
+  background-size: 200% 200%;
+  animation: chaosGradient 3s ease infinite;
+  border: 3px solid var(--gold-light);
+  box-shadow: 0 0 20px rgba(218, 165, 32, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-accent::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transform: rotate(45deg);
+  animation: chaosShine 2s linear infinite;
+}
+
+.btn-accent:hover {
+  transform: scale(1.1) rotate(-2deg);
+  box-shadow: 0 0 30px rgba(218, 165, 32, 0.8);
+  border-color: var(--gold);
+}
+
+@keyframes chaosGradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes chaosShine {
+  0% {
+    left: -50%;
+  }
+  100% {
+    left: 150%;
+  }
+}
