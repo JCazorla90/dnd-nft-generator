@@ -1,515 +1,383 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Character Forge - Generador de Personajes y Bestiario</title>
-    
-    <!-- Fuentes épicas -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="styles.css">
-    
-    <!-- jsPDF para generar PDFs -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <!-- Ethers.js para NFTs (opcional) -->
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐲 D&D Character Forge - Personajes, Bestiario y Encuentros</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- HEADER ÉPICO -->
-    <header class="main-header">
-        <div class="header-decoration">⚔️</div>
-        <div class="header-content">
-            <h1 class="main-title">D&D Character Forge</h1>
-            <p class="subtitle">Generador Épico de Personajes y Bestiario</p>
-        </div>
-        <div class="header-decoration">🐉</div>
+  <div class="container">
+    <header>
+      <h1>🐲 D&D Character Forge 🛡️</h1>
+      <p class="subtitle">Generador de Personajes, Bestiario y Encuentros para Dragones y Mazmorras 5e</p>
+      <a href="https://github.com/JCazorla90/dnd-nft-generator" class="github-link" target="_blank">
+        ⭐ Ver en GitHub
+      </a>
     </header>
 
-    <div class="container">
-        
-        <!-- SELECTOR DE EDICIÓN -->
-        <section class="edition-selector">
-            <label for="editionSelect">📖 Edición de D&D:</label>
-            <select id="editionSelect">
-                <option value="5e" selected>5ta Edición (2014)</option>
-                <option value="3.5e">3.5 Edición (2003)</option>
-                <option value="4e">4ta Edición (2008)</option>
+    <main class="layout">
+      <!-- PANEL DE GENERACIÓN DE PERSONAJE -->
+      <section class="card generator-panel">
+        <h2>⚔️ Crear Personaje</h2>
+
+        <div class="generation-mode">
+          <button id="randomBtn" class="btn btn-primary">🎲 Generar Aleatorio</button>
+          <button id="toggleCustom" class="btn btn-secondary">✏️ Personalizar</button>
+        </div>
+
+        <div id="customPanel" class="custom-panel hidden">
+          <h3>Personalizar Personaje</h3>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="charName">Nombre del Personaje:</label>
+              <input type="text" id="charName" placeholder="Ej: Thorin Escudo de Roble">
+            </div>
+
+            <div class="form-group">
+              <label for="raceSelect">Raza:</label>
+              <select id="raceSelect"></select>
+            </div>
+
+            <div class="form-group">
+              <label for="classSelect">Clase:</label>
+              <select id="classSelect"></select>
+            </div>
+
+            <div class="form-group">
+              <label for="backgroundSelect">Trasfondo:</label>
+              <select id="backgroundSelect"></select>
+            </div>
+
+            <div class="form-group">
+              <label for="alignmentSelect">Alineamiento:</label>
+              <select id="alignmentSelect"></select>
+            </div>
+          </div>
+
+          <button id="customGenerateBtn" class="btn btn-success full-width">
+            ⚔️ Crear Personaje
+          </button>
+        </div>
+
+        <hr class="section-divider">
+
+        <div class="actions-row">
+          <button id="downloadBtn" class="btn btn-secondary">📄 Descargar PDF</button>
+          <button id="shareBtn" class="btn btn-secondary">📤 Compartir</button>
+          <button id="mintNFTBtn" class="btn btn-warning">🪙 Mintear NFT (demo)</button>
+          <button id="newCharBtn" class="btn btn-ghost">🧹 Limpiar ficha</button>
+        </div>
+      </section>
+
+      <!-- HISTORIAL -->
+      <section class="card history-card">
+        <h2>🕒 Historial de Personajes</h2>
+        <p class="card-help">Se guardan hasta los últimos 10 personajes en este navegador.</p>
+        <ul id="historyList" class="history-list">
+          <li class="history-empty">Todavía no hay personajes guardados.</li>
+        </ul>
+      </section>
+
+      <!-- FICHA DEL PERSONAJE -->
+      <section id="characterSheet" class="card character-sheet hidden">
+        <h2>📜 Ficha de Personaje</h2>
+
+        <div class="info-section">
+          <h3>🧾 Información Básica</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Nombre:</span>
+              <span id="displayName" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Raza:</span>
+              <span id="displayRace" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Clase:</span>
+              <span id="displayClass" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Nivel:</span>
+              <span id="displayLevel" class="value">1</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Trasfondo:</span>
+              <span id="displayBackground" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Alineamiento:</span>
+              <span id="displayAlignment" class="value">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>⭐ Nivel de poder & historia</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Nivel de poder:</span>
+              <span id="displayPowerLevel" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Historia breve:</span>
+              <span id="displayBackstory" class="value">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>🧬 Características</h3>
+          <div class="stats-grid">
+            <div class="stat">
+              <span class="stat-label">FUE</span>
+              <span id="statStr" class="stat-score">10</span>
+              <span id="modStr" class="stat-mod">+0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">DES</span>
+              <span id="statDex" class="stat-score">10</span>
+              <span id="modDex" class="stat-mod">+0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">CON</span>
+              <span id="statCon" class="stat-score">10</span>
+              <span id="modCon" class="stat-mod">+0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">INT</span>
+              <span id="statInt" class="stat-score">10</span>
+              <span id="modInt" class="stat-mod">+0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">SAB</span>
+              <span id="statWis" class="stat-score">10</span>
+              <span id="modWis" class="stat-mod">+0</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">CAR</span>
+              <span id="statCha" class="stat-score">10</span>
+              <span id="modCha" class="stat-mod">+0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>⚔️ Combate</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Puntos de Golpe:</span>
+              <span id="displayHP" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Clase de Armadura:</span>
+              <span id="displayAC" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Velocidad:</span>
+              <span id="displaySpeed" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Iniciativa:</span>
+              <span id="displayInit" class="value">+0</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>🛡️ Salvaciones y Habilidades</h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Salvaciones:</span>
+              <span id="displaySavingThrows" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Habilidades:</span>
+              <span id="displaySkills" class="value">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>🎒 Equipo Inicial</h3>
+          <ul id="equipment" class="traits-list"></ul>
+        </div>
+
+        <div class="info-section">
+          <h3>💼 Trasfondo: <span id="backgroundName"></span></h3>
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">Competencias:</span>
+              <span id="backgroundSkills" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Rasgo:</span>
+              <span id="backgroundFeature" class="value">-</span>
+            </div>
+          </div>
+          <h4 class="subsection-title">Equipo de trasfondo</h4>
+          <ul id="backgroundEquipment" class="traits-list"></ul>
+        </div>
+
+        <div class="info-section">
+          <h3>🎭 Rasgos Raciales</h3>
+          <ul id="racialTraits" class="traits-list"></ul>
+        </div>
+
+        <div class="info-section">
+          <h3>🎓 Competencias de Clase</h3>
+          <ul id="classProficiencies" class="traits-list"></ul>
+        </div>
+
+        <div class="info-section">
+          <h3>✨ Características de Clase</h3>
+          <ul id="classFeatures" class="traits-list"></ul>
+        </div>
+      </section>
+
+      <!-- BESTIARIO -->
+      <section class="card bestiary-card">
+        <h2>📚 Bestiario</h2>
+        <p class="card-help">Genera enemigos rápidos para tus encuentros.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="monsterTypeFilter">Tipo:</label>
+            <select id="monsterTypeFilter">
+              <option value="">Cualquiera</option>
+              <option value="Bestia">Bestia</option>
+              <option value="Humanoide">Humanoide</option>
+              <option value="No-muerto">No-muerto</option>
+              <option value="Monstruosidad">Monstruosidad</option>
+              <option value="Dragón">Dragón</option>
+              <option value="Gigante">Gigante</option>
             </select>
-        </section>
-
-        <!-- GENERADOR DE PERSONAJES -->
-        <section class="generator-section">
-            <h2 class="section-title">
-                <span class="title-decoration">⚔️</span>
-                Generador de Personajes
-                <span class="title-decoration">⚔️</span>
-            </h2>
-
-            <div class="controls-grid">
-                <button id="randomBtn" class="btn btn-primary btn-large">
-                    🎲 Generar Personaje Aleatorio
-                </button>
-                
-                <button id="toggleCustom" class="btn btn-secondary">
-                    ⚙️ Personalizar Personaje
-                </button>
-            </div>
-
-            <!-- Panel de personalización (oculto inicialmente) -->
-            <div id="customPanel" class="custom-panel hidden">
-                <div class="custom-grid">
-                    <div class="form-group">
-                        <label for="charName">Nombre del Personaje:</label>
-                        <input type="text" id="charName" placeholder="Ej: Thorin Puño de Hierro">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="raceSelect">Raza:</label>
-                        <select id="raceSelect">
-                            <option value="">Aleatorio</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="classSelect">Clase:</label>
-                        <select id="classSelect">
-                            <option value="">Aleatorio</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="backgroundSelect">Trasfondo:</label>
-                        <select id="backgroundSelect">
-                            <option value="">Aleatorio</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="alignmentSelect">Alineamiento:</label>
-                        <select id="alignmentSelect">
-                            <option value="">Aleatorio</option>
-                        </select>
-                    </div>
-                </div>
-
-                <button id="customGenerateBtn" class="btn btn-primary">
-                    ✨ Generar Personaje Personalizado
-                </button>
-            </div>
-        </section>
-
-        <!-- FICHA DE PERSONAJE -->
-        <div id="characterSheet" class="character-sheet hidden">
-            <div class="sheet-decoration-top"></div>
-            
-            <!-- Header de ficha -->
-            <div class="sheet-header">
-                <div class="header-skulls">💀💀💀</div>
-                <h2 id="displayName" class="character-name">Nombre del Personaje</h2>
-                <div class="character-subtitle">
-                    <span id="displayRace">Raza</span>
-                    <span class="separator">•</span>
-                    <span id="displayClass">Clase</span>
-                    <span class="separator">•</span>
-                    <span>Nivel <span id="displayLevel">1</span></span>
-                </div>
-                <div class="character-meta">
-                    <span id="displayBackground">Trasfondo</span>
-                    <span class="separator">|</span>
-                    <span id="displayAlignment">Alineamiento</span>
-                </div>
-            </div>
-
-            <!-- Avatar y retrato -->
-            <div class="character-visual">
-                <div class="portrait-container">
-                    <div class="portrait-frame">
-                        <img id="aiPortrait" src="" alt="Retrato del personaje">
-                        <button id="regenPortrait" class="regen-btn" title="Regenerar retrato">
-                            🔄
-                        </button>
-                    </div>
-                </div>
-
-                <div class="avatar-container">
-                    <div class="avatar-frame">
-                        <svg id="charAvatar" viewBox="0 0 120 120"></svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Power Level -->
-            <div class="power-level-container">
-                <div class="power-label">Poder del Personaje</div>
-                <div id="powerBar" class="power-bar"></div>
-                <div id="powerLevel" class="power-level-text">⭐ Novato</div>
-            </div>
-
-            <!-- Características -->
-            <div class="abilities-section">
-                <h3 class="section-subtitle">⚡ Características</h3>
-                <div class="ability-scores-grid">
-                    <div class="ability-shield">
-                        <div class="ability-icon">💪</div>
-                        <div class="ability-name">FUE</div>
-                        <div class="ability-value" id="statStr">10</div>
-                        <div class="ability-modifier" id="modStr">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">🏃</div>
-                        <div class="ability-name">DES</div>
-                        <div class="ability-value" id="statDex">10</div>
-                        <div class="ability-modifier" id="modDex">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">🛡️</div>
-                        <div class="ability-name">CON</div>
-                        <div class="ability-value" id="statCon">10</div>
-                        <div class="ability-modifier" id="modCon">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">🧠</div>
-                        <div class="ability-name">INT</div>
-                        <div class="ability-value" id="statInt">10</div>
-                        <div class="ability-modifier" id="modInt">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">👁️</div>
-                        <div class="ability-name">SAB</div>
-                        <div class="ability-value" id="statWis">10</div>
-                        <div class="ability-modifier" id="modWis">+0</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-icon">💬</div>
-                        <div class="ability-name">CAR</div>
-                        <div class="ability-value" id="statCha">10</div>
-                        <div class="ability-modifier" id="modCha">+0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Combate -->
-            <div class="combat-section">
-                <h3 class="section-subtitle">⚔️ Combate</h3>
-                <div class="combat-stats-grid">
-                    <div class="combat-stat">
-                        <div class="stat-icon">❤️</div>
-                        <div class="stat-label">Puntos de Golpe</div>
-                        <div class="stat-value" id="displayHP">0</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-icon">🛡️</div>
-                        <div class="stat-label">Clase de Armadura</div>
-                        <div class="stat-value" id="displayAC">0</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-icon">👟</div>
-                        <div class="stat-label">Velocidad</div>
-                        <div class="stat-value" id="displaySpeed">30 ft</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-icon">⚡</div>
-                        <div class="stat-label">Iniciativa</div>
-                        <div class="stat-value" id="displayInit">+0</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Salvaciones y habilidades -->
-            <div class="info-grid">
-                <div class="info-box">
-                    <h4>🎯 Salvaciones</h4>
-                    <p id="displaySavingThrows">—</p>
-                </div>
-                <div class="info-box">
-                    <h4>🔧 Habilidades</h4>
-                    <p id="displaySkills">—</p>
-                </div>
-            </div>
-
-            <!-- Rasgos, características y equipo -->
-            <div class="details-section">
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🐉 Rasgos Raciales</h3>
-                    <ul id="racialTraits" class="trait-list"></ul>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">⚡ Competencias de Clase</h3>
-                    <ul id="classProficiencies" class="trait-list"></ul>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">✨ Características de Clase</h3>
-                    <ul id="classFeatures" class="trait-list"></ul>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🎒 Equipo Inicial</h3>
-                    <ul id="equipment" class="trait-list"></ul>
-                </div>
-
-                <div class="detail-panel background-panel">
-                    <h3 class="section-subtitle">📜 Trasfondo: <span id="backgroundName"></span></h3>
-                    <p><strong>Habilidades:</strong> <span id="backgroundSkills"></span></p>
-                    <p><strong>Rasgo:</strong> <span id="backgroundFeature"></span></p>
-                    <ul id="backgroundEquipment" class="trait-list"></ul>
-                </div>
-            </div>
-
-            <!-- Botones de acción -->
-            <div class="action-buttons">
-                <button id="downloadBtn" class="btn btn-primary">
-                    📄 Descargar PDF
-                </button>
-                <button id="exportJSONBtn" class="btn btn-secondary">
-                    💾 Exportar JSON
-                </button>
-                <button id="importJSONBtn" class="btn btn-secondary">
-                    📂 Importar JSON
-                </button>
-                <button id="shareBtn" class="btn btn-secondary">
-                    📤 Compartir
-                </button>
-                <button id="mintNFTBtn" class="btn btn-accent">
-                    🎨 Mintear NFT
-                </button>
-                <button id="historyBtn" class="btn btn-secondary">
-                    📚 Historial
-                </button>
-                <button id="newCharBtn" class="btn btn-danger">
-                    🆕 Nuevo Personaje
-                </button>
-            </div>
-
-            <input type="file" id="fileImport" accept=".json" style="display: none;">
+          </div>
+          <div class="form-group">
+            <label for="monsterEnvFilter">Entorno:</label>
+            <select id="monsterEnvFilter">
+              <option value="">Cualquiera</option>
+              <option value="Bosque">Bosque</option>
+              <option value="Mazmorra">Mazmorra</option>
+              <option value="Montaña">Montaña</option>
+              <option value="Pantano">Pantano</option>
+              <option value="Urbano">Urbano</option>
+              <option value="Llanura">Llanura</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="monsterCRFilter">CR:</label>
+            <select id="monsterCRFilter">
+              <option value="">Todos</option>
+              <option value="0-1">0 - 1</option>
+              <option value="2-3">2 - 3</option>
+              <option value="4-5">4 - 5</option>
+              <option value="6-10">6 - 10</option>
+              <option value="11+">11+</option>
+            </select>
+          </div>
         </div>
 
-        <!-- SEPARADOR ÉPICO -->
-        <div class="section-divider">
-            <span class="divider-text">🐉 BESTIARIO 🐉</span>
+        <button id="generateMonsterBtn" class="btn btn-primary full-width">👹 Generar Criatura</button>
+
+        <p id="monsterEmptyMsg" class="card-help">Todavía no has generado ninguna criatura.</p>
+
+        <div id="monsterCard" class="monster-card hidden">
+          <h3 id="displayMonsterName">-</h3>
+          <p class="monster-subtitle">
+            <span id="displayMonsterType">–</span> ·
+            CR <span id="displayMonsterCR">–</span> ·
+            <span id="displayMonsterXP">–</span> XP
+          </p>
+
+          <div class="info-grid">
+            <div class="info-item">
+              <span class="label">CA:</span>
+              <span id="displayMonsterAC" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Puntos de golpe:</span>
+              <span id="displayMonsterHP" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Velocidad:</span>
+              <span id="displayMonsterSpeed" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Alineamiento:</span>
+              <span id="displayMonsterAlignment" class="value">-</span>
+            </div>
+            <div class="info-item">
+              <span class="label">Entornos:</span>
+              <span id="displayMonsterEnv" class="value">-</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h4>Características</h4>
+            <div id="monsterStats" class="stats-grid stats-grid-compact"></div>
+          </div>
+
+          <div class="info-section">
+            <h4>Rasgos</h4>
+            <ul id="monsterTraits" class="traits-list"></ul>
+          </div>
+
+          <div class="info-section">
+            <h4>Acciones</h4>
+            <ul id="monsterActions" class="traits-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- ENCUENTROS -->
+      <section class="card encounter-card">
+        <h2>⚔️ Generador de Encuentros</h2>
+        <p class="card-help">Calcula encuentros rápidos según el nivel del grupo.</p>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="partyLevel">Nivel del grupo:</label>
+            <input type="number" id="partyLevel" min="1" max="20" value="3">
+          </div>
+          <div class="form-group">
+            <label for="partySize">Tamaño del grupo:</label>
+            <input type="number" id="partySize" min="1" max="8" value="4">
+          </div>
+          <div class="form-group">
+            <label for="encounterDifficulty">Dificultad:</label>
+            <select id="encounterDifficulty">
+              <option value="easy">Fácil</option>
+              <option value="medium" selected>Media</option>
+              <option value="hard">Difícil</option>
+              <option value="deadly">Mortal</option>
+            </select>
+          </div>
         </div>
 
-        <!-- GENERADOR DE BESTIAS -->
-        <section class="bestiary-section">
-            <h2 class="section-title">
-                <span class="title-decoration">👹</span>
-                Generador de Criaturas
-                <span class="title-decoration">👹</span>
-            </h2>
+        <button id="generateEncounterBtn" class="btn btn-primary full-width">
+          ⚔️ Generar Encuentro
+        </button>
 
-            <div class="bestiary-controls">
-                <div class="filter-grid">
-                    <div class="form-group">
-                        <label for="creatureTypeFilter">Tipo:</label>
-                        <select id="creatureTypeFilter">
-                            <option value="">Todos</option>
-                            <option value="Aberración">Aberración</option>
-                            <option value="Bestia">Bestia</option>
-                            <option value="Dragón">Dragón</option>
-                            <option value="Demonio">Demonio</option>
-                            <option value="Gigante">Gigante</option>
-                            <option value="Humanoide">Humanoide</option>
-                            <option value="No-muerto">No-muerto</option>
-                            <option value="Monstruosidad">Monstruosidad</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="crFilter">Challenge Rating:</label>
-                        <select id="crFilter">
-                            <option value="">Todos</option>
-                            <option value="0.25">CR 0-1</option>
-                            <option value="2">CR 2-3</option>
-                            <option value="5">CR 4-5</option>
-                            <option value="8">CR 6-8</option>
-                            <option value="13">CR 9+</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="environmentFilter">Ambiente:</label>
-                        <select id="environmentFilter">
-                            <option value="">Todos</option>
-                            <option value="Mazmorra">Mazmorra</option>
-                            <option value="Bosque">Bosque</option>
-                            <option value="Montaña">Montaña</option>
-                            <option value="Pantano">Pantano</option>
-                            <option value="Subterráneo">Subterráneo</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div class="controls-grid">
-                    <button id="generateCreatureBtn" class="btn btn-primary">
-                        🎲 Generar Criatura
-                    </button>
-                    <button id="generateFromAPIBtn" class="btn btn-accent">
-                        📚 Desde API D&D 5e
-                    </button>
-                </div>
-            </div>
-
-            <!-- Generador de encuentros -->
-            <div class="encounter-generator">
-                <h3 class="section-subtitle">⚔️ Generador de Encuentros</h3>
-                <div class="encounter-controls">
-                    <div class="form-group">
-                        <label for="partyLevel">Nivel del Grupo:</label>
-                        <input type="number" id="partyLevel" value="5" min="1" max="20">
-                    </div>
-                    <div class="form-group">
-                        <label for="partySize">Tamaño del Grupo:</label>
-                        <input type="number" id="partySize" value="4" min="1" max="8">
-                    </div>
-                    <button id="generateEncounterBtn" class="btn btn-primary">
-                        ⚔️ Generar Encuentro
-                    </button>
-                </div>
-
-                <div id="encounterPanel" class="encounter-panel hidden">
-                    <p class="encounter-xp"><strong>XP del Encuentro:</strong> <span id="encounterXP"></span></p>
-                    <div id="encounterList" class="encounter-list"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- FICHA DE CRIATURA -->
-        <div id="creatureSheet" class="creature-sheet hidden">
-            <div class="sheet-decoration-top"></div>
-            
-            <div class="sheet-header">
-                <h2 id="creatureName" class="character-name">Nombre Criatura</h2>
-                <div class="character-subtitle">
-                    <span id="creatureType">Tipo</span>
-                    <span class="separator">•</span>
-                    <span>CR <span id="creatureCR">0</span></span>
-                    <span class="separator">•</span>
-                    <span id="creatureXP">0 XP</span>
-                </div>
-            </div>
-
-            <div class="character-visual">
-                <div class="portrait-container">
-                    <div class="portrait-frame">
-                        <img id="creaturePortrait" src="" alt="Retrato de criatura">
-                        <button id="regenCreaturePortrait" class="regen-btn">🔄</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats de criatura -->
-            <div class="combat-section">
-                <h3 class="section-subtitle">⚔️ Estadísticas de Combate</h3>
-                <div class="combat-stats-grid">
-                    <div class="combat-stat">
-                        <div class="stat-label">CA</div>
-                        <div class="stat-value" id="creatureAC">0</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-label">HP</div>
-                        <div class="stat-value" id="creatureHP">0</div>
-                    </div>
-                    <div class="combat-stat">
-                        <div class="stat-label">Velocidad</div>
-                        <div class="stat-value" id="creatureSpeed">30 ft</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="abilities-section">
-                <h3 class="section-subtitle">⚡ Características</h3>
-                <div class="ability-scores-grid">
-                    <div class="ability-shield">
-                        <div class="ability-name">FUE</div>
-                        <div class="ability-value" id="creatureStr">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">DES</div>
-                        <div class="ability-value" id="creatureDex">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">CON</div>
-                        <div class="ability-value" id="creatureCon">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">INT</div>
-                        <div class="ability-value" id="creatureInt">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">SAB</div>
-                        <div class="ability-value" id="creatureWis">10</div>
-                    </div>
-                    <div class="ability-shield">
-                        <div class="ability-name">CAR</div>
-                        <div class="ability-value" id="creatureCha">10</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="details-section">
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🔧 Habilidades</h3>
-                    <ul id="creatureSkills" class="trait-list"></ul>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">✨ Rasgos Especiales</h3>
-                    <ul id="creatureTraits" class="trait-list"></ul>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">⚔️ Acciones</h3>
-                    <ul id="creatureActions" class="trait-list"></ul>
-                </div>
-
-                <div id="legendarySection" class="detail-panel hidden">
-                    <h3 class="section-subtitle">👑 Acciones Legendarias</h3>
-                    <ul id="creatureLegendaryActions" class="trait-list"></ul>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🛡️ Defensas</h3>
-                    <p id="creatureDefenses">—</p>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🌍 Ambiente</h3>
-                    <p id="creatureEnvironment">—</p>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button id="newCreatureBtn" class="btn btn-danger">
-                    🆕 Nueva Criatura
-                </button>
-            </div>
+        <div id="encounterResult" class="encounter-result hidden">
+          <p id="encounterSummary" class="encounter-summary"></p>
+          <ul id="encounterList" class="encounter-list"></ul>
         </div>
+      </section>
+    </main>
 
-    </div>
-
-    <!-- MODAL DE HISTORIAL -->
-    <div id="historyModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">✖️</span>
-            <h2>📚 Historial de Personajes</h2>
-            <div id="historyList" class="history-list"></div>
-        </div>
-    </div>
-
-    <!-- FOOTER -->
-    <footer class="main-footer">
-        <p>⚔️ D&D Character Forge © 2025 🐉</p>
-        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
-        <button id="toggleTheme" class="theme-toggle">🌙 Modo Oscuro</button>
+    <footer>
+      <p>🐲 D&D NFT Character Forge | <a href="https://github.com/JCazorla90/dnd-nft-generator">GitHub</a></p>
+      <p>Sistema de Referencia D&D 5e | Creado con ❤️ por la comunidad</p>
     </footer>
+  </div>
 
-    <!-- SCRIPTS -->
-    <script src="data/dnd-data.js"></script>
-    <script src="data/bestiary.js"></script>
-    <script src="app.js"></script>
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="data/dnd-data.js"></script>
+  <script src="data/dnd-monsters.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
