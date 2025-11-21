@@ -1,501 +1,515 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  --primary: #667eea;
-  --secondary: #764ba2;
-  --success: #48bb78;
-  --danger: #f56565;
-  --dark: #1a202c;
-  --light: #f7fafc;
-  --gold: #FFD700;
-}
-
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top, #2d3748 0, #1a202c 50%, #000 100%);
-  color: #e2e8f0;
-  min-height: 100vh;
-}
-
-a {
-  color: var(--gold);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1.5rem;
-}
-
-/* Header */
-
-header {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-header h1 {
-  font-size: 2.4rem;
-  color: var(--gold);
-  text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
-}
-
-.subtitle {
-  color: #cbd5e0;
-  margin-top: 0.5rem;
-}
-
-.github-link {
-  display: inline-block;
-  margin-top: 0.75rem;
-  padding: 0.4rem 0.9rem;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(226, 232, 240, 0.15);
-  font-size: 0.9rem;
-}
-
-/* Layout */
-
-.layout {
-  display: grid;
-  gap: 1.5rem;
-}
-
-@media (min-width: 960px) {
-  .layout {
-    grid-template-columns: 1.3fr 1fr;
-    grid-template-areas:
-      "generator history"
-      "sheet sheet"
-      "bestiary encounter";
-  }
-
-  .generator-panel { grid-area: generator; }
-  .history-card { grid-area: history; }
-  .character-sheet { grid-area: sheet; }
-  .bestiary-card { grid-area: bestiary; }
-  .encounter-card { grid-area: encounter; }
-}
-
-/* Cards */
-
-.card {
-  background: rgba(15, 23, 42, 0.96);
-  border-radius: 16px;
-  padding: 1.3rem 1.5rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-}
-
-.card h2 {
-  font-size: 1.3rem;
-  margin-bottom: 0.75rem;
-  color: #edf2f7;
-}
-
-.card-help {
-  font-size: 0.9rem;
-  color: #a0aec0;
-  margin-bottom: 0.75rem;
-}
-
-/* Generator */
-
-.generator-panel .generation-mode {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
-}
-
-.custom-panel {
-  margin-top: 0.75rem;
-  padding: 0.9rem;
-  border-radius: 12px;
-  background: rgba(45, 55, 72, 0.9);
-  border-left: 3px solid var(--primary);
-}
-
-.custom-panel h3 {
-  margin-bottom: 0.75rem;
-  color: #e2e8f0;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
-}
-
-@media (min-width: 640px) {
-  .form-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-label {
-  font-size: 0.85rem;
-  color: #cbd5e0;
-}
-
-input[type="text"],
-input[type="number"],
-select {
-  padding: 0.4rem 0.6rem;
-  border-radius: 8px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  background: rgba(15, 23, 42, 0.9);
-  color: #edf2f7;
-  font-size: 0.9rem;
-}
-
-input:focus,
-select:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 1px rgba(102, 126, 234, 0.6);
-}
-
-/* Buttons */
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 999px;
-  border: none;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease, background 0.15s ease;
-  white-space: nowrap;
-}
-
-.btn-primary {
-  background: linear-gradient(90deg, var(--primary), var(--secondary));
-  color: white;
-  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.55);
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.7);
-}
-
-.btn-secondary {
-  background: #e2e8f0;
-  color: var(--dark);
-}
-
-.btn-secondary:hover {
-  background: #cbd5e0;
-}
-
-.btn-success {
-  background: var(--success);
-  color: white;
-}
-
-.btn-success:hover {
-  background: #38a169;
-}
-
-.btn-warning {
-  background: var(--gold);
-  color: #1a202c;
-}
-
-.btn-warning:hover {
-  background: #f6e05e;
-}
-
-.btn-ghost {
-  background: transparent;
-  border: 1px solid rgba(148, 163, 184, 0.4);
-  color: #cbd5e0;
-}
-
-.btn-ghost:hover {
-  background: rgba(148, 163, 184, 0.1);
-}
-
-.full-width {
-  width: 100%;
-  margin-top: 0.75rem;
-}
-
-.actions-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.75rem;
-}
-
-/* Info sections */
-
-.info-section {
-  margin-top: 1rem;
-}
-
-.info-section h3 {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-  color: #e2e8f0;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.35rem 1rem;
-}
-
-@media (min-width: 640px) {
-  .info-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-.info-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-size: 0.9rem;
-}
-
-.info-item .label {
-  font-weight: 600;
-  color: #cbd5e0;
-}
-
-.info-item .value {
-  text-align: right;
-  color: #edf2f7;
-}
-
-/* Stats */
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-@media (min-width: 640px) {
-  .stats-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-}
-
-.stats-grid-compact {
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-}
-
-.stat {
-  background: rgba(15, 23, 42, 0.95);
-  border-radius: 10px;
-  padding: 0.4rem 0.35rem;
-  text-align: center;
-  border: 1px solid rgba(102, 126, 234, 0.4);
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.7rem;
-  letter-spacing: 0.06em;
-  color: #a0aec0;
-  text-transform: uppercase;
-}
-
-.stat-score {
-  display: block;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #edf2f7;
-}
-
-.stat-mod {
-  display: block;
-  font-size: 0.8rem;
-  color: var(--gold);
-}
-
-/* Traits lists */
-
-.traits-list {
-  list-style: none;
-  margin-top: 0.25rem;
-  padding-left: 0;
-}
-
-.traits-list li {
-  position: relative;
-  padding-left: 1rem;
-  margin-bottom: 0.2rem;
-  font-size: 0.9rem;
-  color: #e2e8f0;
-}
-
-.traits-list li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: var(--primary);
-}
-
-/* Subsection title */
-
-.subsection-title {
-  margin-top: 0.6rem;
-  font-size: 0.9rem;
-  color: #a3bffa;
-}
-
-/* History */
-
-.history-card h2 {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.history-list {
-  list-style: none;
-  padding: 0;
-  margin-top: 0.5rem;
-}
-
-.history-item {
-  padding: 0.4rem 0.5rem;
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  margin-bottom: 0.3rem;
-  cursor: pointer;
-  transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.12s ease;
-}
-
-.history-item:hover {
-  background: rgba(79, 70, 229, 0.2);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.6);
-}
-
-.history-main {
-  display: flex;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.history-main span {
-  color: #a0aec0;
-}
-
-.history-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.3rem;
-  margin-top: 0.2rem;
-  font-size: 0.75rem;
-  color: #a0aec0;
-}
-
-.history-empty {
-  font-size: 0.9rem;
-  color: #a0aec0;
-}
-
-.character-sheet h2 {
-  margin-bottom: 0.4rem;
-}
-
-/* Bestiary */
-
-.monster-card {
-  margin-top: 0.75rem;
-  padding: 0.85rem;
-  border-radius: 12px;
-  background: rgba(26, 32, 44, 0.95);
-  border: 1px solid rgba(102, 126, 234, 0.4);
-}
-
-.monster-card h3 {
-  font-size: 1.1rem;
-  margin-bottom: 0.2rem;
-  color: #fefcbf;
-}
-
-.monster-subtitle {
-  font-size: 0.85rem;
-  color: #cbd5e0;
-  margin-bottom: 0.5rem;
-}
-
-/* Encounter */
-
-.encounter-result {
-  margin-top: 0.75rem;
-  padding: 0.75rem;
-  border-radius: 12px;
-  background: rgba(26, 32, 44, 0.95);
-  border: 1px solid rgba(102, 126, 234, 0.4);
-}
-
-.encounter-summary {
-  font-size: 0.9rem;
-  color: #edf2f7;
-  margin-bottom: 0.4rem;
-}
-
-.encounter-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.encounter-list li {
-  font-size: 0.9rem;
-  margin-bottom: 0.2rem;
-}
-
-/* Footer */
-
-footer {
-  margin-top: 1.5rem;
-  text-align: center;
-  font-size: 0.85rem;
-  color: #a0aec0;
-}
-
-footer a {
-  color: var(--gold);
-}
-
-/* Helpers */
-
-.section-divider {
-  margin: 0.9rem 0;
-  border: none;
-  border-top: 1px solid rgba(148, 163, 184, 0.35);
-}
-
-.hidden {
-  display: none !important;
-}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Character Forge - Generador de Personajes y Bestiario</title>
+    
+    <!-- Fuentes épicas -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- jsPDF para generar PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Ethers.js para NFTs (opcional) -->
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+</head>
+<body>
+    <!-- HEADER ÉPICO -->
+    <header class="main-header">
+        <div class="header-decoration">⚔️</div>
+        <div class="header-content">
+            <h1 class="main-title">D&D Character Forge</h1>
+            <p class="subtitle">Generador Épico de Personajes y Bestiario</p>
+        </div>
+        <div class="header-decoration">🐉</div>
+    </header>
+
+    <div class="container">
+        
+        <!-- SELECTOR DE EDICIÓN -->
+        <section class="edition-selector">
+            <label for="editionSelect">📖 Edición de D&D:</label>
+            <select id="editionSelect">
+                <option value="5e" selected>5ta Edición (2014)</option>
+                <option value="3.5e">3.5 Edición (2003)</option>
+                <option value="4e">4ta Edición (2008)</option>
+            </select>
+        </section>
+
+        <!-- GENERADOR DE PERSONAJES -->
+        <section class="generator-section">
+            <h2 class="section-title">
+                <span class="title-decoration">⚔️</span>
+                Generador de Personajes
+                <span class="title-decoration">⚔️</span>
+            </h2>
+
+            <div class="controls-grid">
+                <button id="randomBtn" class="btn btn-primary btn-large">
+                    🎲 Generar Personaje Aleatorio
+                </button>
+                
+                <button id="toggleCustom" class="btn btn-secondary">
+                    ⚙️ Personalizar Personaje
+                </button>
+            </div>
+
+            <!-- Panel de personalización (oculto inicialmente) -->
+            <div id="customPanel" class="custom-panel hidden">
+                <div class="custom-grid">
+                    <div class="form-group">
+                        <label for="charName">Nombre del Personaje:</label>
+                        <input type="text" id="charName" placeholder="Ej: Thorin Puño de Hierro">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="raceSelect">Raza:</label>
+                        <select id="raceSelect">
+                            <option value="">Aleatorio</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="classSelect">Clase:</label>
+                        <select id="classSelect">
+                            <option value="">Aleatorio</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="backgroundSelect">Trasfondo:</label>
+                        <select id="backgroundSelect">
+                            <option value="">Aleatorio</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="alignmentSelect">Alineamiento:</label>
+                        <select id="alignmentSelect">
+                            <option value="">Aleatorio</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button id="customGenerateBtn" class="btn btn-primary">
+                    ✨ Generar Personaje Personalizado
+                </button>
+            </div>
+        </section>
+
+        <!-- FICHA DE PERSONAJE -->
+        <div id="characterSheet" class="character-sheet hidden">
+            <div class="sheet-decoration-top"></div>
+            
+            <!-- Header de ficha -->
+            <div class="sheet-header">
+                <div class="header-skulls">💀💀💀</div>
+                <h2 id="displayName" class="character-name">Nombre del Personaje</h2>
+                <div class="character-subtitle">
+                    <span id="displayRace">Raza</span>
+                    <span class="separator">•</span>
+                    <span id="displayClass">Clase</span>
+                    <span class="separator">•</span>
+                    <span>Nivel <span id="displayLevel">1</span></span>
+                </div>
+                <div class="character-meta">
+                    <span id="displayBackground">Trasfondo</span>
+                    <span class="separator">|</span>
+                    <span id="displayAlignment">Alineamiento</span>
+                </div>
+            </div>
+
+            <!-- Avatar y retrato -->
+            <div class="character-visual">
+                <div class="portrait-container">
+                    <div class="portrait-frame">
+                        <img id="aiPortrait" src="" alt="Retrato del personaje">
+                        <button id="regenPortrait" class="regen-btn" title="Regenerar retrato">
+                            🔄
+                        </button>
+                    </div>
+                </div>
+
+                <div class="avatar-container">
+                    <div class="avatar-frame">
+                        <svg id="charAvatar" viewBox="0 0 120 120"></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Power Level -->
+            <div class="power-level-container">
+                <div class="power-label">Poder del Personaje</div>
+                <div id="powerBar" class="power-bar"></div>
+                <div id="powerLevel" class="power-level-text">⭐ Novato</div>
+            </div>
+
+            <!-- Características -->
+            <div class="abilities-section">
+                <h3 class="section-subtitle">⚡ Características</h3>
+                <div class="ability-scores-grid">
+                    <div class="ability-shield">
+                        <div class="ability-icon">💪</div>
+                        <div class="ability-name">FUE</div>
+                        <div class="ability-value" id="statStr">10</div>
+                        <div class="ability-modifier" id="modStr">+0</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-icon">🏃</div>
+                        <div class="ability-name">DES</div>
+                        <div class="ability-value" id="statDex">10</div>
+                        <div class="ability-modifier" id="modDex">+0</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-icon">🛡️</div>
+                        <div class="ability-name">CON</div>
+                        <div class="ability-value" id="statCon">10</div>
+                        <div class="ability-modifier" id="modCon">+0</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-icon">🧠</div>
+                        <div class="ability-name">INT</div>
+                        <div class="ability-value" id="statInt">10</div>
+                        <div class="ability-modifier" id="modInt">+0</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-icon">👁️</div>
+                        <div class="ability-name">SAB</div>
+                        <div class="ability-value" id="statWis">10</div>
+                        <div class="ability-modifier" id="modWis">+0</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-icon">💬</div>
+                        <div class="ability-name">CAR</div>
+                        <div class="ability-value" id="statCha">10</div>
+                        <div class="ability-modifier" id="modCha">+0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Combate -->
+            <div class="combat-section">
+                <h3 class="section-subtitle">⚔️ Combate</h3>
+                <div class="combat-stats-grid">
+                    <div class="combat-stat">
+                        <div class="stat-icon">❤️</div>
+                        <div class="stat-label">Puntos de Golpe</div>
+                        <div class="stat-value" id="displayHP">0</div>
+                    </div>
+                    <div class="combat-stat">
+                        <div class="stat-icon">🛡️</div>
+                        <div class="stat-label">Clase de Armadura</div>
+                        <div class="stat-value" id="displayAC">0</div>
+                    </div>
+                    <div class="combat-stat">
+                        <div class="stat-icon">👟</div>
+                        <div class="stat-label">Velocidad</div>
+                        <div class="stat-value" id="displaySpeed">30 ft</div>
+                    </div>
+                    <div class="combat-stat">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-label">Iniciativa</div>
+                        <div class="stat-value" id="displayInit">+0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Salvaciones y habilidades -->
+            <div class="info-grid">
+                <div class="info-box">
+                    <h4>🎯 Salvaciones</h4>
+                    <p id="displaySavingThrows">—</p>
+                </div>
+                <div class="info-box">
+                    <h4>🔧 Habilidades</h4>
+                    <p id="displaySkills">—</p>
+                </div>
+            </div>
+
+            <!-- Rasgos, características y equipo -->
+            <div class="details-section">
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">🐉 Rasgos Raciales</h3>
+                    <ul id="racialTraits" class="trait-list"></ul>
+                </div>
+
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">⚡ Competencias de Clase</h3>
+                    <ul id="classProficiencies" class="trait-list"></ul>
+                </div>
+
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">✨ Características de Clase</h3>
+                    <ul id="classFeatures" class="trait-list"></ul>
+                </div>
+
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">🎒 Equipo Inicial</h3>
+                    <ul id="equipment" class="trait-list"></ul>
+                </div>
+
+                <div class="detail-panel background-panel">
+                    <h3 class="section-subtitle">📜 Trasfondo: <span id="backgroundName"></span></h3>
+                    <p><strong>Habilidades:</strong> <span id="backgroundSkills"></span></p>
+                    <p><strong>Rasgo:</strong> <span id="backgroundFeature"></span></p>
+                    <ul id="backgroundEquipment" class="trait-list"></ul>
+                </div>
+            </div>
+
+            <!-- Botones de acción -->
+            <div class="action-buttons">
+                <button id="downloadBtn" class="btn btn-primary">
+                    📄 Descargar PDF
+                </button>
+                <button id="exportJSONBtn" class="btn btn-secondary">
+                    💾 Exportar JSON
+                </button>
+                <button id="importJSONBtn" class="btn btn-secondary">
+                    📂 Importar JSON
+                </button>
+                <button id="shareBtn" class="btn btn-secondary">
+                    📤 Compartir
+                </button>
+                <button id="mintNFTBtn" class="btn btn-accent">
+                    🎨 Mintear NFT
+                </button>
+                <button id="historyBtn" class="btn btn-secondary">
+                    📚 Historial
+                </button>
+                <button id="newCharBtn" class="btn btn-danger">
+                    🆕 Nuevo Personaje
+                </button>
+            </div>
+
+            <input type="file" id="fileImport" accept=".json" style="display: none;">
+        </div>
+
+        <!-- SEPARADOR ÉPICO -->
+        <div class="section-divider">
+            <span class="divider-text">🐉 BESTIARIO 🐉</span>
+        </div>
+
+        <!-- GENERADOR DE BESTIAS -->
+        <section class="bestiary-section">
+            <h2 class="section-title">
+                <span class="title-decoration">👹</span>
+                Generador de Criaturas
+                <span class="title-decoration">👹</span>
+            </h2>
+
+            <div class="bestiary-controls">
+                <div class="filter-grid">
+                    <div class="form-group">
+                        <label for="creatureTypeFilter">Tipo:</label>
+                        <select id="creatureTypeFilter">
+                            <option value="">Todos</option>
+                            <option value="Aberración">Aberración</option>
+                            <option value="Bestia">Bestia</option>
+                            <option value="Dragón">Dragón</option>
+                            <option value="Demonio">Demonio</option>
+                            <option value="Gigante">Gigante</option>
+                            <option value="Humanoide">Humanoide</option>
+                            <option value="No-muerto">No-muerto</option>
+                            <option value="Monstruosidad">Monstruosidad</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="crFilter">Challenge Rating:</label>
+                        <select id="crFilter">
+                            <option value="">Todos</option>
+                            <option value="0.25">CR 0-1</option>
+                            <option value="2">CR 2-3</option>
+                            <option value="5">CR 4-5</option>
+                            <option value="8">CR 6-8</option>
+                            <option value="13">CR 9+</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="environmentFilter">Ambiente:</label>
+                        <select id="environmentFilter">
+                            <option value="">Todos</option>
+                            <option value="Mazmorra">Mazmorra</option>
+                            <option value="Bosque">Bosque</option>
+                            <option value="Montaña">Montaña</option>
+                            <option value="Pantano">Pantano</option>
+                            <option value="Subterráneo">Subterráneo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="controls-grid">
+                    <button id="generateCreatureBtn" class="btn btn-primary">
+                        🎲 Generar Criatura
+                    </button>
+                    <button id="generateFromAPIBtn" class="btn btn-accent">
+                        📚 Desde API D&D 5e
+                    </button>
+                </div>
+            </div>
+
+            <!-- Generador de encuentros -->
+            <div class="encounter-generator">
+                <h3 class="section-subtitle">⚔️ Generador de Encuentros</h3>
+                <div class="encounter-controls">
+                    <div class="form-group">
+                        <label for="partyLevel">Nivel del Grupo:</label>
+                        <input type="number" id="partyLevel" value="5" min="1" max="20">
+                    </div>
+                    <div class="form-group">
+                        <label for="partySize">Tamaño del Grupo:</label>
+                        <input type="number" id="partySize" value="4" min="1" max="8">
+                    </div>
+                    <button id="generateEncounterBtn" class="btn btn-primary">
+                        ⚔️ Generar Encuentro
+                    </button>
+                </div>
+
+                <div id="encounterPanel" class="encounter-panel hidden">
+                    <p class="encounter-xp"><strong>XP del Encuentro:</strong> <span id="encounterXP"></span></p>
+                    <div id="encounterList" class="encounter-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FICHA DE CRIATURA -->
+        <div id="creatureSheet" class="creature-sheet hidden">
+            <div class="sheet-decoration-top"></div>
+            
+            <div class="sheet-header">
+                <h2 id="creatureName" class="character-name">Nombre Criatura</h2>
+                <div class="character-subtitle">
+                    <span id="creatureType">Tipo</span>
+                    <span class="separator">•</span>
+                    <span>CR <span id="creatureCR">0</span></span>
+                    <span class="separator">•</span>
+                    <span id="creatureXP">0 XP</span>
+                </div>
+            </div>
+
+            <div class="character-visual">
+                <div class="portrait-container">
+                    <div class="portrait-frame">
+                        <img id="creaturePortrait" src="" alt="Retrato de criatura">
+                        <button id="regenCreaturePortrait" class="regen-btn">🔄</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats de criatura -->
+            <div class="combat-section">
+                <h3 class="section-subtitle">⚔️ Estadísticas de Combate</h3>
+                <div class="combat-stats-grid">
+                    <div class="combat-stat">
+                        <div class="stat-label">CA</div>
+                        <div class="stat-value" id="creatureAC">0</div>
+                    </div>
+                    <div class="combat-stat">
+                        <div class="stat-label">HP</div>
+                        <div class="stat-value" id="creatureHP">0</div>
+                    </div>
+                    <div class="combat-stat">
+                        <div class="stat-label">Velocidad</div>
+                        <div class="stat-value" id="creatureSpeed">30 ft</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="abilities-section">
+                <h3 class="section-subtitle">⚡ Características</h3>
+                <div class="ability-scores-grid">
+                    <div class="ability-shield">
+                        <div class="ability-name">FUE</div>
+                        <div class="ability-value" id="creatureStr">10</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-name">DES</div>
+                        <div class="ability-value" id="creatureDex">10</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-name">CON</div>
+                        <div class="ability-value" id="creatureCon">10</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-name">INT</div>
+                        <div class="ability-value" id="creatureInt">10</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-name">SAB</div>
+                        <div class="ability-value" id="creatureWis">10</div>
+                    </div>
+                    <div class="ability-shield">
+                        <div class="ability-name">CAR</div>
+                        <div class="ability-value" id="creatureCha">10</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="details-section">
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">🔧 Habilidades</h3>
+                    <ul id="creatureSkills" class="trait-list"></ul>
+                </div>
+
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">✨ Rasgos Especiales</h3>
+                    <ul id="creatureTraits" class="trait-list"></ul>
+                </div>
+
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">⚔️ Acciones</h3>
+                    <ul id="creatureActions" class="trait-list"></ul>
+                </div>
+
+                <div id="legendarySection" class="detail-panel hidden">
+                    <h3 class="section-subtitle">👑 Acciones Legendarias</h3>
+                    <ul id="creatureLegendaryActions" class="trait-list"></ul>
+                </div>
+
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">🛡️ Defensas</h3>
+                    <p id="creatureDefenses">—</p>
+                </div>
+
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">🌍 Ambiente</h3>
+                    <p id="creatureEnvironment">—</p>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="newCreatureBtn" class="btn btn-danger">
+                    🆕 Nueva Criatura
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL DE HISTORIAL -->
+    <div id="historyModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">✖️</span>
+            <h2>📚 Historial de Personajes</h2>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="main-footer">
+        <p>⚔️ D&D Character Forge © 2025 🐉</p>
+        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
+        <button id="toggleTheme" class="theme-toggle">🌙 Modo Oscuro</button>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script src="data/dnd-data.js"></script>
+    <script src="data/bestiary.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
