@@ -1,347 +1,248 @@
-// ===========================================
-// 🎲 D&D CHARACTER FORGE - SISTEMA COMPLETO FINAL
-// Versión con todos los enlaces de botones e IDs corregidos
-// ===========================================
+"use strict";
+/* =========================
+ * DATOS BASE DE D&D
+ * ========================= */
 
-'use strict';
+const DND_DATA = {
+  races: {
+    Humano: { description: 'Versátiles y adaptativos.', speed: 30, size: 'Mediano', traits: ['+1 a todas las características', 'Idiomas: común'] },
+    Elfo: { description: 'Ágiles y perceptivos.', speed: 30, size: 'Mediano', traits: ['Visión en la oscuridad', '+2 Destreza'] }
+  },
+  classes: {
+    Guerrero: { description: 'Maestro en armas y defensa.', hitDie: 10, primaryAbility: 'Fuerza/Destreza', spellcasting: false },
+    Mago: { description: 'Dominio del arcano.', hitDie: 6, primaryAbility: 'Inteligencia', spellcasting: true }
+  },
+  backgrounds: {
+    Noble: { feature: 'Contactos privilegiados', skills: ['Historia', 'Persuasión'] },
+    Forajido: { feature: 'Refugio secreto', skills: ['Sigilo', 'Juego de manos'] }
+  },
+  alignments: [
+    'Legal Bueno','Neutral Bueno','Caótico Bueno',
+    'Legal Neutral','Neutral','Caótico Neutral',
+    'Legal Malvado','Neutral Malvado','Caótico Malvado'
+  ],
+  pointBuyCosts: { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 }
+};
 
-// Las utilidades (randomFromArray, rollDice, calculateModifier) y las funciones
-// principales de generación (generateStats, generateCharacter, displayCharacter, 
-// saveToHistory, openHistoryModal) se asumen cargadas desde 'dnd-data.js'.
-// Los datos (DND_MONSTERS) se asumen cargados desde 'dnd-monsters.js'.
-// La lógica del bestiario (displayCreature, displayEncounter) se asume cargada desde 'bestiary.js'.
-// Las APIs (DND_API) se asumen cargadas desde 'dnd-apis.js'.
+/* =========================
+ * MONSTRUOS
+ * ========================= */
 
-// ===== ESTADO GLOBAL (Necesario para el seguimiento) =====
-let currentCharacter = null;
-let currentCreature = null;
-let currentEncounter = [];
-let currentEdition = '5e';
-const STORAGE_KEY = 'dnd_character_history';
+const DND_MONSTERS = [
+  { name: "Goblin", type: "Humanoide", cr: "1/4", xp: 50, ac: 15, hp: 7, speed: "30 ft", stats: { str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8 }, environment: ["Bosque", "Mazmorra"], traits: ["Nimble Escape"], actions: ["Hoja curva: +4, 1d6 + 2 daño cortante."], legendaryActions: [] },
+  { name: "Ogro", type: "Gigante", cr: "2", xp: 450, ac: 11, hp: 59, speed: "40 ft", stats: { str: 19, dex: 8, con: 17, int: 5, wis: 7, cha: 7 }, environment: ["Montaña", "Bosque"], traits: [], actions: ["Garrote grande: +6, 2d8 + 4 daño contundente."], legendaryActions: [] }
+];
 
+/* =========================
+ * METADATOS Y HELPERS BESTIARIO
+ * ========================= */
 
-// ===========================================
-// 🧍 LÓGICA DE PERSONAJE AVANZADA
-// ===========================================
+const DND_BESTIARY = {
+  version: "5e",
+  creatureTypes: ["Aberración","Bestia","Celestial","Constructo","Dragón","Elemental","Feérico","Demonio","Gigante","Humanoide","Monstruosidad","Cieno","Planta","No-muerto"],
+  environments: ["Mazmorra","Bosque","Montaña","Pantano","Desierto","Subterráneo","Ciudad","Costa","Ártico","Plano Abismal"],
+  challengeRatings: [ { cr: "0", xp: 10 }, { cr: "1/8", xp: 25 }, { cr: "1/4", xp: 50 }, { cr: "1/2", xp: 100 }, { cr: "1", xp: 200 }, { cr: "2", xp: 450 }]
+};
 
-/**
- * Función para generar un personaje de Caos con stats muy altos.
- * Se asume que generateStats está definida en dnd-data.js
- */
-function generateChaosCharacter() {
-    console.log('🌀 Generando personaje CHAOS...');
-    
-    // Función de tirada muy alta para Caos: Tira 4d6, quita el más bajo, y suma un bonus
-    const rollChaosStat = () => {
-        const rolls = [rollDice(6), rollDice(6), rollDice(6), rollDice(6)];
-        rolls.sort((a, b) => a - b);
-        // Sumar el resultado de 3 dados más altos + un bonus (ej: 5)
-        return rolls.slice(1).reduce((a, b) => a + b, 0) + rollDice(5); 
-    };
-    
-    // Generar stats usando la tirada de caos
-    const chaosStats = {
-        strength: rollChaosStat(),
-        dexterity: rollChaosStat(),
-        constitution: rollChaosStat(),
-        intelligence: rollChaosStat(),
-        wisdom: rollChaosStat(),
-        charisma: rollChaosStat()
-    };
-    
-    // Si la función generateCharacter (en dnd-data.js) está disponible, la usamos
-    if (typeof generateCharacter !== 'undefined') {
-        // Llama a la función de generación normal, forzando los stats de caos
-        generateCharacter({ 
-            stats: chaosStats,
-            name: `${generateRandomName('Random', 'Chaos')} el Innombrable`
-        });
-    } else {
-        console.error("Error: Función 'generateCharacter' no definida en dnd-data.js.");
-    }
-}
-
-/**
- * Función para generar personaje con opciones personalizadas (customGenerateBtn)
- * Asume que generateCharacter (en dnd-data.js) está disponible
- */
-function generateCustomCharacter() {
-    const customOptions = {
-        name: document.getElementById('charName').value || null,
-        race: document.getElementById('raceSelect').value || null,
-        charClass: document.getElementById('classSelect').value || null,
-        background: document.getElementById('backgroundSelect').value || null,
-        alignment: document.getElementById('alignmentSelect').value || null,
-    };
-
-    if (typeof generateCharacter !== 'undefined') {
-        generateCharacter(customOptions);
-    } else {
-        console.error("Error: Función 'generateCharacter' no definida en dnd-data.js.");
-    }
-}
-
-
-// ===========================================
-// 👹 LÓGICA DEL BESTIARIO
-// ===========================================
-
-/**
- * Genera una criatura aleatoria de la lista LOCAL (dnd-monsters.js)
- */
-function generateRandomMonster() {
-    console.log('🐺 Generando criatura aleatoria LOCAL...');
-    // Verificar si DND_MONSTERS está cargado desde dnd-monsters.js
-    if (typeof DND_MONSTERS === 'undefined' || DND_MONSTERS.length === 0) {
-        console.error("Error: El array DND_MONSTERS no está definido o está vacío. Asegúrate de que 'dnd-monsters.js' se cargue ANTES de 'app.js'.");
-        return;
-    }
-
-    const randomCreatureData = randomFromArray(DND_MONSTERS);
-    
-    // Mapear los datos al formato de criatura (asumiendo que displayCreature lo maneja)
-    const creature = {
-        name: randomCreatureData.name,
-        type: randomCreatureData.type,
-        cr: randomCreatureData.cr,
-        xp: randomCreatureData.xp,
-        hp: randomCreatureData.hp,
-        ac: randomCreatureData.ac,
-        speed: randomCreatureData.speed,
-        stats: randomCreatureData.stats,
-        traits: randomCreatureData.traits || [],
-        actions: randomCreatureData.actions || [],
-        description: `Un ${randomCreatureData.name} de tipo ${randomCreatureData.type}.`,
-        environment: randomCreatureData.environments || [],
-        rarity: randomFromArray(['Común', 'Raro', 'Épico']) 
-    };
-
-    currentCreature = creature;
-    if (typeof displayCreature !== 'undefined') {
-        displayCreature(creature);
-    } else {
-        console.error("Error: Función 'displayCreature' no definida. (Verifica bestiary.js)");
-        document.getElementById('creatureSheet').innerHTML = `<h2>${creature.name}</h2><pre>${JSON.stringify(creature, null, 2)}</pre>`;
-        document.getElementById('creatureSheet').classList.remove('hidden');
-    }
-}
-
-/**
- * Función para generar un Monstruo de la API (Open5e)
- * Asume que DND_API está definido en dnd-apis.js
- */
-async function generateMonsterFromAPI() {
-    console.log('📡 Generando criatura de API (Open5e)...');
-    
-    if (typeof DND_API === 'undefined' || typeof DND_API.getMonsterDetails === 'undefined') {
-        console.error("Error: DND_API no está disponible. Revisa la carga de `dnd-apis.js`.");
-        document.getElementById('creatureName').textContent = 'Error de API';
-        document.getElementById('creatureSheet').classList.remove('hidden');
-        return;
-    }
-    
+/* =========================
+ * API D&D EXTERNA
+ * ========================= */
+const DND_API = {
+  dnd5e: 'https://www.dnd5eapi.co/api',
+  open5e: 'https://api.open5e.com/v1',
+  cache: { details: {}, lists: {} },
+  async fetchData(url) {
+    if (this.cache.details[url]) return this.cache.details[url];
     try {
-        // Llama a la API para obtener un monstruo aleatorio (simulación simple)
-        const monsterList = await DND_API.listMonsters();
-        const randomIndex = rollDice(monsterList.length) - 1;
-        const randomMonsterIndex = monsterList[randomIndex].index;
-        
-        const creature = await DND_API.getMonsterDetails(randomMonsterIndex);
-        
-        if (creature && typeof displayCreature !== 'undefined') {
-            currentCreature = creature;
-            displayCreature(creature);
-        } else {
-            document.getElementById('creatureName').textContent = 'Fallo al obtener datos de API';
-            document.getElementById('creatureSheet').classList.remove('hidden');
-        }
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error('Error en la API');
+      const data = await resp.json();
+      this.cache.details[url] = data;
+      return data;
+    } catch (err) { console.error(err); return null; }
+  }
+};
 
-    } catch (error) {
-        console.error("Error al generar monstruo con API:", error);
-        document.getElementById('creatureName').textContent = 'Error de conexión a la API';
-        document.getElementById('creatureSheet').classList.remove('hidden');
-    }
+/* =========================
+ * WIZARD AVANZADO PERSONAJES
+ * ========================= */
+
+class CharacterWizard {
+  constructor() {
+    this.currentStep = 1;
+    this.totalSteps = 6;
+    this.character = { name: '', race: null, class: null, background: null, alignment: 'Neutral', stats: { strength: 8, dexterity: 8, constitution: 8, intelligence: 8, wisdom: 8, charisma: 8 }, hp: 0, ac: 10, equipment: [] };
+    this.pointBuyRemaining = 27;
+  }
+  start() {
+    document.getElementById('mainContainer').classList.add('hidden');
+    document.getElementById('wizard-container').classList.remove('hidden');
+    this.renderWizard();
+  }
+  finishWizard() {
+    setTimeout(() => {
+      document.getElementById('wizard-container').classList.add('hidden');
+      document.getElementById('mainContainer').classList.remove('hidden');
+      alert("Personaje creado:\n" + JSON.stringify(this.character, null, 2));
+    }, 700);
+  }
+  renderWizard() {
+    document.getElementById('wizard-container').innerHTML =
+      `<div class="wizard">
+        <h2 class="wizard-title">Paso ${this.currentStep} / ${this.totalSteps}</h2>
+        <!-- Renderiza contenidos según el paso actual aquí -->
+        <button onclick="window.wizard.finishWizard()" class="btn btn-success">Finalizar</button>
+      </div>`;
+  }
+}
+window.wizard = new CharacterWizard();
+
+/* =========================
+ * FUNCIONES Y EVENTOS PRINCIPALES
+ * ========================= */
+
+// --- Eventos principales de botones ---
+document.getElementById('wizardBtn').addEventListener('click', () => window.wizard.start());
+document.getElementById('randomBtn').addEventListener('click', generateRandomCharacter);
+document.getElementById('chaosCharacterBtn').addEventListener('click', generateChaosCharacter);
+document.getElementById('generateCreatureBtn').addEventListener('click', generateCreature);
+document.getElementById('generateEncounterBtn').addEventListener('click', generateEncounter);
+
+// --- Paneles de filtro para bestiario ---
+function initFilters() {
+  populateSelect('filterType', DND_BESTIARY.creatureTypes);
+  populateSelect('filterEnv', DND_BESTIARY.environments);
+  populateSelect('filterCR', DND_BESTIARY.challengeRatings.map(c => c.cr));
+}
+function populateSelect(selectId, values) {
+  const select = document.getElementById(selectId);
+  select.innerHTML = `<option value="">Todos</option>` + values.map(v => `<option value="${v}">${v}</option>`).join('');
+}
+initFilters();
+
+/* ========== Generador de Personaje Aleatorio ========== */
+
+function generateRandomCharacter() {
+  const race = randomFromArray(Object.keys(DND_DATA.races));
+  const clazz = randomFromArray(Object.keys(DND_DATA.classes));
+  const bg = randomFromArray(Object.keys(DND_DATA.backgrounds));
+  const stats = generateRandomStats();
+  const align = randomFromArray(DND_DATA.alignments);
+  const char = {
+    name: 'Héroe Aleatorio',
+    race, class: clazz, background: bg, alignment: align,
+    stats,
+    hp: DND_DATA.classes[clazz].hitDie + calculateModifier(stats.constitution)
+  };
+  displayCharacter(char);
+}
+function generateRandomStats() {
+  const base = [15,14,13,12,10,8];
+  return ['strength','dexterity','constitution','intelligence','wisdom','charisma']
+    .reduce((obj, stat, i) => { obj[stat]=base[i]; return obj; }, {});
+}
+function calculateModifier(stat) { return Math.floor((stat-10)/2); }
+function displayCharacter(char) {
+  const html = `
+    <div class="character-sheet">
+      <h3>${char.name}</h3>
+      <ul>
+        <li><strong>Raza:</strong> ${char.race}</li>
+        <li><strong>Clase:</strong> ${char.class}</li>
+        <li><strong>Trasfondo:</strong> ${char.background}</li>
+        <li><strong>Alineamiento:</strong> ${char.alignment}</li>
+        <li><strong>HP:</strong> ${char.hp}</li>
+      </ul>
+      <h4>Características:</h4>
+      <ul>${Object.entries(char.stats).map(
+          ([k, v]) => `<li>${k}: ${v} (${formatMod(calculateModifier(v))})</li>`
+        ).join('')}</ul>
+    </div>`;
+  openModal(html);
+}
+function formatMod(mod) { return (mod>=0?'+':'')+mod; }
+
+/* ========== Generador modo Caos ========== */
+function generateChaosCharacter() {
+  const stats = {};
+  ["strength","dexterity","constitution","intelligence","wisdom","charisma"].forEach(stat => {
+    stats[stat] = 16 + Math.floor(Math.random()*3);
+  });
+  displayCharacter({
+    name: 'Personaje Caótico',
+    race: randomFromArray(Object.keys(DND_DATA.races)),
+    class: randomFromArray(Object.keys(DND_DATA.classes)),
+    background: randomFromArray(Object.keys(DND_DATA.backgrounds)),
+    alignment: randomFromArray(DND_DATA.alignments),
+    stats,
+    hp: 26
+  });
 }
 
+/* ========== Generador de Criatura ========== */
+function generateCreature() {
+  let type = document.getElementById('filterType').value;
+  let env = document.getElementById('filterEnv').value;
+  let cr = document.getElementById('filterCR').value;
+  let monsters = DND_MONSTERS;
+  if(type) monsters = monsters.filter(m => m.type === type);
+  if(env) monsters = monsters.filter(m => m.environment.includes(env));
+  if(cr) monsters = monsters.filter(m => m.cr === cr);
+  const monster = monsters.length ? randomFromArray(monsters) : randomFromArray(DND_MONSTERS);
+  displayCreature(monster);
+}
+function displayCreature(monster) {
+  document.getElementById('creatureSheet').innerHTML = `
+    <div class="creature-sheet">
+      <h3>${monster.name}</h3>
+      <p><strong>Tipo:</strong> ${monster.type} | <strong>CR:</strong> ${monster.cr}</p>
+      <p><strong>HP:</strong> ${monster.hp} | <strong>AC:</strong> ${monster.ac}</p>
+      <ul>
+        ${Object.entries(monster.stats).map(([k, v])=>`<li>${k}: ${v}</li>`).join('')}
+        <li><strong>Entorno:</strong> ${monster.environment.join(', ')}</li>
+        <li><strong>Acciones:</strong> ${monster.actions.join(', ')}</li>
+        <li><strong>Rasgos:</strong> ${monster.traits.join(', ')}</li>
+      </ul>
+    </div>`;
+}
 
-/**
- * Función para generar una criatura CHAOS (Engendro Chaos)
- * Se asume que randomFromArray y rollDice están definidas en dnd-data.js
- */
-function generateChaosBeast() {
-  console.log('🌀 Generando criatura CHAOS...');
-  
-  const allTypes = ['Aberración', 'Bestia', 'Dragón', 'Demonio', 'Gigante', 'Humanoide', 'No-muerto', 'Monstruosidad'];
-  const allEnvironments = ['Mazmorra', 'Bosque', 'Montaña', 'Pantano', 'Subterráneo'];
-  
-  const randomType = randomFromArray(allTypes);
-  const randomEnvironment = randomFromArray(allEnvironments);
-  const randomCR = rollDice(30); 
-  
-  // Generar stats aleatorios altos para el Caos
-  const chaosStats = { 
-      str: rollDice(25), dex: rollDice(25), con: rollDice(25), 
-      int: rollDice(25), wis: rollDice(25), cha: rollDice(25) 
-  };
-  
-  const creature = {
-    name: `${generateRandomName(randomType, 'Chaos')} el Innombrable`, 
-    type: randomType,
-    cr: randomCR,
-    environment: [randomEnvironment],
-    hp: rollDice(20) * randomCR,
-    ac: 10 + rollDice(10),
-    speed: "40 ft",
-    stats: chaosStats,
-    actions: [
-      { name: "Ataque Caótico", desc: `El enemigo es golpeado por energía pura. +${rollDice(10)} al impacto, daño ${rollDice(6)}d${rollDice(12)} (Daño puro)`},
-      { name: "Desintegración", desc: `El enemigo debe superar una tirada de salvación de CON CD ${10 + Math.floor(randomCR / 2)} o sufrir ${rollDice(4)}d${rollDice(8)} de fuerza.`}
-    ],
-    description: `Una abominación ${randomType} de CR ${randomCR} que opera fuera de las leyes de la física. ¡TOTALMENTE IMPREDECIBLE!`,
-    traits: [`Aura de Miedo (CD ${10 + Math.floor(randomCR / 2)})`, 'Inmunidad a todo daño mundano'],
-    rarity: 'Legendario'
-  };
-  
-  currentCreature = creature;
-  if (typeof displayCreature !== 'undefined') {
-    displayCreature(creature);
-  } else {
-    document.getElementById('creatureSheet').innerHTML = `<h2>${creature.name}</h2><pre>${JSON.stringify(creature, null, 2)}</pre>`;
-    document.getElementById('creatureSheet').classList.remove('hidden');
+/* ========== Generador criatura desde API ========== */
+async function generateApiCreature() {
+  const data = await DND_API.fetchData(DND_API.open5e + '/monsters/?limit=1&ordering=random');
+  if(data && data.results && data.results.length) {
+    const m = data.results[0];
+    const html = `
+      <div class="creature-sheet">
+        <h3>${m.name}</h3>
+        <p><strong>Tipo:</strong> ${m.type || ''} | <strong>CR:</strong> ${m.challenge_rating}</p>
+        <p><strong>HP:</strong> ${m.hit_points} | <strong>AC:</strong> ${m.armor_class}</p>
+        <ul>
+          <li><strong>Alineamiento:</strong> ${m.alignment || '-'}</li>
+          <li><strong>Size:</strong> ${m.size}</li>
+          <li><strong>Environment:</strong> ${m.environment || '-'}</li>
+        </ul>
+      </div>`;
+    document.getElementById('creatureSheet').innerHTML = html;
   }
 }
 
-
-/**
- * Función para generar un encuentro (usa la lógica de dnd-apis.js)
- * Asume que DND_API y displayEncounter están definidos.
- */
-async function generateEncounter() {
-    const level = parseInt(document.getElementById('partyLevel').value) || 1;
-    const size = parseInt(document.getElementById('partySize').value) || 4;
-    
-    // Verificar si la API está disponible globalmente
-    if (typeof DND_API !== 'undefined' && DND_API.generateEncounter && typeof displayEncounter !== 'undefined') {
-        try {
-            const encounter = await DND_API.generateEncounter(level, size);
-            displayEncounter(encounter);
-        } catch (error) {
-            console.error("Error al generar encuentro con DND_API:", error);
-            document.getElementById('encounterMonstersList').innerHTML = '<li class="trait-description">Error de conexión o datos en la API. Intenta más tarde.</li>';
-            document.getElementById('encounterSheet').classList.remove('hidden');
-        }
-    } else {
-        document.getElementById('encounterMonstersList').innerHTML = '<li class="trait-description">Error: DND_API o displayEncounter no están disponibles. Revisa la carga de `dnd-apis.js` y `bestiary.js` o que sus funciones estén definidas.</li>';
-        document.getElementById('encounterSheet').classList.remove('hidden');
-    }
+/* ========== Encuentros D&D ========== */
+function generateEncounter() {
+  const lvl = Number(document.getElementById('groupLevel').value) || 1;
+  const size = Number(document.getElementById('groupSize').value) || 4;
+  let pool = DND_MONSTERS;
+  let monsters = [];
+  for(let i = 0; i < size; i++) {
+    monsters.push(randomFromArray(pool));
+  }
+  document.getElementById('encounterSheet').innerHTML =
+    `<strong>Encuentro nivel ${lvl}, grupo ${size}:</strong>` +
+    monsters.map(m => `<div>${m.name} (CR ${m.cr})</div>`).join('');
 }
 
-// ===========================================
-// 💡 INICIALIZACIÓN DE EVENTOS (El punto CLAVE)
-// ===========================================
-
-function initEventListeners() {
-
-    // 1. PERSONAJES: Botón RANDOM (Usando el nuevo ID randomBtn)
-    const randomBtn = document.getElementById('randomBtn');
-    if (randomBtn && typeof generateCharacter !== 'undefined') {
-        randomBtn.addEventListener('click', () => generateCharacter());
-    } else {
-        console.error("Error: Botón 'randomBtn' o función 'generateCharacter' no encontrados.");
-    }
-    
-    // 2. PERSONAJES: Botón CHAOS (Usando el nuevo ID chaosCharacterBtn)
-    const chaosCharacterBtn = document.getElementById('chaosCharacterBtn');
-    if (chaosCharacterBtn) chaosCharacterBtn.addEventListener('click', generateChaosCharacter);
-
-    // 3. PERSONAJES: Botón FORJAR HÉROE (CUSTOM)
-    const customGenerateBtn = document.getElementById('customGenerateBtn');
-    if (customGenerateBtn) customGenerateBtn.addEventListener('click', generateCustomCharacter);
-    
-    // 4. BESTIARIO: Monstruo LOCAL (generateCreatureBtn)
-    const generateCreatureBtn = document.getElementById('generateCreatureBtn');
-    if (generateCreatureBtn) generateCreatureBtn.addEventListener('click', generateRandomMonster);
-
-    // 5. BESTIARIO: Monstruo API (generateFromAPIBtn)
-    const generateFromAPIBtn = document.getElementById('generateFromAPIBtn');
-    if (generateFromAPIBtn) generateFromAPIBtn.addEventListener('click', generateMonsterFromAPI);
-
-    // 6. BESTIARIO: Engendro CHAOS (chaosBeastBtn)
-    const chaosBeastBtn = document.getElementById('chaosBeastBtn');
-    if (chaosBeastBtn) chaosBeastBtn.addEventListener('click', generateChaosBeast);
-    
-    // 7. BESTIARIO: OCULTAR FICHA (newCreatureBtn renombrado a hideCreatureBtn en el HTML corregido)
-    const hideCreatureBtn = document.getElementById('hideCreatureBtn');
-    if (hideCreatureBtn) hideCreatureBtn.addEventListener('click', () => {
-        document.getElementById('creatureSheet').classList.add('hidden');
-    });
-
-    // 8. ENCUENTRO: Generar
-    const generateEncounterBtn = document.getElementById('generateEncounterBtn');
-    if (generateEncounterBtn) generateEncounterBtn.addEventListener('click', generateEncounter);
-    
-    // 9. ENCUENTRO: Nuevo Encuentro (Botón de la ficha de encuentro)
-    const newEncounterBtn = document.getElementById('newEncounterBtn');
-    if (newEncounterBtn) newEncounterBtn.addEventListener('click', generateEncounter);
-    
-    // 10. BOTÓN DE HISTORIAL
-    const historyBtn = document.getElementById('historyBtn');
-    if (historyBtn && typeof openHistoryModal !== 'undefined') {
-        historyBtn.addEventListener('click', openHistoryModal);
-    } else {
-        console.error("Error: Botón 'historyBtn' o función 'openHistoryModal' no encontrados.");
-    }
-    
-    // 11. CUSTOM PANEL TOGGLE
-    const toggleCustomBtn = document.getElementById('toggleCustomBtn');
-    const customPanel = document.getElementById('customPanel');
-    if (toggleCustomBtn && customPanel) {
-        toggleCustomBtn.addEventListener('click', () => {
-            customPanel.classList.toggle('hidden');
-            toggleCustomBtn.textContent = customPanel.classList.contains('hidden') ? '⚙️ Personalizar Opciones' : '❌ Ocultar Opciones';
-        });
-    }
-
-    // 12. TEMA y MODAL (Lógica de cierre y tema)
-    const closeModalBtn = document.querySelector('.close-modal');
-    if (closeModalBtn) closeModalBtn.addEventListener('click', () => {
-        document.getElementById('historyModal').classList.add('hidden');
-    });
-
-    window.addEventListener('click', (event) => {
-        const modal = document.getElementById('historyModal');
-        if (event.target === modal) {
-            document.getElementById('historyModal').classList.add('hidden');
-        }
-    });
-    
-    const themeToggleBtn = document.getElementById('toggleTheme');
-    if (themeToggleBtn) {
-        themeToggleBtn.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-            const isDark = document.body.classList.contains('dark-mode');
-            themeToggleBtn.textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Oscuro';
-        });
-    }
-    
-    // Inicializar el tema al cargar
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.body.classList.add('dark-mode');
-        if (themeToggleBtn) themeToggleBtn.textContent = '☀️ Modo Claro';
-    } else if (themeToggleBtn) {
-        themeToggleBtn.textContent = '🌙 Modo Oscuro';
-    }
+/* ========== Helpers generales ========== */
+function randomFromArray(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function openModal(content) {
+  // Simple: alert. Expande fácil a modal visual.
+  alert(content.replace(/<\/?[^>]+(>|$)/g, ""));
 }
-
-
-// ===== 🚀 INICIO DE LA APLICACIÓN (Aseguramos la llamada) =====
-document.addEventListener('DOMContentLoaded', () => {
-    initEventListeners();
-    
-    // Generar personaje inicial si la función está disponible
-    if (typeof generateCharacter !== 'undefined') {
-        generateCharacter(); 
-    } else {
-        console.warn("Advertencia: No se pudo generar el personaje inicial. Verifique la carga de 'dnd-data.js'.");
-    }
-});
