@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Character Forge - Generador Épico</title>
+    <title>D&D Character Forge - Generador Épico NFT</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="styles.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
 </head>
 <body>
     <header class="main-header">
@@ -78,6 +80,16 @@
                 <div class="avatar-frame"></div>
             </div>
 
+            <div id="nftSection" class="nft-section hidden">
+                <h3 class="section-subtitle">💎 ESTADO NFT <span id="nftRarity" class="rarity-badge"></span></h3>
+                <div class="nft-stats">
+                    <p>ID Simulado: <strong id="nftTokenID">--</strong></p>
+                    <p>Blockchain: <strong id="nftBlockchain">Ethereum (Simulado)</strong></p>
+                    <p>Bonus Especial: <strong id="nftBonus">--</strong></p>
+                    <p id="nftShinyFoil" class="shiny-foil-text"></p>
+                </div>
+                <button id="mintNFTBtn" class="btn btn-gold full-width">✨ Mint NFT</button>
+            </div>
             <div class="power-level-container">
                 <div class="power-bar-bg"><div id="powerBar" class="power-bar-fill"></div></div>
                 <div id="powerLevel" class="power-level-text">⭐ Novato</div>
