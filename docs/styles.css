@@ -1,22 +1,21 @@
 /* ===========================================
-   D&D CHARACTER FORGE - ESTILOS ÉPICOS PROFESIONALES
-   Inspirado en Baldur's Gate 3, Pathfinder, fichas clásicas D&D
+   D&D CHARACTER FORGE - ESTILOS ÉPICOS PROFESIONALES (PULIDO)
    =========================================== */
 
 /* ===== IMPORTS Y VARIABLES ===== */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap');
 
 :root {
-  /* Colores principales */
+  /* Colores principales - Base de Pergamino */
   --parchment-light: #f4e9d8;
-  --parchment: #e8d5b7;
-  --parchment-dark: #d4c4a8;
+  --parchment: #e8d5b7; /* Fondo principal de fichas */
+  --parchment-dark: #d4c4a8; /* Fondo del body */
   --ink-black: #1a0f08;
   --ink-dark: #2a1a0f;
   --ink-medium: #5d4037;
   --ink-light: #8d6e63;
   
-  /* Colores épicos */
+  /* Colores épicos - Acentos */
   --gold: #d4af37;
   --gold-light: #f4d03f;
   --blood-red: #8b0000;
@@ -36,24 +35,24 @@
   --spacing-lg: 32px;
   --spacing-xl: 64px;
 
-  /* Sombra de caja (para dar profundidad de ficha) */
-  --box-shadow-parchment: 0 4px 10px rgba(0, 0, 0, 0.2);
+  /* Sombra de caja (Para dar profundidad de ficha física) */
+  --box-shadow-parchment: 4px 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 /* ===== MODO OSCURO (Dark Mode) ===== */
 .dark-mode {
   --parchment-light: #121212;
-  --parchment: #1e1e1e;
-  --parchment-dark: #2a2a2a;
+  --parchment: #1e1e1e; 
+  --parchment-dark: #2a2a2a; 
   --ink-black: #f0f0f0;
   --ink-dark: #d0d0d0;
   --ink-medium: #b0b0b0;
   --ink-light: #8d6e63;
-  --box-shadow-parchment: 0 4px 10px rgba(0, 0, 0, 0.5);
+  --box-shadow-parchment: 4px 4px 10px rgba(255, 255, 255, 0.1);
   
-  /* Acentos se mantienen para el contraste */
+  /* Acentos se mantienen o se aclaran para contraste */
   --gold: #f4d03f; 
-  --blood-red: #ff4500;
+  --blood-red: #ff6347; /* Un rojo más vibrante para la oscuridad */
 }
 
 
@@ -70,17 +69,7 @@ body {
   color: var(--ink-black);
   line-height: 1.6;
   transition: background-color 0.3s, color 0.3s;
-  padding-bottom: var(--spacing-xl); /* Espacio para el footer */
-}
-
-a {
-  color: var(--blood-red);
-  text-decoration: none;
-  transition: color 0.2s;
-}
-
-a:hover {
-  color: var(--dark-red);
+  padding-bottom: var(--spacing-xl);
 }
 
 h1, h2, h3, h4, .main-title {
@@ -91,50 +80,35 @@ h1, h2, h3, h4, .main-title {
 }
 
 .main-title {
-    letter-spacing: 2px;
-    font-size: 2.5rem;
+    letter-spacing: 3px; /* Más espaciado para sensación épica */
+    font-size: 3rem; /* Título más grande */
     color: var(--gold-light);
-    text-shadow: 2px 2px var(--blood-red);
+    text-shadow: 3px 3px 0 var(--blood-red); /* Sombra 3D */
+}
+
+.subtitle {
+    font-family: var(--font-cursive);
+    font-size: 1.5rem; /* Subtítulo más grande */
+    color: var(--silver);
+    margin-top: -10px;
+    opacity: 0.9;
 }
 
 .section-title {
-    font-size: 1.8rem;
+    font-size: 2rem;
     text-align: center;
-    border-bottom: 3px solid var(--ink-medium);
+    border-bottom: 4px solid var(--blood-red); /* Línea más gruesa y roja */
     padding-bottom: var(--spacing-sm);
     margin-bottom: var(--spacing-md);
     color: var(--blood-red);
 }
 
 .section-subtitle {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     color: var(--ink-dark);
-    border-bottom: 1px dashed var(--ink-light);
+    border-bottom: 2px dashed var(--ink-light);
     margin-bottom: var(--spacing-sm);
     padding-bottom: 4px;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* Estilo de scrollbar (temático) */
-::-webkit-scrollbar {
-  width: 12px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--parchment);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--ink-medium);
-  border-radius: 6px;
-  border: 3px solid var(--parchment);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-light);
 }
 
 /* ===== ENCABEZADO Y CONTENEDOR PRINCIPAL ===== */
@@ -142,29 +116,17 @@ h1, h2, h3, h4, .main-title {
   background-color: var(--ink-dark);
   padding: var(--spacing-md) 0;
   text-align: center;
-  border-bottom: 5px solid var(--blood-red);
+  border-bottom: 8px solid var(--gold); /* Borde dorado destacado */
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: var(--spacing-lg);
 }
 
 .header-decoration {
-    font-size: 2rem;
-    color: var(--gold);
+    font-size: 3rem;
+    color: var(--blood-red);
     animation: rotateIcon 10s linear infinite;
-}
-
-@keyframes rotateIcon {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.subtitle {
-    color: var(--silver);
-    font-family: var(--font-cursive);
-    font-size: 1.2rem;
-    margin-top: -5px;
 }
 
 .container {
@@ -176,106 +138,59 @@ h1, h2, h3, h4, .main-title {
 /* ===== NAVEGACIÓN Y CONTROLES (TABS) ===== */
 .tab-navigation {
     display: flex;
-    justify-content: flex-start;
-    gap: 5px;
+    justify-content: center; /* Centrar las pestañas */
+    gap: 10px;
     margin-bottom: var(--spacing-md);
-    border-bottom: 3px solid var(--ink-medium);
+    border-bottom: 4px solid var(--ink-medium);
 }
 
 .tab-btn {
-    padding: 10px 20px;
-    border: none;
+    padding: 12px 24px;
+    border: 3px solid var(--ink-medium);
     border-radius: 8px 8px 0 0;
-    cursor: pointer;
+    font-size: 1.1rem;
     background-color: var(--parchment-light);
     color: var(--ink-dark);
-    font-family: var(--font-title);
-    font-size: 1rem;
-    transition: background-color 0.2s, color 0.2s;
-    border: 2px solid var(--ink-medium);
-    border-bottom: none;
-}
-
-.tab-btn:hover {
-    background-color: var(--parchment);
 }
 
 .tab-btn.active {
     background-color: var(--parchment);
     color: var(--blood-red);
-    font-weight: bold;
-    border: 3px solid var(--blood-red);
-    border-bottom: 3px solid var(--parchment); /* Para que parezca que está conectada */
+    font-weight: 700;
+    border: 4px solid var(--blood-red);
+    border-bottom: 4px solid var(--parchment);
     transform: translateY(1px);
+    box-shadow: none; /* Quitar sombra de la pestaña activa */
 }
 
 .tab-content {
     background-color: var(--parchment);
     padding: var(--spacing-lg);
-    border: 4px solid var(--ink-medium);
+    border: 5px solid var(--ink-medium); /* Borde de ficha más marcado */
     border-radius: 0 0 10px 10px;
     box-shadow: var(--box-shadow-parchment);
 }
 
-/* ===== CONTROLS GRID ===== */
-.controls-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-md);
-  margin: var(--spacing-lg) 0;
-}
-
-/* ===== BOTONES GENERALES ===== */
+/* ===== BOTONES GENERALES (Ajustes de color y sombra) ===== */
 .btn {
-  display: inline-block;
-  padding: 12px 24px;
+  padding: 15px 30px;
   border: 3px solid var(--ink-medium);
   border-radius: 8px;
-  cursor: pointer;
   font-family: var(--font-title);
-  font-size: 1rem;
-  text-transform: uppercase;
-  transition: transform 0.1s, box-shadow 0.1s;
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
-  text-align: center;
-}
-
-.btn:active {
-  transform: translateY(1px);
-  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
 }
 
 .btn-primary {
   background-color: var(--blood-red);
-  color: var(--parchment-light);
   border-color: var(--dark-red);
 }
 
-.btn-primary:hover {
-  background-color: var(--dark-red);
-}
-
-.btn-danger {
+.btn-danger { /* Usado para Bestiario */
   background-color: var(--ink-dark);
-  color: var(--parchment-light);
   border-color: var(--ink-black);
 }
 
-.btn-danger:hover {
-  background-color: var(--ink-black);
-}
-
-.btn-subtitle {
-  display: block;
-  font-size: 0.85rem;
-  font-family: var(--font-body);
-  color: var(--parchment-light);
-  margin-top: 8px;
-  opacity: 0.9;
-  font-style: italic;
-}
-
-/* ===== BOTÓN ACCENT (CHAOS) ===== */
+/* Botón de Caos (Accent) */
 @keyframes chaosGradient {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -286,388 +201,68 @@ h1, h2, h3, h4, .main-title {
   background: linear-gradient(135deg, var(--royal-purple) 0%, var(--blood-red) 50%, var(--gold) 100%);
   background-size: 200% 200%;
   animation: chaosGradient 3s ease infinite;
-  border: 3px solid var(--gold-light);
-  box-shadow: 0 0 20px rgba(218, 165, 32, 0.5);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-accent::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: rgba(255, 255, 255, 0.1);
-  transform: rotate(30deg);
-  pointer-events: none;
-}
-
-.btn-accent:hover {
-  box-shadow: 0 0 30px var(--gold-light);
-}
-
-/* ===== FORMULARIOS Y SELECTORES ===== */
-select, input[type="number"] {
-    padding: 10px;
-    border: 2px solid var(--ink-medium);
-    border-radius: 6px;
-    background-color: var(--parchment-light);
-    color: var(--ink-black);
-    font-family: var(--font-body);
-    font-size: 1rem;
-    width: 100%;
-    margin-top: var(--spacing-sm);
-    appearance: none; /* Elimina estilos nativos en algunos navegadores */
+  border: 4px solid var(--gold-light); /* Borde más grueso y dorado */
+  box-shadow: 0 0 25px rgba(218, 165, 32, 0.7); /* Sombra más fuerte */
 }
 
 /* ===== FICHA DE PERSONAJE Y BESTIARIO (SHEETS) ===== */
-
 .character-sheet, .creature-sheet, .encounter-sheet {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-lg);
+  border: 6px solid var(--ink-medium); /* Borde de ficha principal muy destacado */
+  border-radius: 12px;
   padding: var(--spacing-lg);
-  margin-top: var(--spacing-md);
-  background-color: var(--parchment);
-  border: 4px solid var(--ink-medium);
-  border-radius: 10px;
-  box-shadow: var(--box-shadow-parchment);
-}
-
-@media (min-width: 900px) {
-  .character-sheet {
-    grid-template-columns: 2fr 1fr; /* Columna principal y barra lateral */
-  }
-}
-
-/* --- Panel de Información Principal --- */
-.main-info-panel {
-    grid-column: 1 / -1; /* Ocupa todo el ancho en la parte superior */
-    text-align: center;
-    border-bottom: 3px solid var(--blood-red);
-    padding-bottom: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
 }
 
 .character-name {
-    font-family: var(--font-title);
-    font-size: 3rem;
+    font-size: 3.5rem; /* Más grande */
     color: var(--dark-red);
-    text-shadow: 1px 1px 0 var(--ink-dark);
-}
-
-.character-details {
-    font-family: var(--font-body);
-    font-size: 1.2rem;
-    font-style: italic;
-    color: var(--ink-medium);
-}
-
-.power-level-bar {
-    width: 100%;
-    height: 10px;
-    background-color: var(--ink-light);
-    border-radius: 5px;
-    margin-top: var(--spacing-sm);
-}
-
-.power-level-fill {
-    height: 100%;
-    width: 0%; /* Se actualiza con JS */
-    background-color: var(--gold);
-    border-radius: 5px;
-    transition: width 0.5s ease-out;
+    text-shadow: 2px 2px 0 var(--ink-dark);
 }
 
 /* --- Grid de Habilidades (Abilities) --- */
-.abilities-scores-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
-    text-align: center;
-    margin-bottom: var(--spacing-lg);
-}
-
 .ability-score {
     background-color: var(--ink-dark);
     color: var(--parchment-light);
-    padding: var(--spacing-sm);
-    border-radius: 8px;
-    border: 3px solid var(--gold);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
-    transition: transform 0.1s;
-}
-
-.ability-score:hover {
-    transform: scale(1.03);
-}
-
-.ability-label {
-    font-family: var(--font-title);
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    color: var(--gold-light);
-    margin-bottom: 4px;
-}
-
-.ability-value {
-    font-size: 2rem;
-    font-weight: bold;
-    color: var(--parchment-light);
+    border: 4px solid var(--gold); /* Borde dorado más grueso */
 }
 
 .ability-modifier {
-    font-size: 1.5rem;
-    color: var(--blood-red);
-}
-
-/* --- Grid de Combate y Stats --- */
-.combat-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-    gap: var(--spacing-md);
-    text-align: center;
-    margin-bottom: var(--spacing-lg);
-}
-
-.stat-block {
-    background-color: var(--parchment-light);
-    padding: var(--spacing-sm);
-    border: 2px solid var(--ink-medium);
-    border-radius: 4px;
-}
-
-.stat-label {
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    color: var(--ink-medium);
-}
-
-.stat-value {
     font-family: var(--font-title);
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: var(--blood-red);
+    font-size: 2rem; /* Más grande para el modificador */
+    color: var(--gold-light); /* Modificador dorado */
 }
 
-/* --- Paneles de Detalles --- */
-.detail-panel {
-    background-color: var(--parchment-light);
-    padding: var(--spacing-md);
-    border: 1px solid var(--ink-light);
-    border-radius: 6px;
-    margin-bottom: var(--spacing-md);
-}
-
-.trait-list {
-    list-style: none;
-    padding: 0;
-}
-
-.trait-list li {
-    margin-bottom: var(--spacing-sm);
-    padding-left: 1.5em;
-    position: relative;
-    font-family: var(--font-body);
-    color: var(--ink-dark);
-}
-
-.trait-list li::before {
-    content: "🗡️"; /* Icono temático */
-    position: absolute;
-    left: 0;
-    color: var(--gold);
-    font-size: 0.8em;
-}
-
-.trait-description {
-    font-style: italic;
-    color: var(--ink-medium);
-    margin-top: 5px;
-}
-
-/* ===== BESTIARIO Y ENCUENTRO ===== */
-
-.creature-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-lg);
-}
-
-.creature-stat-block {
-    background-color: var(--ink-dark);
-    color: var(--parchment-light);
-    padding: var(--spacing-sm);
-    border-radius: 8px;
-    border: 3px solid var(--steel-blue);
-    text-align: center;
-}
-
-/* Hoja de Encuentro */
-.encounter-sheet {
-    background-color: var(--parchment-dark);
-    border-color: var(--royal-purple);
-}
-
-.encounter-details {
-    display: flex;
-    justify-content: space-around;
-    padding: var(--spacing-sm);
-    border-bottom: 2px dashed var(--ink-medium);
-    margin-bottom: var(--spacing-md);
-}
-
-#encounterList {
-    list-style: none;
-    padding: 0;
-}
-
-.encounter-monster-item {
-    padding: 10px;
-    border-bottom: 1px solid var(--ink-light);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.cr-badge {
-    background-color: var(--blood-red);
-    color: var(--parchment-light);
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    font-weight: bold;
-}
-
-/* ===== NFT Y RARESAS ===== */
+/* --- Raresas y NFT (PULIDO) --- */
 .rarity-badge {
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    text-transform: uppercase;
-    display: inline-block;
-    margin-left: var(--spacing-sm);
-    border: 1px solid;
+    padding: 3px 10px;
+    border-radius: 15px;
     font-family: var(--font-title);
+    font-size: 0.9rem;
+    letter-spacing: 1px;
 }
 
-.rarity-común { background-color: var(--silver); color: var(--ink-black); border-color: gray; }
-.rarity-raro { background-color: var(--steel-blue); color: var(--parchment-light); border-color: navy; }
-.rarity-épico { background-color: var(--royal-purple); color: var(--parchment-light); border-color: purple; }
-.rarity-legendario { background-color: var(--gold); color: var(--ink-dark); border-color: var(--gold-light); }
+.rarity-legendario { 
+    background-color: var(--gold); 
+    color: var(--ink-dark); 
+    border-color: var(--dark-red);
+    box-shadow: 0 0 5px var(--gold-light);
+}
 
 .nft-panel {
-    text-align: center;
-    padding: var(--spacing-md);
-    border: 2px solid var(--royal-purple);
-    border-radius: 10px;
-    background-color: var(--parchment-light);
-    box-shadow: 0 0 15px rgba(75, 0, 130, 0.4);
-    margin-top: var(--spacing-lg);
+    border: 3px solid var(--royal-purple);
+    box-shadow: 0 0 20px rgba(75, 0, 130, 0.6); /* Sombra más intensa */
 }
 
-/* ===== MODAL DE HISTORIAL ===== */
-.modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
+/* --- Modal (Historial) --- */
 .modal-content {
-    background-color: var(--parchment);
-    padding: var(--spacing-lg);
-    border: 5px solid var(--blood-red);
-    border-radius: 10px;
-    width: 90%;
-    max-width: 700px;
-    position: relative;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.8);
-    max-height: 80vh;
-    overflow-y: auto;
-}
-
-.close-modal {
-    color: var(--blood-red);
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close-modal:hover,
-.close-modal:focus {
-    color: var(--dark-red);
-}
-
-.history-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px dashed var(--ink-light);
+    border: 6px solid var(--blood-red); /* Borde del modal en rojo sangre */
 }
 
 .history-name {
-    font-family: var(--font-title);
-    font-weight: bold;
     color: var(--blood-red);
-    display: flex;
-    align-items: center;
+    font-size: 1.1rem;
 }
 
-.history-details {
-    font-family: var(--font-body);
-    font-style: italic;
-    color: var(--ink-medium);
-    flex-grow: 1;
-    margin-left: var(--spacing-md);
-}
-
-/* FOOTER */
+/* --- Footer --- */
 .main-footer {
-    background-color: var(--ink-dark);
-    color: var(--ink-light);
-    text-align: center;
-    padding: var(--spacing-md) 0;
-    border-top: 5px solid var(--gold);
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    z-index: 50; /* Sobre la página, bajo el modal */
-}
-
-.main-footer p {
-    margin: 5px 0;
-    font-size: 0.9rem;
-    font-family: var(--font-body);
-}
-
-.theme-toggle {
-    background-color: var(--parchment-light);
-    color: var(--ink-dark);
-    padding: 8px 15px;
-    border: 2px solid var(--ink-medium);
-    border-radius: 5px;
-    cursor: pointer;
-    font-family: var(--font-title);
-    margin-top: 10px;
-}
-
-.dark-mode .theme-toggle {
-    background-color: var(--parchment-dark);
-    color: var(--parchment-light);
-    border-color: var(--gold);
+    border-top: 6px solid var(--gold-light); /* Borde dorado destacado */
 }
