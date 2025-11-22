@@ -1,268 +1,64 @@
-/* ===========================================
-   D&D CHARACTER FORGE - ESTILOS ÉPICOS PROFESIONALES (PULIDO)
-   =========================================== */
-
-/* ===== IMPORTS Y VARIABLES ===== */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap');
-
 :root {
-  /* Colores principales - Base de Pergamino */
   --parchment-light: #f4e9d8;
-  --parchment: #e8d5b7; /* Fondo principal de fichas */
-  --parchment-dark: #d4c4a8; /* Fondo del body */
+  --parchment: #e8d5b7;
+  --parchment-dark: #d4c4a8;
   --ink-black: #1a0f08;
-  --ink-dark: #2a1a0f;
-  --ink-medium: #5d4037;
-  --ink-light: #8d6e63;
-  
-  /* Colores épicos - Acentos */
   --gold: #d4af37;
-  --gold-light: #f4d03f;
   --blood-red: #8b0000;
-  --dark-red: #5c0000;
-  --royal-purple: #4b0082;
-  --steel-blue: #4682b4;
-  --silver: #c0c0c0;
-
-  /* Tipografía */
   --font-title: 'Cinzel', serif;
   --font-body: 'MedievalSharp', cursive;
-  --font-cursive: 'Marck Script', cursive;
-
-  /* Espaciado */
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 32px;
-  --spacing-xl: 64px;
-
-  /* Sombra de caja (Para dar profundidad de ficha física) */
   --box-shadow-parchment: 4px 4px 10px rgba(0, 0, 0, 0.3);
 }
-
-/* ===== MODO OSCURO (Dark Mode) ===== */
-.dark-mode {
-  --parchment-light: #121212;
-  --parchment: #1e1e1e; 
-  --parchment-dark: #2a2a2a; 
-  --ink-black: #f0f0f0;
-  --ink-dark: #d0d0d0;
-  --ink-medium: #b0b0b0;
-  --ink-light: #8d6e63;
-  --box-shadow-parchment: 4px 4px 10px rgba(255, 255, 255, 0.1);
-  
-  /* Acentos se mantienen o se aclaran para contraste */
-  --gold: #f4d03f; 
-  --blood-red: #ff6347; /* Un rojo más vibrante para la oscuridad */
-}
-
-
-/* ===== RESET Y ESTILO BASE ===== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 body {
-  font-family: var(--font-body);
-  background-color: var(--parchment-dark);
+  background: linear-gradient(to bottom, var(--ink-black), var(--parchment-dark));
   color: var(--ink-black);
-  line-height: 1.6;
-  transition: background-color 0.3s, color 0.3s;
-  padding-bottom: var(--spacing-xl);
+  font-family: var(--font-body);
 }
-
-h1, h2, h3, h4, .main-title {
-  font-family: var(--font-title);
-  color: var(--ink-dark);
-  text-transform: uppercase;
-  margin-bottom: var(--spacing-sm);
-}
-
 .main-title {
-    letter-spacing: 3px; /* Más espaciado para sensación épica */
-    font-size: 3rem; /* Título más grande */
-    color: var(--gold-light);
-    text-shadow: 3px 3px 0 var(--blood-red); /* Sombra 3D */
-}
-
-.subtitle {
-    font-family: var(--font-cursive);
-    font-size: 1.5rem; /* Subtítulo más grande */
-    color: var(--silver);
-    margin-top: -10px;
-    opacity: 0.9;
-}
-
-.section-title {
-    font-size: 2rem;
-    text-align: center;
-    border-bottom: 4px solid var(--blood-red); /* Línea más gruesa y roja */
-    padding-bottom: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
-    color: var(--blood-red);
-}
-
-.section-subtitle {
-    font-size: 1.4rem;
-    color: var(--ink-dark);
-    border-bottom: 2px dashed var(--ink-light);
-    margin-bottom: var(--spacing-sm);
-    padding-bottom: 4px;
-}
-
-/* ===== ENCABEZADO Y CONTENEDOR PRINCIPAL ===== */
-.main-header {
-  background-color: var(--ink-dark);
-  padding: var(--spacing-md) 0;
-  text-align: center;
-  border-bottom: 8px solid var(--gold); /* Borde dorado destacado */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: var(--spacing-lg);
-}
-
-.header-decoration {
-    font-size: 3rem;
-    color: var(--blood-red);
-    animation: rotateIcon 10s linear infinite;
-}
-
-.container {
-  max-width: 1400px;
-  margin: var(--spacing-lg) auto;
-  padding: 0 var(--spacing-md);
-}
-
-/* ===== NAVEGACIÓN Y CONTROLES (TABS) ===== */
-.tab-navigation {
-    display: flex;
-    justify-content: center; /* Centrar las pestañas */
-    gap: 10px;
-    margin-bottom: var(--spacing-md);
-    border-bottom: 4px solid var(--ink-medium);
-}
-
-.tab-btn {
-    padding: 12px 24px;
-    border: 3px solid var(--ink-medium);
-    border-radius: 8px 8px 0 0;
-    font-size: 1.1rem;
-    background-color: var(--parchment-light);
-    color: var(--ink-dark);
-}
-
-.tab-btn.active {
-    background-color: var(--parchment);
-    color: var(--blood-red);
-    font-weight: 700;
-    border: 4px solid var(--blood-red);
-    border-bottom: 4px solid var(--parchment);
-    transform: translateY(1px);
-    box-shadow: none; /* Quitar sombra de la pestaña activa */
-}
-
-.tab-content {
-    background-color: var(--parchment);
-    padding: var(--spacing-lg);
-    border: 5px solid var(--ink-medium); /* Borde de ficha más marcado */
-    border-radius: 0 0 10px 10px;
-    box-shadow: var(--box-shadow-parchment);
-}
-
-/* ===== BOTONES GENERALES (Ajustes de color y sombra) ===== */
-.btn {
-  padding: 15px 30px;
-  border: 3px solid var(--ink-medium);
-  border-radius: 8px;
+  color: var(--blood-red);
   font-family: var(--font-title);
-  box-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
+  font-size: 2.7rem;
+  margin-bottom: 4px;
+  text-align: center;
 }
-
-.btn-primary {
-  background-color: var(--blood-red);
-  border-color: var(--dark-red);
+.subtitle {
+  text-align: center;
+  font-family: var(--font-cursive);
+  color: var(--gold);
+  margin-bottom: 20px;
 }
-
-.btn-danger { /* Usado para Bestiario */
-  background-color: var(--ink-dark);
-  border-color: var(--ink-black);
+.container {
+  max-width: 900px;
+  margin: 24px auto;
+  background: var(--parchment);
+  box-shadow: var(--box-shadow-parchment);
+  border-radius: 18px;
+  padding: 24px 32px;
 }
-
-/* Botón de Caos (Accent) */
-@keyframes chaosGradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.section-title {
+  color: var(--blood-red);
+  font-family: var(--font-title);
+  font-size: 1.5rem;
+  margin: 24px 0 16px 0;
 }
-
-.btn-accent {
-  background: linear-gradient(135deg, var(--royal-purple) 0%, var(--blood-red) 50%, var(--gold) 100%);
-  background-size: 200% 200%;
-  animation: chaosGradient 3s ease infinite;
-  border: 4px solid var(--gold-light); /* Borde más grueso y dorado */
-  box-shadow: 0 0 25px rgba(218, 165, 32, 0.7); /* Sombra más fuerte */
+.btn {
+  border-radius: 8px; padding: 16px 24px; font-weight: bold; margin: 8px; box-shadow: var(--box-shadow-parchment); transition: box-shadow 0.2s;
 }
-
-/* ===== FICHA DE PERSONAJE Y BESTIARIO (SHEETS) ===== */
-.character-sheet, .creature-sheet, .encounter-sheet {
-  border: 6px solid var(--ink-medium); /* Borde de ficha principal muy destacado */
-  border-radius: 12px;
-  padding: var(--spacing-lg);
+.btn-primary { background: linear-gradient(90deg, #a82c24, #c76e43); color: #fff; }
+.btn-success { background: linear-gradient(90deg, #378a2c, #7bcc43); color: #fff; }
+.btn-accent  { background: linear-gradient(90deg, #c96d34, #b41717); color: #fff; }
+.btn-danger  { background: linear-gradient(90deg, #b01d1d, #732323); color: #fff; }
+.btn-large { font-size: 1.1rem; padding: 22px 34px;}
+.hidden { display: none; }
+.wizard-container {
+  background: var(--parchment-light);
+  padding: 32px;
+  box-shadow: var(--box-shadow-parchment);
+  border-radius: 18px;
+  max-width: 820px;
+  margin: 28px auto;
+  display: none; /* Alternar con la clase .hidden */
 }
-
-.character-name {
-    font-size: 3.5rem; /* Más grande */
-    color: var(--dark-red);
-    text-shadow: 2px 2px 0 var(--ink-dark);
-}
-
-/* --- Grid de Habilidades (Abilities) --- */
-.ability-score {
-    background-color: var(--ink-dark);
-    color: var(--parchment-light);
-    border: 4px solid var(--gold); /* Borde dorado más grueso */
-}
-
-.ability-modifier {
-    font-family: var(--font-title);
-    font-size: 2rem; /* Más grande para el modificador */
-    color: var(--gold-light); /* Modificador dorado */
-}
-
-/* --- Raresas y NFT (PULIDO) --- */
-.rarity-badge {
-    padding: 3px 10px;
-    border-radius: 15px;
-    font-family: var(--font-title);
-    font-size: 0.9rem;
-    letter-spacing: 1px;
-}
-
-.rarity-legendario { 
-    background-color: var(--gold); 
-    color: var(--ink-dark); 
-    border-color: var(--dark-red);
-    box-shadow: 0 0 5px var(--gold-light);
-}
-
-.nft-panel {
-    border: 3px solid var(--royal-purple);
-    box-shadow: 0 0 20px rgba(75, 0, 130, 0.6); /* Sombra más intensa */
-}
-
-/* --- Modal (Historial) --- */
-.modal-content {
-    border: 6px solid var(--blood-red); /* Borde del modal en rojo sangre */
-}
-
-.history-name {
-    color: var(--blood-red);
-    font-size: 1.1rem;
-}
-
-/* --- Footer --- */
-.main-footer {
-    border-top: 6px solid var(--gold-light); /* Borde dorado destacado */
-}
+.wizard-container.active { display: block; }
+/* ...continuar con detalles, responsividad y paneles según tus secciones y cards... */
