@@ -1,6 +1,6 @@
 /* ==========================================
    D&D CHARACTER FORGE - ESTILOS ÉPICOS PROFESIONALES
-   (Contenido completo de tu diseño)
+   (Incluye estilos base, D&D Theme y NFT Rarity)
    ========================================== */
 
 /* ===== IMPORTS Y VARIABLES ===== */
@@ -28,6 +28,13 @@
   --royal-purple: #4b0082;
   --steel-blue: #4682b4;
 
+  /* Colores NFT Rarity */
+  --rarity-comun: var(--ink-medium);
+  --rarity-infrecuente: var(--steel-blue);
+  --rarity-rara: var(--royal-purple);
+  --rarity-epica: var(--gold);
+  --rarity-legendaria: var(--dark-red);
+
   /* Fuentes */
   --font-title: 'Cinzel', serif;
   --font-handwriting: 'Marck Script', cursive;
@@ -42,7 +49,7 @@
 /* Base and Typography */
 body {
   font-family: var(--font-body);
-  background: var(--ink-dark) url('https://placehold.co/1920x1080/1a0f08/1a0f08'); /* Fondo sutil de textura */
+  background: var(--ink-dark) url('https://placehold.co/1920x1080/1a0f08/1a0f08'); 
   color: var(--ink-black);
   margin: 0;
   padding: 0;
@@ -55,7 +62,7 @@ body {
   --parchment: #1a0f08;
   --parchment-dark: #0f0a07;
   --ink-black: #f4e9d8;
-  --ink-dark: #e8d5b7;
+  --ink-dark: #110905;
   --gold: #f4d03f;
   --gold-light: #ffe680;
   color: var(--ink-black);
@@ -74,6 +81,9 @@ h1, h2, h3, .main-title, .section-title {
   text-transform: uppercase;
   letter-spacing: 2px;
   text-shadow: 1px 1px 3px var(--ink-black);
+}
+.dark-mode h1, .dark-mode h2, .dark-mode h3, .dark-mode .main-title, .dark-mode .section-title {
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 .main-title { font-size: 2.8rem; }
@@ -149,6 +159,7 @@ h1, h2, h3, .main-title, .section-title {
   color: var(--parchment-light);
   border: 2px solid var(--ink-black);
 }
+.btn-large { padding: 20px 30px; }
 
 /* BOTÓN ACCENT (CHAOS) */
 .btn-accent {
@@ -216,7 +227,6 @@ input, select {
 .character-sheet, .creature-sheet {
   background: var(--parchment);
   border: 5px solid var(--ink-black);
-  border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect x="0" y="0" width="100" height="100" fill="%23d4c4a8" stroke="%231a0f08" stroke-width="5" rx="10"/></svg>') 10 10 repeat;
   padding: var(--spacing-lg);
   margin-top: var(--spacing-lg);
   border-radius: 12px;
@@ -442,7 +452,80 @@ input, select {
     z-index: 1;
 }
 
-/* Modals and History */
+/* ===== ESTILOS NFT (NUEVOS) ===== */
+.nft-section {
+    background: var(--parchment-dark);
+    border: 3px solid var(--gold);
+    padding: var(--spacing-md);
+    margin: var(--spacing-md) 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-align: center;
+}
+.nft-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 0.95rem;
+    color: var(--ink-black);
+}
+.nft-stats p { margin: 5px 10px; }
+.nft-stats strong {
+    font-family: var(--font-title);
+    color: var(--dark-red);
+}
+
+/* Insignia de Rareza */
+.rarity-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    color: white;
+    font-family: var(--font-title);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-shadow: 1px 1px 2px var(--ink-black);
+    margin-left: 10px;
+}
+
+/* Colores por rareza */
+.rarity-comun { background-color: var(--rarity-comun); }
+.rarity-infrecuente { background-color: var(--rarity-infrecuente); }
+.rarity-rara { background-color: var(--rarity-rara); }
+.rarity-epica { background-color: var(--rarity-epica); color: var(--ink-black); box-shadow: 0 0 8px var(--gold); }
+.rarity-legendaria { background-color: var(--rarity-legendaria); box-shadow: 0 0 10px var(--blood-red); }
+
+/* Efecto Shiny/Foil */
+.shiny-foil-text {
+    font-family: var(--font-title);
+    font-size: 1.2rem;
+    font-weight: 900;
+    margin-top: 10px;
+}
+
+.is-shiny {
+    color: var(--gold-light);
+    text-shadow: 0 0 5px var(--gold), 0 0 10px var(--gold-light);
+    animation: shinyFlash 1.5s infinite alternate;
+}
+.is-foil {
+    background: -webkit-linear-gradient(45deg, var(--gold-light), var(--steel-blue), var(--royal-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: foilShift 4s linear infinite;
+}
+
+@keyframes shinyFlash {
+    from { opacity: 0.8; }
+    to { opacity: 1; }
+}
+@keyframes foilShift {
+    to { background-position: 200% center; }
+}
+
+/* Modals, History, Footer (Mantenidos) */
 .hidden {
   display: none !important;
 }
@@ -478,9 +561,6 @@ input, select {
   cursor: pointer;
   color: var(--dark-red);
 }
-.history-list {
-  margin-top: var(--spacing-md);
-}
 .history-item {
   background: var(--parchment-dark);
   padding: var(--spacing-sm);
@@ -510,7 +590,6 @@ input, select {
   z-index: 999;
 }
 
-/* FOOTER */
 .main-footer {
   text-align: center;
   padding: var(--spacing-md) 0;
