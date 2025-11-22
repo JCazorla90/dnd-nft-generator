@@ -1,39 +1,62 @@
-/**
- * ═══════════════════════════════════════════════════════════════════
- * 🐉 D&D CHARACTER FORGE - MONSTERS
- * Copyright (c) 2025 José Cazorla
- * ═══════════════════════════════════════════════════════════════════
- */
+// ==========================================
+// 👹 BESTIARIO BÁSICO PARA GENERACIÓN LOCAL
+// ==========================================
 
 const DND_MONSTERS = [
   {
-    name: "Goblin Explorador", type: "Humanoide", cr: "1/4", hp: 7, ac: 15,
-    description: "Pequeño, verde y malicioso.",
-    actions: ["Cimitarra +4 (1d6+2)", "Arco corto +4 (1d6+2)"]
+    name: "Goblin",
+    type: "Humanoide",
+    cr: "1/4",
+    xp: 50,
+    ac: 15,
+    hp: 7,
+    speed: "30 ft",
+    stats: { str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8 },
+    environment: ["Bosque", "Mazmorra"],
+    traits: ["Nimble Escape"],
+    actions: ["Hoja curva: +4, 1d6 + 2 daño cortante."],
+    legendaryActions: []
   },
   {
-    name: "Orco Guerrero", type: "Humanoide", cr: "1/2", hp: 15, ac: 13,
-    description: "Un bruto salvaje con un hacha enorme.",
-    actions: ["Gran Hacha +5 (1d12+3)", "Jabalina +5 (1d6+3)"]
+    name: "Ogro",
+    type: "Gigante",
+    cr: "2",
+    xp: 450,
+    ac: 11,
+    hp: 59,
+    speed: "40 ft",
+    stats: { str: 19, dex: 8, con: 17, int: 5, wis: 7, cha: 7 },
+    environment: ["Montaña", "Bosque"],
+    traits: [],
+    actions: ["Garrote grande: +6, 2d8 + 4 daño contundente."],
+    legendaryActions: []
   },
   {
-    name: "Ogro", type: "Gigante", cr: "2", hp: 59, ac: 11,
-    description: "Enorme, tonto y hambriento.",
-    actions: ["Gran Garrote +6 (2d8+4)"]
+    name: "Espectro",
+    type: "No-muerto",
+    cr: "1",
+    xp: 200,
+    ac: 12,
+    hp: 22,
+    speed: "0 ft, fly 50 ft",
+    stats: { str: 1, dex: 14, con: 11, int: 10, wis: 10, cha: 16 },
+    environment: ["Tumba", "Ruinas"],
+    traits: ["Incorpóreo"],
+    actions: ["Toque Espectral: +5, 3d6+3 de daño necrótico."],
+    legendaryActions: []
   },
   {
-    name: "Lobo Huargo", type: "Bestia", cr: "1", hp: 37, ac: 14,
-    description: "Un lobo monstruoso del tamaño de un caballo.",
-    actions: ["Mordisco +5 (2d6+3) + Derribo"]
-  },
-  {
-    name: "Cubo Gelatinoso", type: "Cieno", cr: "2", hp: 84, ac: 6,
-    description: "Un cubo transparente que disuelve materia orgánica.",
-    actions: ["Pseudópodo +4 (3d6 ácido)", "Engullir"]
-  },
-  {
-    name: "Dragón Rojo Joven", type: "Dragón", cr: "10", hp: 178, ac: 18,
-    description: "Una furia alada de escamas carmesí.",
-    actions: ["Aliento de Fuego (16d6)", "Multiataque"]
+    name: "Joven Dragón Rojo",
+    type: "Dragón",
+    cr: "10",
+    xp: 5900,
+    ac: 18,
+    hp: 178,
+    speed: "40 ft, fly 80 ft",
+    stats: { str: 23, dex: 10, con: 21, int: 14, wis: 11, cha: 19 },
+    environment: ["Montaña", "Volcán"],
+    traits: ["Resistencia al Fuego"],
+    actions: ["Mordida: +10, 2d6+6", "Aliento de Fuego (60 ft Cone)"],
+    legendaryActions: []
   }
 ];
