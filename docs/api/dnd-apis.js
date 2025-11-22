@@ -63,10 +63,13 @@ const DND_API = {
     const data = await this.fetchData(url);
 
     if (data) {
+        // Se extrae información relevante
+        const bonusStat = data.ability_score_bonuses ? (data.ability_score_bonuses[0] || {}).ability_score.name.toLowerCase() : 'dexterity';
+        
         return {
             racialTraits: data.traits ? data.traits.map(t => t.name) : ['Sin rasgos detallados'],
             speed: data.speed || 30,
-            primaryStat: data.ability_score_bonuses ? (data.ability_score_bonuses[0] || {}).ability_score.name.toLowerCase() : 'dexterity'
+            primaryStat: bonusStat // Usar la estadística con bonus
         };
     }
     return null;
@@ -79,12 +82,21 @@ const DND_API = {
   async getClassDetails(index) {
     const url = `${this.dnd5e}/classes/${index}`;
     const data = await this.fetchData(url);
+    const spellcasting = await this.fetchData(`${this.dnd5e}/classes/${index}/spellcasting`);
 
     if (data) {
+        let primaryStat = 'strength'; // Default
+        if (data.spellcasting && data.spellcasting.spellcasting_ability) {
+            primaryStat = data.spellcasting.spellcasting_ability.name.toLowerCase();
+        } else if (spellcasting && spellcasting.spellcasting_ability) {
+             primaryStat = spellcasting.spellcasting_ability.name.toLowerCase();
+        }
+        
         return {
-            features: data.starting_equipment || [], // Esto es simplificado, en una app real habría que hacer más fetches
+            // Esto es un placeholder, lo ideal sería hacer fetch de starting_equipment
+            features: data.features ? data.features.map(f => f.name).slice(0, 3) : ['Habilidad de Clase Base'], 
             hitDie: data.hit_die || 6,
-            primaryStat: data.spellcasting ? data.spellcasting.spellcasting_ability.name.toLowerCase() : (data.class_levels || [])[0]?.ability_score_bonus || 'strength'
+            primaryStat: primaryStat
         };
     }
     return null;
@@ -99,24 +111,25 @@ const DND_API = {
    * @returns {Promise<Array<Object>>} - Lista de monstruos (solo índice y CR).
    */
   async listAllMonsters() {
-    const url = `${this.open5e}/monsters/?limit=300`;
-    let monsterList = this.cache.lists.monsters;
-
-    if (!monsterList) {
-        const data = await this.fetchData(url);
-        if (data && data.results) {
-            monsterList = data.results.map(m => ({
-                index: m.slug,
-                name: m.name,
-                cr: m.challenge_rating,
-                type: m.type
-            }));
-            this.cache.lists.monsters = monsterList; // Cachear la lista grande
-        } else {
-            return [];
-        }
+    // Usar caché si la lista ya fue cargada
+    if (this.cache.lists.monsters) {
+        return this.cache.lists.monsters;
     }
-    return monsterList;
+    
+    const url = `${this.open5e}/monsters/?limit=300`;
+    const data = await this.fetchData(url); // fetchData maneja el cacheo
+
+    if (data && data.results) {
+        const monsterList = data.results.map(m => ({
+            index: m.slug,
+            name: m.name,
+            cr: m.challenge_rating,
+            type: m.type
+        }));
+        this.cache.lists.monsters = monsterList; // Cachear la lista grande
+        return monsterList;
+    } 
+    return [];
   },
 
   /**
@@ -140,7 +153,7 @@ const DND_API = {
                 str: data.strength, dex: data.dexterity, con: data.constitution, 
                 int: data.intelligence, wis: data.wisdom, cha: data.charisma 
             },
-            environments: data.environment ? data.environment.split(', ').map(e => e.trim()) : ["Desconocido"],
+            environments: data.environment ? data.environment.split(', ').map(e => e.trim()).filter(e => e) : ["Desconocido"],
             traits: data.special_abilities ? data.special_abilities.map(a => `${a.name}: ${a.desc}`) : ['Ninguno'],
             actions: data.actions ? data.actions.map(a => `${a.name}: ${a.desc}`) : ['Ataque Básico'],
             defenses: `Saves: ${data.saving_throws || 'N/A'}. Inmunidades: ${data.damage_immunities || 'N/A'}.`,
@@ -151,8 +164,7 @@ const DND_API = {
   },
   
   // ===================================
-  // 📸 MÓDULO DE IMÁGENES (Mantener placeholder pero con contexto)
-  // No podemos usar una API de generación de imágenes gratuita en tiempo real.
+  // 📸 MÓDULO DE IMÁGENES (Placeholder)
   // ===================================
   Images: {
     async getEpicImage(query, type) {
