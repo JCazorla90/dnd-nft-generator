@@ -18,7 +18,7 @@
         <div class="header-decoration">⚔️</div>
         <div class="header-content">
             <h1 class="main-title">D&D Character Forge</h1>
-            <p class="subtitle">Generador Épico de Personajes y Bestiario</p>
+            <p class="subtitle">Generador Épico de Personajes, Bestiario y Encuentros</p>
         </div>
         <div class="header-decoration">🐉</div>
     </header>
@@ -34,14 +34,14 @@
         </section>
 
         <section class="generator-section">
-            <h2 class="section-title"><span class="title-decoration">⚔️</span> Forja de Héroes <span class="title-decoration">⚔️</span></h2>
+            <h2 class="section-title"><span class="title-decoration">⚔️</span> Forja de Héroes NFT <span class="title-decoration">⚔️</span></h2>
 
             <div class="controls-grid">
                 <button id="randomBtn" class="btn btn-secondary btn-large">
                     🎲 RANDOM <span class="btn-subtitle">Aventurero Rápido</span>
                 </button>
                 <button id="chaosBtn" class="btn btn-accent btn-large">
-                    🌀 CHAOS <span class="btn-subtitle">¡Pura Locura!</span>
+                    🌀 CHAOS <span class="btn-subtitle">¡Stats al Límite!</span>
                 </button>
             </div>
 
@@ -77,16 +77,16 @@
 
             <div class="character-visual">
                 <div class="portrait-frame"><img id="aiPortrait" src="" alt="Retrato"><button id="regenPortrait" class="regen-btn" title="Regenerar Imagen">🔄</button></div>
-                <div class="avatar-frame"></div>
             </div>
 
             <div id="nftSection" class="nft-section hidden">
                 <h3 class="section-subtitle">💎 ESTADO NFT <span id="nftRarity" class="rarity-badge"></span></h3>
                 <div class="nft-stats">
                     <p>ID Simulado: <strong id="nftTokenID">--</strong></p>
+                    <p>Bonus Raro: <strong id="nftBonus">--</strong></p>
                     <p>Blockchain: <strong id="nftBlockchain">Ethereum (Simulado)</strong></p>
-                    <p>Bonus Especial: <strong id="nftBonus">--</strong></p>
                     <p id="nftShinyFoil" class="shiny-foil-text"></p>
+                    <p>Rasgo Especial: <strong id="nftSpecialTrait">--</strong></p>
                 </div>
                 <button id="mintNFTBtn" class="btn btn-gold full-width">✨ Mint NFT</button>
             </div>
@@ -141,13 +141,48 @@
             </div>
         </div>
 
-        <div class="section-divider"><span class="divider-text">👹 BESTIARIO 👹</span></div>
+        <div class="section-divider"><span class="divider-text">👹 ENCUENTROS Y BESTIARIO 👹</span></div>
 
-        <section class="bestiary-section">
+        <section class="encounter-section generator-section">
+            <h2 class="section-title"><span class="title-decoration">🎲</span> Generador de Encuentros <span class="title-decoration">🎲</span></h2>
+            <div class="custom-panel">
+                <div class="custom-grid">
+                    <div class="form-group"><label>Nivel Medio del Grupo</label><input type="number" id="partyLevel" min="1" max="20" value="3"></div>
+                    <div class="form-group"><label>Tamaño del Grupo</label><input type="number" id="partySize" min="1" max="10" value="4"></div>
+                    <div class="form-group full-width"><label>Dificultad Deseada</label><select id="difficultySelect">
+                        <option value="moderado" selected>Moderado</option>
+                        <option value="facil">Fácil</option>
+                        <option value="desafiante">Desafiante</option>
+                        <option value="mortal">Mortal</option>
+                    </select></div>
+                </div>
+                <button id="generateEncounterBtn" class="btn btn-danger full-width">🔥 Generar Encuentro (API)</button>
+            </div>
+            
+            <div id="encounterSheet" class="creature-sheet hidden">
+                <div class="sheet-header">
+                    <h3 id="encounterName" class="character-name" style="font-size: 1.8rem;">Encuentro Generado</h3>
+                    <div class="character-subtitle">
+                        Dificultad: <strong id="encounterDifficulty">--</strong> | XP Total: <strong id="encounterXP">--</strong>
+                    </div>
+                </div>
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">Lista de Monstruos</h3>
+                    <ul id="encounterMonstersList" class="trait-list"></ul>
+                </div>
+                <div class="action-buttons">
+                    <button id="newEncounterBtn" class="btn btn-secondary">➕ Nuevo Encuentro</button>
+                </div>
+            </div>
+        </section>
+
+
+        <section class="bestiary-section generator-section">
+            <h2 class="section-title"><span class="title-decoration">🐺</span> Ficha de Monstruo <span class="title-decoration">🐺</span></h2>
             <div class="bestiary-controls">
                 <div class="controls-grid">
                     <button id="generateCreatureBtn" class="btn btn-danger">🐺 Monstruo Local</button>
-                    <button id="generateFromAPIBtn" class="btn btn-gold">📡 API D&D 5e (Simulado)</button>
+                    <button id="generateFromAPIBtn" class="btn btn-gold">📡 Monstruo API (Open5e)</button>
                     <button id="chaosBeastBtn" class="btn btn-accent">🌀 Engendro Chaos</button>
                 </div>
             </div>
@@ -162,7 +197,7 @@
                 <div class="character-visual">
                     <div class="portrait-frame">
                         <img id="creaturePortrait" src="" alt="Bestia">
-                        <button id="regenCreaturePortrait" class="regen-btn">🔄</button>
+                        <button id="regenCreaturePortrait" class="regen-btn" title="Regenerar Imagen">🔄</button>
                     </div>
                 </div>
                 
@@ -205,7 +240,7 @@
                 </div>
 
                 <div class="action-buttons">
-                    <button id="newCreatureBtn" class="btn btn-danger">🆕 Nueva Criatura</button>
+                    <button id="newCreatureBtn" class="btn btn-danger">🆕 Ocultar Ficha</button>
                 </div>
             </div>
         </section>
@@ -220,18 +255,16 @@
         </div>
     </div>
 
-    <button id="historyBtn" class="floating-history-btn">📜</button>
+    <button id="historyBtn" class="floating-history-btn" title="Historial">📜</button>
 
     <footer class="main-footer">
         <p>⚔️ D&D Character Forge © 2025 🐉</p>
-        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
+        <p>Creado por Generador Épico | Integración con DnD5eAPI y Open5e.</p>
         <button id="toggleTheme" class="theme-toggle">🌙 Modo Oscuro</button>
     </footer>
 
-    <script src="data/dnd-data.js"></script>
-    <script src="data/bestiary.js"></script>
-    <script src="data/dnd-monsters.js"></script>
-    <script src="api/dnd-apis.js"></script>
+    <script src="dnd-data.js"></script>
+    <script src="dnd-apis.js"></script>
     <script src="app.js"></script>
 
 </body>
