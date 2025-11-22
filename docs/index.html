@@ -18,6 +18,7 @@
     <p class="subtitle">Generador Épico de Personajes y Bestiario</p>
   </header>
   <div class="container" id="mainContainer">
+    <!-- Selector de edición y reglas -->
     <section class="edition-selector">
       <label for="editionSelect">Edición de D&D:</label>
       <select id="editionSelect">
@@ -25,21 +26,26 @@
         <option value="3.5e">3.5 Edición</option>
       </select>
     </section>
+    <!-- Panel de generación de personajes -->
     <section>
       <h2 class="section-title">Generador de Personajes</h2>
       <button id="wizardBtn" class="btn btn-primary btn-large">WIZARD</button>
       <button id="randomBtn" class="btn btn-success btn-large">RANDOM</button>
       <button id="chaosCharacterBtn" class="btn btn-accent btn-large">CAOS</button>
     </section>
+    <!-- Panel para bestiario -->
     <section>
       <h2 class="section-title">Bestiario</h2>
       <button id="generateCreatureBtn" class="btn btn-danger">Generar Criatura</button>
+      <div id="creatureSheet"></div>
     </section>
+    <!-- Panel de encuentros -->
     <section>
       <h2 class="section-title">Generador de Encuentros</h2>
-      <input type="number" id="groupLevel" placeholder="Nivel del grupo">
-      <input type="number" id="groupSize" placeholder="Tamaño del grupo">
+      <input type="number" id="groupLevel" placeholder="Nivel del grupo" min="1" max="20">
+      <input type="number" id="groupSize" placeholder="Tamaño del grupo" min="1" max="10">
       <button id="generateEncounterBtn" class="btn btn-danger">Generar Encuentro</button>
+      <div id="encounterSheet"></div>
     </section>
   </div>
   <div id="wizard-container" class="wizard-container hidden"></div>
