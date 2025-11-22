@@ -3,17 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Character Forge | Baldur's Gate Edition</title>
+    <title>D&D Character Forge - Generador Épico</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="styles.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
 </head>
 <body>
-
     <header class="main-header">
         <div class="header-decoration">⚔️</div>
         <div class="header-content">
@@ -28,25 +26,18 @@
         <section class="edition-selector">
             <label for="editionSelect">📖 Reglas:</label>
             <select id="editionSelect">
-                <option value="5e" selected>D&D 5e (2014)</option>
-                <option value="5e-2024">D&D 5e (2024)</option>
+                <option value="5e" selected>D&D 5e</option>
                 <option value="3.5e">D&D 3.5e</option>
             </select>
-            <button id="toggleTheme" class="btn-mini">🌙 / ☀️</button>
         </section>
 
         <section class="generator-section">
             <h2 class="section-title"><span class="title-decoration">⚔️</span> Forja de Héroes <span class="title-decoration">⚔️</span></h2>
 
             <div class="controls-grid">
-                <button id="wizardBtn" class="btn btn-primary btn-large" onclick="alert('El hechicero está preparando sus conjuros... (Próximamente)')">
-                    🧙 WIZARD <span class="btn-subtitle">Paso a Paso</span>
-                </button>
-
                 <button id="randomBtn" class="btn btn-secondary btn-large">
                     🎲 RANDOM <span class="btn-subtitle">Aventurero Rápido</span>
                 </button>
-
                 <button id="chaosBtn" class="btn btn-accent btn-large">
                     🌀 CHAOS <span class="btn-subtitle">¡Pura Locura!</span>
                 </button>
@@ -58,41 +49,18 @@
 
             <div id="customPanel" class="custom-panel hidden">
                 <div class="custom-grid">
-                    <div class="form-group">
-                        <label>Nombre</label>
-                        <input type="text" id="charName" placeholder="Ej: Valerius">
-                    </div>
-                    <div class="form-group">
-                        <label>Raza</label>
-                        <select id="raceSelect"><option value="">Aleatorio</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Clase</label>
-                        <select id="classSelect"><option value="">Aleatorio</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Trasfondo</label>
-                        <select id="backgroundSelect"><option value="">Aleatorio</option></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Alineamiento</label>
-                        <select id="alignmentSelect">
-                            <option value="">Aleatorio</option>
-                            <option value="Legal Bueno">Legal Bueno</option>
-                            <option value="Neutral">Neutral</option>
-                            <option value="Caótico Malvado">Caótico Malvado</option>
-                        </select>
-                    </div>
+                    <div class="form-group"><label>Nombre</label><input type="text" id="charName" placeholder="Ej: Valerius"></div>
+                    <div class="form-group"><label>Raza</label><select id="raceSelect"><option value="">Aleatorio</option></select></div>
+                    <div class="form-group"><label>Clase</label><select id="classSelect"><option value="">Aleatorio</option></select></div>
+                    <div class="form-group"><label>Trasfondo</label><select id="backgroundSelect"><option value="">Aleatorio</option></select></div>
+                    <div class="form-group"><label>Alineamiento</label><select id="alignmentSelect"><option value="">Aleatorio</option></select></div>
                 </div>
                 <button id="customGenerateBtn" class="btn btn-primary full-width">✨ Forjar Héroe</button>
             </div>
         </section>
 
         <div id="characterSheet" class="character-sheet hidden">
-            <div class="sheet-decoration-top"></div>
-            
             <div class="sheet-header">
-                <div class="header-skulls">💀💀💀</div>
                 <h2 id="displayName" class="character-name">Nombre del Héroe</h2>
                 <div class="character-subtitle">
                     <span id="displayRace">Raza</span> <span class="separator">•</span> 
@@ -106,17 +74,11 @@
             </div>
 
             <div class="character-visual">
-                <div class="portrait-frame">
-                    <img id="aiPortrait" src="" alt="Retrato">
-                    <button id="regenPortrait" class="regen-btn" title="Regenerar Imagen">🔄</button>
-                </div>
-                <div class="avatar-frame">
-                    <svg id="charAvatar" viewBox="0 0 120 120"></svg>
-                </div>
+                <div class="portrait-frame"><img id="aiPortrait" src="" alt="Retrato"><button id="regenPortrait" class="regen-btn" title="Regenerar Imagen">🔄</button></div>
+                <div class="avatar-frame"></div>
             </div>
 
             <div class="power-level-container">
-                <div class="power-label">Nivel de Poder Estimado</div>
                 <div class="power-bar-bg"><div id="powerBar" class="power-bar-fill"></div></div>
                 <div id="powerLevel" class="power-level-text">⭐ Novato</div>
             </div>
@@ -139,22 +101,31 @@
                 <div class="combat-stat"><div class="stat-icon">⚡</div><div class="stat-label">Init</div><div id="displayInit" class="stat-value">+0</div></div>
             </div>
 
+            <div class="detail-section full-width">
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">💾 Tiradas de Salvación</h3>
+                    <p id="displaySaves" class="trait-list-inline">—</p>
+                </div>
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">🎯 Habilidades (Skills)</h3>
+                    <p id="displaySkills" class="trait-list-inline">—</p>
+                </div>
+            </div>
+
             <div class="details-section">
                 <div class="detail-panel"><h3>🎒 Equipo</h3><ul id="equipment" class="trait-list"></ul></div>
-                <div class="detail-panel"><h3>✨ Rasgos</h3><ul id="racialTraits" class="trait-list"></ul></div>
-                <div class="detail-panel"><h3>⚔️ Habilidades</h3><ul id="classFeatures" class="trait-list"></ul></div>
+                <div class="detail-panel"><h3>✨ Rasgos Raciales</h3><ul id="racialTraits" class="trait-list"></ul></div>
+                <div class="detail-panel"><h3>⚔️ Habilidades de Clase</h3><ul id="classFeatures" class="trait-list"></ul></div>
                 <div class="detail-panel background-panel">
-                    <h3>📜 Historia: <span id="backgroundName"></span></h3>
+                    <h3>📜 Trasfondo: <span id="backgroundName"></span></h3>
                     <p><strong>Rasgo:</strong> <span id="backgroundFeature"></span></p>
-                    <p><strong>Skills:</strong> <span id="backgroundSkills"></span></p>
+                    <p><strong>Equipo Extra:</strong> <ul id="backgroundEquipment" class="trait-list"></ul></p>
                 </div>
             </div>
 
             <div class="action-buttons">
                 <button id="downloadBtn" class="btn btn-primary">📄 PDF</button>
                 <button id="exportJSONBtn" class="btn btn-secondary">💾 Guardar</button>
-                <button id="shareBtn" class="btn btn-accent">📤 Compartir</button>
-                <button id="mintNFTBtn" class="btn btn-purple">💎 Mint NFT</button>
             </div>
         </div>
 
@@ -162,20 +133,16 @@
 
         <section class="bestiary-section">
             <div class="bestiary-controls">
-                <div class="filter-grid">
-                    <select id="creatureTypeFilter"><option value="">Tipo: Todos</option><option value="Humanoide">Humanoide</option><option value="Dragón">Dragón</option><option value="Bestia">Bestia</option><option value="No-muerto">No-muerto</option></select>
-                    <select id="crFilter"><option value="">CR: Todos</option><option value="0.25">CR 1/4</option><option value="1">CR 1</option><option value="5">CR 5</option><option value="10">CR 10</option></select>
-                </div>
                 <div class="controls-grid">
                     <button id="generateCreatureBtn" class="btn btn-danger">🐺 Monstruo Local</button>
                     <button id="generateFromAPIBtn" class="btn btn-gold">📡 API D&D 5e</button>
-                    <button id="chaosBeastBtn" class="btn btn-chaos">🌀 Engendro Chaos</button>
+                    <button id="chaosBeastBtn" class="btn btn-accent">🌀 Engendro Chaos</button>
                 </div>
             </div>
 
             <div id="creatureSheet" class="creature-sheet hidden">
                 <div class="sheet-header">
-                    <h2 id="creatureName" class="character-name">Nombre</h2>
+                    <h2 id="creatureName" class="character-name">Nombre de la Bestia</h2>
                     <div class="character-subtitle">
                         <span id="creatureType">Tipo</span> • CR <span id="creatureCR">0</span> • <span id="creatureXP">0 XP</span>
                     </div>
@@ -186,6 +153,7 @@
                         <button id="regenCreaturePortrait" class="regen-btn">🔄</button>
                     </div>
                 </div>
+                
                 <div class="combat-stats-grid">
                     <div class="combat-stat"><div class="stat-label">AC</div><div id="creatureAC" class="stat-value">10</div></div>
                     <div class="combat-stat"><div class="stat-label">HP</div><div id="creatureHP" class="stat-value">10</div></div>
@@ -200,14 +168,32 @@
                     <div class="ability-shield"><small>SAB</small><div id="creatureWis">10</div></div>
                     <div class="ability-shield"><small>CAR</small><div id="creatureCha">10</div></div>
                 </div>
-
-                <div class="detail-panel">
-                    <h3>⚔️ Acciones</h3>
-                    <ul id="creatureActions" class="trait-list"></ul>
+                
+                <div class="details-section">
+                    <div class="detail-panel">
+                        <h3 class="section-subtitle">⚔️ Acciones</h3>
+                        <ul id="creatureActions" class="trait-list"></ul>
+                    </div>
+                    <div class="detail-panel">
+                        <h3 class="section-subtitle">✨ Rasgos Especiales</h3>
+                        <ul id="creatureTraits" class="trait-list"></ul>
+                    </div>
+                    <div class="detail-panel">
+                        <h3 class="section-subtitle">👑 Acciones Legendarias</h3>
+                        <ul id="creatureLegendaryActions" class="trait-list"></ul>
+                    </div>
+                    <div class="detail-panel">
+                        <h3 class="section-subtitle">🛡️ Defensas</h3>
+                        <p id="creatureDefenses" class="trait-list-inline">—</p>
+                    </div>
+                    <div class="detail-panel">
+                        <h3 class="section-subtitle">🌍 Ambiente</h3>
+                        <p id="creatureEnvironment" class="trait-list-inline">—</p>
+                    </div>
                 </div>
-                <div class="detail-panel">
-                    <h3>✨ Rasgos</h3>
-                    <ul id="creatureTraits" class="trait-list"></ul>
+
+                <div class="action-buttons">
+                    <button id="newCreatureBtn" class="btn btn-danger">🆕 Nueva Criatura</button>
                 </div>
             </div>
         </section>
@@ -217,21 +203,22 @@
     <div id="historyModal" class="modal hidden">
         <div class="modal-content">
             <span class="close-modal">✖️</span>
-            <h2>📜 Historial de la Forja</h2>
+            <h2>📚 Historial de Personajes</h2>
             <div id="historyList" class="history-list"></div>
-            <button id="newCharBtn" class="btn btn-secondary" style="margin-top:20px">Limpiar Vista</button>
         </div>
     </div>
-    
+
     <button id="historyBtn" class="floating-history-btn">📜</button>
-    
+
     <footer class="main-footer">
-        <p>D&D Character Forge © 2025 | Creado por José Cazorla</p>
+        <p>⚔️ D&D Character Forge © 2025 🐉</p>
+        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
+        <button id="toggleTheme" class="theme-toggle">🌙 Modo Oscuro</button>
     </footer>
 
     <script src="data/dnd-data.js"></script>
-    <script src="data/dnd-monsters.js"></script>
     <script src="data/bestiary.js"></script>
+    <script src="data/dnd-monsters.js"></script>
     <script src="api/dnd-apis.js"></script>
     <script src="app.js"></script>
 
