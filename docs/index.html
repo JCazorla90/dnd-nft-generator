@@ -1,269 +1,57 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Character Forge - Generador Épico NFT</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="styles.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <script src="https://cdn.ethers.io/lib/ethers-5.7.2.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <title>D&D Character Forge</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <script src="dnd-data.js"></script>
+  <script src="dnd-monsters.js"></script>
+  <script src="bestiary.js"></script>
+  <script src="dnd-apis.js"></script>
+  <script src="character-wizard.js"></script>
+  <script src="app.js" defer></script>
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-decoration">⚔️</div>
-        <div class="header-content">
-            <h1 class="main-title">D&D Character Forge</h1>
-            <p class="subtitle">Generador Épico de Personajes, Bestiario y Encuentros</p>
-        </div>
-        <div class="header-decoration">🐉</div>
-    </header>
+  <header class="main-header">
+    <h1 class="main-title">D&D Character Forge</h1>
+    <p class="subtitle">Generador Épico de Personajes y Bestiario</p>
+  </header>
+  <div class="container" id="mainContainer">
+    <!-- Selector de edición y reglas -->
+    <section class="edition-selector">
+      <label for="editionSelect">Edición de D&D:</label>
+      <select id="editionSelect">
+        <option value="5e">5ª Edición</option>
+        <option value="3.5e">3.5 Edición</option>
+        <!-- Añade más ediciones si lo necesitas -->
+      </select>
+    </section>
+    <!-- Panel de generación de personajes -->
+    <section>
+      <h2 class="section-title">Generador de Personajes</h2>
+      <button id="wizardBtn" class="btn btn-primary btn-large">WIZARD</button>
+      <button id="randomBtn" class="btn btn-success btn-large">RANDOM</button>
+      <button id="chaosCharacterBtn" class="btn btn-accent btn-large">CAOS</button>
+      <!-- Puedes añadir más botones si lo requieres -->
+    </section>
+    <!-- Panel para bestiario -->
+    <section>
+      <h2 class="section-title">Bestiario</h2>
+      <!-- Aquí van controles del bestiario, género de criatura, filtros, etc. -->
+      <button id="generateCreatureBtn" class="btn btn-danger">Generar Criatura</button>
+      <!-- Más botones y filtros -->
+    </section>
+    <!-- Panel de encuentros -->
+    <section>
+      <h2 class="section-title">Generador de Encuentros</h2>
+      <input type="number" id="groupLevel" placeholder="Nivel del grupo">
+      <input type="number" id="groupSize" placeholder="Tamaño del grupo">
+      <button id="generateEncounterBtn" class="btn btn-danger">Generar Encuentro</button>
+    </section>
+    <!-- ... Más paneles según lo que requieras ... -->
+  </div>
 
-    <div class="container">
-        
-        <section class="edition-selector">
-            <label for="editionSelect">📖 Reglas:</label>
-            <select id="editionSelect">
-                <option value="5e" selected>D&D 5e</option>
-                <option value="3.5e">D&D 3.5e</option>
-            </select>
-        </section>
-
-        <section class="generator-section">
-            <h2 class="section-title"><span class="title-decoration">⚔️</span> Forja de Héroes NFT <span class="title-decoration">⚔️</span></h2>
-
-            <div class="controls-grid">
-                <button id="randomBtn" class="btn btn-primary btn-large">
-                    🎲 RANDOM <span class="btn-subtitle">Aventurero Rápido</span>
-                </button>
-                <button id="chaosCharacterBtn" class="btn btn-accent btn-large">                     🌀 CHAOS <span class="btn-subtitle">¡Stats al Límite!</span>
-                </button>
-            </div>
-
-            <div class="custom-panel-toggle">
-                <button id="toggleCustomBtn" class="btn btn-gold full-width">⚙️ Personalizar Opciones</button>
-            </div>
-
-            <div id="customPanel" class="custom-panel hidden">
-                <div class="custom-grid">
-                    <div class="form-group"><label>Nombre</label><input type="text" id="charName" placeholder="Ej: Valerius"></div>
-                    <div class="form-group"><label>Raza</label><select id="raceSelect"><option value="">Aleatorio</option></select></div>
-                    <div class="form-group"><label>Clase</label><select id="classSelect"><option value="">Aleatorio</option></select></div>
-                    <div class="form-group"><label>Trasfondo</label><select id="backgroundSelect"><option value="">Aleatorio</option></select></div>
-                    <div class="form-group"><label>Alineamiento</label><select id="alignmentSelect"><option value="">Aleatorio</option></select></div>
-                </div>
-                <button id="customGenerateBtn" class="btn btn-primary full-width">✨ Forjar Héroe</button>
-            </div>
-        </section>
-
-        <div id="characterSheet" class="character-sheet hidden">
-            <div class="sheet-header">
-                <h2 id="displayName" class="character-name">Nombre del Héroe</h2>
-                <div class="character-subtitle">
-                    <span id="displayRace">Raza</span> <span class="separator">•</span> 
-                    <span id="displayClass">Clase</span> <span class="separator">•</span> 
-                    Nivel <span id="displayLevel">1</span>
-                </div>
-                <div class="character-meta">
-                    <span id="displayBackground">Trasfondo</span> <span class="separator">|</span> 
-                    <span id="displayAlignment">Alineamiento</span>
-                </div>
-            </div>
-
-            <div class="character-visual">
-                <div class="portrait-frame"><img id="aiPortrait" src="" alt="Retrato"><button id="regenPortrait" class="regen-btn" title="Regenerar Imagen">🔄</button></div>
-            </div>
-
-            <div id="nftSection" class="nft-section hidden">
-                <h3 class="section-subtitle">💎 ESTADO NFT <span id="nftRarity" class="rarity-badge"></span></h3>
-                <div class="nft-stats">
-                    <p>ID Simulado: <strong id="nftTokenID">--</strong></p>
-                    <p>Bonus Raro: <strong id="nftBonus">--</strong></p>
-                    <p>Blockchain: <strong id="nftBlockchain">Ethereum (Simulado)</strong></p>
-                    <p id="nftShinyFoil" class="shiny-foil-text"></p>
-                    <p>Rasgo Especial: <strong id="nftSpecialTrait">--</strong></p>
-                </div>
-                <button id="mintNFTBtn" class="btn btn-gold full-width">✨ Mint NFT</button>
-            </div>
-            <div class="power-level-container">
-                <div class="power-bar-bg"><div id="powerBar" class="power-bar-fill"></div></div>
-                <div id="powerLevel" class="power-level-text">⭐ Novato</div>
-            </div>
-
-            <div class="abilities-section">
-                <div class="ability-scores-grid">
-                    <div class="ability-shield"><div class="ability-name">FUE</div><div id="statStr" class="ability-value">10</div><div id="modStr" class="ability-modifier">+0</div></div>
-                    <div class="ability-shield"><div class="ability-name">DES</div><div id="statDex" class="ability-value">10</div><div id="modDex" class="ability-modifier">+0</div></div>
-                    <div class="ability-shield"><div class="ability-name">CON</div><div class="ability-value" id="statCon">10</div><div id="modCon" class="ability-modifier">+0</div></div>
-                    <div class="ability-shield"><div class="ability-name">INT</div><div class="ability-value" id="statInt">10</div><div id="modInt" class="ability-modifier">+0</div></div>
-                    <div class="ability-shield"><div class="ability-name">SAB</div><div class="ability-value" id="statWis">10</div><div id="modWis" class="ability-modifier">+0</div></div>
-                    <div class="ability-shield"><div class="ability-name">CAR</div><div class="ability-value" id="statCha">10</div><div id="modCha" class="ability-modifier">+0</div></div>
-                </div>
-            </div>
-
-            <div class="combat-stats-grid">
-                <div class="combat-stat"><div class="stat-icon">❤️</div><div class="stat-label">HP</div><div id="displayHP" class="stat-value">10</div></div>
-                <div class="combat-stat"><div class="stat-icon">🛡️</div><div class="stat-label">AC</div><div id="displayAC" class="stat-value">10</div></div>
-                <div class="combat-stat"><div class="stat-icon">👟</div><div class="stat-label">Vel</div><div id="displaySpeed" class="stat-value">30</div></div>
-                <div class="combat-stat"><div class="stat-icon">⚡</div><div class="stat-label">Init</div><div id="displayInit" class="stat-value">+0</div></div>
-            </div>
-
-            <div class="detail-section full-width">
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">💾 Tiradas de Salvación</h3>
-                    <p id="displaySaves" class="trait-list-inline">—</p>
-                </div>
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🎯 Habilidades (Skills)</h3>
-                    <p id="displaySkills" class="trait-list-inline">—</p>
-                </div>
-            </div>
-
-            <div class="details-section">
-                <div class="detail-panel"><h3>🎒 Equipo</h3><ul id="equipment" class="trait-list"></ul></div>
-                <div class="detail-panel"><h3>✨ Rasgos Raciales</h3><ul id="racialTraits" class="trait-list"></ul></div>
-                <div class="detail-panel"><h3>⚔️ Habilidades de Clase</h3><ul id="classFeatures" class="trait-list"></ul></div>
-                <div class="detail-panel background-panel">
-                    <h3>📜 Trasfondo: <span id="backgroundName"></span></h3>
-                    <p><strong>Rasgo:</strong> <span id="backgroundFeature"></span></p>
-                    <p><strong>Equipo Extra:</strong> <ul id="backgroundEquipment" class="trait-list"></ul></p>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button id="downloadBtn" class="btn btn-primary">📄 PDF</button>
-                <button id="exportJSONBtn" class="btn btn-secondary">💾 Guardar</button>
-            </div>
-        </div>
-
-        <div class="section-divider"><span class="divider-text">👹 ENCUENTROS Y BESTIARIO 👹</span></div>
-
-        <section class="encounter-section generator-section">
-            <h2 class="section-title"><span class="title-decoration">🎲</span> Generador de Encuentros <span class="title-decoration">🎲</span></h2>
-            <div class="custom-panel">
-                <div class="custom-grid">
-                    <div class="form-group"><label>Nivel Medio del Grupo</label><input type="number" id="partyLevel" min="1" max="20" value="3"></div>
-                    <div class="form-group"><label>Tamaño del Grupo</label><input type="number" id="partySize" min="1" max="10" value="4"></div>
-                    <div class="form-group full-width"><label>Dificultad Deseada</label><select id="difficultySelect">
-                        <option value="moderado" selected>Moderado</option>
-                        <option value="facil">Fácil</option>
-                        <option value="desafiante">Desafiante</option>
-                        <option value="mortal">Mortal</option>
-                    </select></div>
-                </div>
-                <button id="generateEncounterBtn" class="btn btn-danger full-width">🔥 Generar Encuentro (API)</button>
-            </div>
-            
-            <div id="encounterSheet" class="creature-sheet hidden">
-                <div class="sheet-header">
-                    <h3 id="encounterName" class="character-name" style="font-size: 1.8rem;">Encuentro Generado</h3>
-                    <div class="character-subtitle">
-                        Dificultad: <strong id="encounterDifficulty">--</strong> | XP Total: <strong id="encounterXP">--</strong>
-                    </div>
-                </div>
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">Lista de Monstruos</h3>
-                    <ul id="encounterMonstersList" class="trait-list"></ul>
-                </div>
-                <div class="action-buttons">
-                    <button id="newEncounterBtn" class="btn btn-secondary">➕ Nuevo Encuentro</button>
-                </div>
-            </div>
-        </section>
-
-
-        <section class="bestiary-section generator-section">
-            <h2 class="section-title"><span class="title-decoration">🐺</span> Ficha de Monstruo <span class="title-decoration">🐺</span></h2>
-            <div class="bestiary-controls">
-                <div class="controls-grid">
-                    <button id="generateCreatureBtn" class="btn btn-danger">🐺 Monstruo Local</button>
-                    <button id="generateFromAPIBtn" class="btn btn-gold">📡 Monstruo API (Open5e)</button>
-                    <button id="chaosBeastBtn" class="btn btn-accent">🌀 Engendro Chaos</button>
-                </div>
-            </div>
-
-            <div id="creatureSheet" class="creature-sheet hidden">
-                <div class="sheet-header">
-                    <h2 id="creatureName" class="character-name">Nombre de la Bestia</h2>
-                    <div class="character-subtitle">
-                        <span id="creatureType">Tipo</span> • CR <span id="creatureCR">0</span> • <span id="creatureXP">0 XP</span>
-                    </div>
-                </div>
-                <div class="character-visual">
-                    <div class="portrait-frame">
-                        <img id="creaturePortrait" src="" alt="Bestia">
-                        <button id="regenCreaturePortrait" class="regen-btn" title="Regenerar Imagen">🔄</button>
-                    </div>
-                </div>
-                
-                <div class="combat-stats-grid">
-                    <div class="combat-stat"><div class="stat-label">AC</div><div id="creatureAC" class="stat-value">10</div></div>
-                    <div class="combat-stat"><div class="stat-label">HP</div><div id="creatureHP" class="stat-value">10</div></div>
-                    <div class="combat-stat"><div class="stat-label">VEL</div><div id="creatureSpeed" class="stat-value">30</div></div>
-                </div>
-                
-                <div class="ability-scores-grid small-grid">
-                    <div class="ability-shield"><small>FUE</small><div id="creatureStr">10</div></div>
-                    <div class="ability-shield"><small>DES</small><div id="creatureDex">10</div></div>
-                    <div class="ability-shield"><small>CON</small><div id="creatureCon">10</div></div>
-                    <div class="ability-shield"><small>INT</small><div id="creatureInt">10</div></div>
-                    <div class="ability-shield"><small>SAB</small><div id="creatureWis">10</div></div>
-                    <div class="ability-shield"><small>CAR</small><div id="creatureCha">10</div></div>
-                </div>
-                
-                <div class="details-section">
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">⚔️ Acciones</h3>
-                        <ul id="creatureActions" class="trait-list"></ul>
-                    </div>
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">✨ Rasgos Especiales</h3>
-                        <ul id="creatureTraits" class="trait-list"></ul>
-                    </div>
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">👑 Acciones Legendarias</h3>
-                        <ul id="creatureLegendaryActions" class="trait-list"></ul>
-                    </div>
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">🛡️ Defensas</h3>
-                        <p id="creatureDefenses" class="trait-list-inline">—</p>
-                    </div>
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">🌍 Ambiente</h3>
-                        <p id="creatureEnvironment" class="trait-list-inline">—</p>
-                    </div>
-                </div>
-
-                <div class="action-buttons">
-                    <button id="hideCreatureBtn" class="btn btn-danger">🆕 Ocultar Ficha</button>                 </div>
-            </div>
-        </section>
-
-    </div>
-
-    <div id="historyModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">✖️</span>
-            <h2>📚 Historial de Personajes</h2>
-            <div id="historyList" class="history-list"></div>
-        </div>
-    </div>
-
-    <button id="historyBtn" class="floating-history-btn" title="Historial">📜</button>
-
-    <footer class="main-footer">
-        <p>⚔️ D&D Character Forge © 2025 🐉</p>
-        <p>Creado por Generador Épico | Integración con DnD5eAPI y Open5e.</p>
-        <button id="toggleTheme" class="theme-toggle">🌙 Modo Oscuro</button>
-    </footer>
-
-    <script src="dnd-data.js"></script>
-    <script src="dnd-monsters.js"></script> <script src="dnd-apis.js"></script>
-    <script src="bestiary.js"></script> <script src="app.js"></script>
-
+  <div id="wizard-container" class="wizard-container hidden"></div>
 </body>
 </html>
