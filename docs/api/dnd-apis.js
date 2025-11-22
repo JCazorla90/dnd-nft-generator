@@ -1,6 +1,6 @@
 // ==========================================
 // 🌐 INTEGRACIÓN DE APIs D&D - SISTEMA COMPLETO FINAL
-// Módulos: Datos, Encuentros, e Imágenes de Alta Definición
+// Módulos: Datos y Imágenes de Alta Definición (Simulado)
 // ==========================================
 
 const DND_API = {
@@ -9,60 +9,55 @@ const DND_API = {
   open5e: 'https://api.open5e.com',
   
   // Cache para optimizar llamadas (Mantenidas)
-  cache: { 
-    monsters: {}, 
-    spells: {},
-    equipment: {},
-    classes: {},
-    races: {},
-    feats: {},
-    magicItems: {}
-  },
+  cache: { monsters: {}, classes: {}, races: {} },
   
   // ===================================
-  // 📸 MÓDULO DE IMÁGENES (Usa Lógica de Búsqueda de Arte)
+  // 📸 MÓDULO DE IMÁGENES (Simula la Búsqueda de Arte)
   // ===================================
   Images: {
     /**
-     * Busca una imagen específica usando la lógica de consulta para arte de alta definición.
+     * Simula la búsqueda de una imagen específica de alta definición.
      * @param {string} query Consulta base (Ej: Tiefling Warlock)
      * @param {'character' | 'creature' | 'generic'} type Tipo de búsqueda.
      * @returns {Promise<string>} URL de la imagen o URL de fallback.
      */
     async getEpicImage(query, type) {
-        console.log(`🔎 Buscando imagen para: ${query} (Tipo: ${type})`);
+        console.log(`🔎 Simulación: Buscando imagen para: ${query} (Tipo: ${type})`);
         
-        let finalQuery;
-        
-        // Refinamiento de la consulta para obtener arte de alta calidad
-        if (type === 'character') {
-            finalQuery = `${query} D&D fantasy portrait detailed digital art`;
-        } else if (type === 'creature') {
-            finalQuery = `${query} D&D monster official illustration high resolution`;
-        } else {
-            finalQuery = `${query} fantasy illustration`;
-        }
+        // Simulación de URL de Imagen (Usamos placehold.co con colores temáticos)
+        const placeholderColor = type === 'character' ? '300x400/5c0000/d4af37' : '300x400/1a0f08/f4e9d8';
+        const fallbackUrl = `https://placehold.co/${placeholderColor}?text=${type.toUpperCase()}+${encodeURIComponent(query).substring(0, 15)}`;
 
-        try {
-             // **NOTA DE IMPLEMENTACIÓN:**
-             // Esta función usaría la herramienta de búsqueda de imágenes (`image_retrieval:search`) o un servicio real.
-             // Aquí se simula la URL de respuesta para que el app.js pueda funcionar.
-             
-             // Simulación de URL de Imagen (Se asume que la API devuelve una URL funcional)
-             const mockUrl = type === 'character' 
-                ? `https://i.imgur.com/high-res-char-fantasy-art.jpg?q=${encodeURIComponent(query)}`
-                : `https://i.imgur.com/high-res-monster-art.png?q=${encodeURIComponent(query)}`;
+        // En un entorno real, aquí se realizaría la llamada a la API.
+        // Simulamos un retraso de red.
+        await new Promise(resolve => setTimeout(resolve, 800));
 
-             return mockUrl; 
-
-        } catch (error) {
-            console.error("Error al recuperar imagen:", error);
-            // Fallback: URL de imagen de error sincronizada con el diseño
-            return "https://placehold.co/300x400/8b0000/d4af37?text=API+FALLA";
-        }
+        return fallbackUrl; 
     }
   },
 
-  // ... (Otras funciones de la API de datos, no modificadas) ...
-  
+  // ===================================
+  // 👹 MÓDULO DE MONSTRUOS (Simulado con API D&D 5e)
+  // ===================================
+  /** Simula la obtención de un monstruo de la API (solo para que funcione generateAPICreature) */
+  async fetchRandomAPIMonster() {
+    console.log("📡 Simulación: Petición de monstruo a API D&D 5e...");
+    await new Promise(resolve => setTimeout(resolve, 1500)); 
+
+    // Monstruo de ejemplo (simulado)
+    return {
+        name: "Golem de Carne (API)",
+        type: "Constructo",
+        cr: "5",
+        xp: 1800,
+        ac: 9,
+        hp: 93,
+        speed: "30 ft",
+        stats: { str: 19, dex: 9, con: 18, int: 3, wis: 11, cha: 5 },
+        actions: ["Multiataque", "Golpe: +7, 2d8+4 de daño"],
+        traits: ["Absorción de Relámpago", "Inmunidad Mágica"],
+        legendaryActions: [],
+        defenses: "Inmunidad: Relámpago, Veneno, Contundente/Perforante/Cortante no mágico"
+    };
+  }
 };
