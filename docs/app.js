@@ -523,3 +523,270 @@ class CharacterWizard {
   }
 }
 window.wizard = new CharacterWizard();
+class CharacterWizard {
+  constructor() {
+    this.currentStep = 1;
+    this.totalSteps = 6;
+    this.character = this.getInitialState();
+    this.statGenerationMethod = 'point-buy';
+    this.pointBuyRemaining = 27;
+    window.wizard = this;
+  }
+
+  getInitialState() {
+    return {
+      name: '',
+      race: null,
+      class: null,
+      background: null,
+      alignment: 'Neutral',
+      stats: { strength: 8, dexterity: 8, constitution: 8, intelligence: 8, wisdom: 8, charisma: 8 },
+      hp: 0,
+      ac: 10,
+      equipment: []
+    };
+  }
+
+  start() {
+    this.character = this.getInitialState();
+    this.currentStep = 1;
+    document.getElementById('mainContainer').classList.add('hidden');
+    document.getElementById('wizard-container').classList.remove('hidden');
+    this.renderWizard();
+  }
+
+  finishWizard() {
+    document.getElementById('wizard-container').innerHTML = `<div class="wizard">
+      <h2 class="wizard-title" style="color:var(--gold)">¡Personaje creado!</h2>
+      <div class="character-sheet">
+        <h3>${this.character.name}</h3>
+        <ul>
+          <li><strong>Raza:</strong> ${this.character.race}</li>
+          <li><strong>Clase:</strong> ${this.character.class}</li>
+          <li><strong>Trasfondo:</strong> ${this.character.background}</li>
+          <li><strong>Alineamiento:</strong> ${this.character.alignment}</li>
+          <li><strong>HP:</strong> ${this.character.hp}</li>
+        </ul>
+        <h4>Características:</h4>
+        <ul>${Object.entries(this.character.stats).map(([k, v]) =>
+            `<li>${k}: ${v} (${calculateModifier(v)>=0?'+':''}${calculateModifier(v)})</li>`).join('')}</ul>
+      </div>
+      <button class="btn btn-success" onclick="wizard.returnToMain()">Volver</button>
+    </div>`;
+  }
+
+  returnToMain() {
+    document.getElementById('wizard-container').classList.add('hidden');
+    document.getElementById('mainContainer').classList.remove('hidden');
+  }
+
+  renderWizard() {
+    // Barra de progreso visual
+    const steps = Array.from({length:this.totalSteps},(_,i)=>`<div class="progress-step ${this.currentStep>i+1?'complete':''} ${this.currentStep===i+1?'current':''}">${this.currentStep>i+1?'✓':i+1}</div>`).join('<div class="progress-connector"></div>');
+    const html = `
+      <div class="wizard">
+        <div class="wizard-header">
+          <div class="wizard-progress" style="display:flex;justify-content:center;gap:12px;margin-bottom:18px;">${steps}</div>
+          <h2 class="wizard-title">${this.getStepTitle()}</h2>
+        </div>
+        <div class="wizard-content">${this.renderStepContent()}</div>
+        <div class="wizard-footer" style="text-align:center;margin-top:20px;">
+          <button class="btn btn-special" onclick="wizard.previousStep()" ${this.currentStep === 1 ? 'disabled' : ''}>← Anterior</button>
+          <button class="btn btn-success" onclick="wizard.nextStep()">${this.currentStep === this.totalSteps ? 'Finalizar' : 'Siguiente →'}</button>
+        </div>
+      </div>`;
+    document.getElementById('wizard-container').innerHTML = html;
+  }
+
+  getStepTitle() {
+    const titles = [
+      '🧬 Selecciona tu raza', '⚔️ Selecciona tu clase', '📜 Selecciona tu trasfondo',
+      '🧠 Asigna tus atributos', '🎒 Equipo inicial', '✨ Detalles del personaje'
+    ];
+    return titles[this.currentStep - 1];
+  }
+
+  renderStepContent() {
+    switch (this.currentStep) {
+      case 1: return this.renderRaceSelection();
+      case 2: return this.renderClassSelection();
+      case 3: return this.renderBackgroundSelection();
+      case 4: return this.renderStatsSelection();
+      case 5: return this.renderEquipmentSelection();
+      case 6: return this.renderFinalDetails();
+      default: return '<p>Error</p>';
+    }
+  }
+
+  renderRaceSelection() {
+    const races = Object.keys(DND_DATA.races);
+    return `<div class="selection-grid">${races.map(raceName => {
+      const race = DND_DATA.races[raceName];
+      const isSelected = this.character.race === raceName;
+      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectRace('${raceName}')">
+        <div class="card-header">
+          <h3>${raceName}</h3>
+          ${isSelected ? '<span class="badge badge--success">✓ Seleccionado</span>' : ''}
+        </div>
+        <div class="card-body">
+          <p>${race.description}</p>
+          <ul>${race.traits.map(t => `<li>${t}</li>`).join('')}</ul>
+          <span>Velocidad: ${race.speed} ft</span> | <span>Tamaño: ${race.size}</span>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+  selectRace(raceName) {
+    this.character.race = raceName;
+    this.renderWizard();
+  }
+
+  renderClassSelection() {
+    const classes = Object.keys(DND_DATA.classes);
+    return `<div class="selection-grid">${classes.map(className => {
+      const clazz = DND_DATA.classes[className];
+      const isSelected = this.character.class === className;
+      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectClass('${className}')">
+        <div class="card-header">
+          <h3>${className}</h3>
+          ${isSelected ? '<span class="badge badge--success">✓ Seleccionado</span>' : ''}
+        </div>
+        <div class="card-body">
+          <p>${clazz.description}</p>
+          <div>Dado de Golpe: d${clazz.hitDie}</div>
+          <div>Principal: ${clazz.primaryAbility}</div>
+          ${clazz.spellcasting ? '<span class="badge">✨ Magia</span>' : ''}
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+  selectClass(className) {
+    this.character.class = className;
+    this.character.hp = DND_DATA.classes[className].hitDie + calculateModifier(this.character.stats.constitution);
+    this.renderWizard();
+  }
+
+  renderBackgroundSelection() {
+    const backgrounds = Object.keys(DND_DATA.backgrounds);
+    return `<div class="selection-grid">${backgrounds.map(bgName => {
+      const bg = DND_DATA.backgrounds[bgName];
+      const isSelected = this.character.background === bgName;
+      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectBackground('${bgName}')">
+        <div class="card-header">
+          <h3>${bgName}</h3>
+          ${isSelected ? '<span class="badge badge--success">✓</span>' : ''}
+        </div>
+        <div class="card-body">
+          <p>${bg.feature}</p>
+          <div><strong>Competencias:</strong> ${bg.skills.join(', ')}</div>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+  }
+  selectBackground(bgName) {
+    this.character.background = bgName;
+    this.renderWizard();
+  }
+
+  renderStatsSelection() {
+    return `<div>
+      <div class="stats-methods" style="margin-bottom:14px;">
+        <button class="btn ${this.statGenerationMethod==='point-buy'?'btn-success':''}" onclick="wizard.setStatMethod('point-buy')">Point Buy</button>
+        <button class="btn ${this.statGenerationMethod==='standard-array'?'btn-success':''}" onclick="wizard.setStatMethod('standard-array')">Standard Array</button>
+        <button class="btn ${this.statGenerationMethod==='roll'?'btn-success':''}" onclick="wizard.setStatMethod('roll')">Roll</button>
+      </div>
+      ${this.renderStatInputs()}
+    </div>`;
+  }
+  renderStatInputs() {
+    const stats = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
+    const labels = ['Fuerza','Destreza','Constitución','Inteligencia','Sabiduría','Carisma'];
+    return `<div class="stats-grid">${stats.map((stat,i) => {
+      const value = this.character.stats[stat];
+      const mod = calculateModifier(value);
+      return `<div class="stat-box">
+        <label>${labels[i]}</label>
+        <div>
+          <button onclick="wizard.decreaseStat('${stat}')">-</button>
+          <span style="display:inline-block;width:28px;">${value}</span>
+          <button onclick="wizard.increaseStat('${stat}')">+</button>
+          <span style="margin-left:10px;font-size:0.95em;">(${mod>=0?'+':''}${mod})</span>
+        </div>
+      </div>`;
+    }).join('')}</div>
+    ${this.statGenerationMethod==='point-buy'?`<div class="points-remaining"><strong>Puntos restantes:</strong> ${this.pointBuyRemaining}</div>`:''}`;
+  }
+  setStatMethod(method) {
+    this.statGenerationMethod = method;
+    if (method === 'standard-array') {
+      const array = [15,14,13,12,10,8];
+      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach((stat,i)=>this.character.stats[stat]=array[i]);
+    } else if (method === 'roll') {
+      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach(stat=>{ this.character.stats[stat]=this.roll4d6DropLowest(); });
+    } else {
+      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach(stat=>{ this.character.stats[stat]=8; });
+      this.pointBuyRemaining=27;
+    }
+    this.renderWizard();
+  }
+  roll4d6DropLowest() {
+    let rolls = Array.from({length:4},()=>Math.floor(Math.random()*6)+1);
+    rolls.sort((a,b)=>a-b);
+    return rolls.slice(1).reduce((a,b)=>a+b,0);
+  }
+  increaseStat(stat) {
+    if(this.statGenerationMethod!=='point-buy') return;
+    let v = this.character.stats[stat];
+    if(v>=15||this.pointBuyRemaining<=0) return;
+    const cost = DND_DATA.pointBuyCosts[v+1]-DND_DATA.pointBuyCosts[v];
+    if(cost<=this.pointBuyRemaining) {
+      this.character.stats[stat]++;
+      this.pointBuyRemaining -= cost;
+      this.renderWizard();
+    }
+  }
+  decreaseStat(stat) {
+    if(this.statGenerationMethod!=='point-buy') return;
+    let v = this.character.stats[stat];
+    if(v<=8) return;
+    const refund = DND_DATA.pointBuyCosts[v]-DND_DATA.pointBuyCosts[v-1];
+    this.character.stats[stat]--;
+    this.pointBuyRemaining += refund;
+    this.renderWizard();
+  }
+
+  renderEquipmentSelection() {
+    return `<div>
+      <p>Equipo inicial te asignado según clase. Incluye:</p>
+      <ul>
+        <li>Armas y armadura base</li>
+        <li>Mochila de explorador</li>
+        <li>50 piezas de oro</li>
+      </ul>
+    </div>`;
+  }
+
+  renderFinalDetails() {
+    return `<div>
+      <label>Nombre del Personaje *</label>
+      <input type="text" id="characterNameInput" value="${this.character.name}" placeholder="Ej: Thorin Escudo de Roble" style="width:96%;font-size:1.09rem;" oninput="wizard.character.name = this.value">
+      <label>Alineamiento:</label>
+      <select id="characterAlignmentSelect" onchange="wizard.character.alignment = this.value">
+        ${DND_DATA.alignments.map(al=>`<option value="${al}"${this.character.alignment===al?' selected':''}>${al}</option>`).join('')}
+      </select>
+      <div style="margin-top:15px;">
+        <h4>Resumen:</h4>
+        <ul>
+          <li>Raza: ${this.character.race||'No seleccionada'}</li>
+          <li>Clase: ${this.character.class||'No seleccionada'}</li>
+          <li>Trasfondo: ${this.character.background||'No seleccionado'}</li>
+          <li>Nivel: 1</li>
+          <li>HP: ${this.character.hp}</li>
+          <li>Alineamiento: ${this.character.alignment}</li>
+        </ul>
+      </div>
+    </div>`;
+  }
+}
+
+window.wizard = new CharacterWizard();
