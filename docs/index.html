@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐉 D&D Character Forge - Generador Épico</title>
+    <title>🐉 D&D Character Forge - Ultimate Edition</title>
+    
+    <!-- Fuentes épicas medievales -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+    
     <style>
         /* ═══════════════════════════════════════════════════════════
-           🎨 D&D CHARACTER FORGE - ESTILO ÉPICO MEDIEVAL
-           Inspirado en Baldur's Gate 3 + Diseño Clásico D&D
+           🎨 SISTEMA DE DISEÑO MEDIEVAL ÉPICO
+           Copyright (c) 2025 José Cazorla
            ═══════════════════════════════════════════════════════════ */
         
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&display=swap');
-        
         :root {
+            /* Colores base del pergamino y tinta */
             --parchment: #f4e9d8;
             --parchment-dark: #e8d5b7;
             --ink: #2a1a0f;
@@ -20,7 +23,30 @@
             --blood-red: #8b0000;
             --dark-brown: #3a2517;
             --forest-green: #2d5016;
+            
+            /* Sistema de rarezas para NFTs */
+            --rarity-common: #95a5a6;
+            --rarity-uncommon: #27ae60;
+            --rarity-rare: #3498db;
+            --rarity-epic: #9b59b6;
+            --rarity-legendary: #f39c12;
+            
+            /* Espaciado consistente */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            
+            /* Fuentes medievales */
+            --font-title: 'MedievalSharp', 'Cinzel', serif;
+            --font-body: 'Cinzel', serif;
+            
+            /* Efectos y sombras */
             --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-epic: 0 10px 40px rgba(0, 0, 0, 0.4);
+            --transition: all 0.3s ease;
         }
         
         * {
@@ -30,660 +56,440 @@
         }
         
         body {
-            font-family: 'Cinzel', serif;
-            background: 
-                linear-gradient(135deg, rgba(58, 37, 23, 0.95), rgba(26, 15, 8, 0.98)),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%233a2517" width="100" height="100"/><path d="M0 0L100 100M100 0L0 100" stroke="%232a1a0f" stroke-width="0.5" opacity="0.1"/></svg>');
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, rgba(58, 37, 23, 0.95), rgba(26, 15, 8, 0.98)),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%233a2517" width="100" height="100"/><path d="M0 0L100 100M100 0L0 100" stroke="%232a1a0f" stroke-width="0.5" opacity="0.1"/></svg>');
             color: var(--parchment);
             min-height: 100vh;
             overflow-x: hidden;
         }
         
-        /* ═══════════════════════════════════════════════════════════
-           📜 HEADER ÉPICO CON PERGAMINO
-           ═══════════════════════════════════════════════════════════ */
-        
+        /* Header épico con decoraciones */
         .epic-header {
-            background: 
-                linear-gradient(to bottom, 
-                    rgba(244, 233, 216, 0.95), 
-                    rgba(232, 213, 183, 0.9)
-                );
+            background: linear-gradient(to bottom, rgba(244, 233, 216, 0.95), rgba(232, 213, 183, 0.9));
             border-bottom: 5px double var(--gold);
-            padding: 3rem 2rem;
+            padding: var(--space-xxl) var(--space-lg);
             text-align: center;
             position: relative;
-            box-shadow: 0 10px 40px var(--shadow);
-            overflow: hidden;
-        }
-        
-        .epic-header::before,
-        .epic-header::after {
-            content: '🐉';
-            position: absolute;
-            font-size: 8rem;
-            opacity: 0.1;
-            filter: grayscale(100%);
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        .epic-header::before {
-            left: -30px;
-            top: 50%;
-            transform: translateY(-50%) rotate(-15deg);
-        }
-        
-        .epic-header::after {
-            right: -30px;
-            top: 50%;
-            transform: translateY(-50%) rotate(15deg) scaleX(-1);
-            animation-delay: -3s;
+            box-shadow: var(--shadow-epic);
+            margin-bottom: var(--space-xxl);
         }
         
         .main-title {
-            font-family: 'MedievalSharp', 'Cinzel', serif;
+            font-family: var(--font-title);
             font-size: clamp(2.5rem, 8vw, 5rem);
             color: var(--blood-red);
-            text-shadow: 
-                3px 3px 0 var(--gold),
-                5px 5px 15px rgba(0,0,0,0.6);
+            text-shadow: 3px 3px 0 var(--gold), 5px 5px 15px rgba(0,0,0,0.6);
             letter-spacing: 0.1em;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
+            margin-bottom: var(--space-sm);
         }
         
         .subtitle {
-            font-family: 'Cinzel', serif;
             font-size: clamp(1rem, 3vw, 1.5rem);
             color: var(--ink);
             font-style: italic;
-            position: relative;
-            z-index: 1;
+            margin-bottom: var(--space-md);
         }
         
-        /* ═══════════════════════════════════════════════════════════
-           🎲 SELECTOR DE EDICIÓN
-           ═══════════════════════════════════════════════════════════ */
-        
+        /* Selector de edición de D&D */
         .edition-selector {
-            background: var(--parchment-dark);
-            border: 3px solid var(--ink);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin: 2rem auto;
-            max-width: 600px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 1rem;
-            box-shadow: 0 4px 15px var(--shadow);
+            background: rgba(244, 233, 216, 0.9);
+            border: 2px solid var(--ink);
+            border-radius: 8px;
+            padding: var(--space-md);
+            margin: var(--space-lg) auto;
+            max-width: 400px;
+            text-align: center;
         }
         
         .edition-selector label {
-            font-weight: 600;
+            display: block;
             color: var(--ink);
-            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: var(--space-sm);
         }
         
         .edition-selector select {
-            font-family: 'Cinzel', serif;
-            padding: 0.75rem 1.5rem;
+            width: 100%;
+            padding: var(--space-sm);
+            font-family: var(--font-body);
+            font-size: 1rem;
             border: 2px solid var(--ink);
-            border-radius: 8px;
+            border-radius: 4px;
             background: var(--parchment);
             color: var(--ink);
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.3s;
         }
         
-        .edition-selector select:hover {
-            border-color: var(--gold);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        /* Contenedor principal */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-lg);
         }
         
-        /* ═══════════════════════════════════════════════════════════
-           ⚔️ SECCIÓN GENERADOR - TRES BOTONES ÉPICOS
-           ═══════════════════════════════════════════════════════════ */
-        
-        .generator-section {
-            background: rgba(244, 233, 216, 0.95);
-            border: 5px double var(--ink);
-            border-radius: 12px;
-            padding: 3rem;
-            margin: 2rem auto;
-            max-width: 1200px;
-            box-shadow: 0 8px 30px var(--shadow);
-        }
-        
-        .section-title {
-            font-family: 'MedievalSharp', 'Cinzel', serif;
-            font-size: 2.5rem;
-            color: var(--blood-red);
-            text-align: center;
-            margin-bottom: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: 0.05em;
-        }
-        
-        .title-icons {
-            display: inline-block;
-            margin: 0 1rem;
-            opacity: 0.7;
-        }
-        
-        .controls-grid {
+        /* Grid de modos de generación */
+        .modes-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
+            gap: var(--space-lg);
+            margin: var(--space-xxl) 0;
         }
         
-        /* ═══════════════════════════════════════════════════════════
-           🔘 BOTONES ÉPICOS CON EFECTOS
-           ═══════════════════════════════════════════════════════════ */
-        
-        .btn-epic {
-            font-family: 'Cinzel', serif;
-            padding: 2rem 1.5rem;
-            border: 3px solid var(--ink);
+        /* Tarjeta de modo con hover épico */
+        .mode-card {
+            background: linear-gradient(135deg, rgba(244, 233, 216, 0.95), rgba(232, 213, 183, 0.9));
+            border: 4px solid var(--ink);
             border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            padding: var(--space-xl);
             text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
             position: relative;
             overflow: hidden;
             box-shadow: 0 4px 15px var(--shadow);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.75rem;
         }
         
-        .btn-epic::before {
+        .mode-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px var(--shadow);
+            border-color: var(--gold);
+        }
+        
+        .mode-card::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
             opacity: 0;
             transition: opacity 0.3s;
         }
         
-        .btn-epic:hover::before {
+        .mode-card:hover::before {
             opacity: 1;
         }
         
-        .btn-epic:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px var(--shadow);
+        .mode-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-md);
+            display: block;
         }
         
-        .btn-epic:active {
-            transform: translateY(-2px);
+        .mode-title {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            color: var(--blood-red);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
         }
         
-        /* WIZARD - Rojo */
-        .btn-wizard {
-            background: linear-gradient(135deg, #8b0000 0%, #a00000 100%);
+        .mode-description {
+            color: var(--ink);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: var(--space-md);
+        }
+        
+        .mode-features {
+            text-align: left;
+            padding-left: var(--space-lg);
+            margin-bottom: var(--space-md);
+        }
+        
+        .mode-features li {
+            color: var(--ink);
+            margin-bottom: var(--space-xs);
+            font-size: 0.9rem;
+        }
+        
+        /* Botón épico con efecto de brillo */
+        .btn-launch {
+            background: linear-gradient(135deg, var(--blood-red) 0%, #a00000 100%);
             color: var(--gold);
-        }
-        
-        .btn-wizard:hover {
-            border-color: var(--gold);
-            box-shadow: 0 8px 25px rgba(139, 0, 0, 0.6);
-        }
-        
-        /* RANDOM - Verde */
-        .btn-random {
-            background: linear-gradient(135deg, #2d5016 0%, #3d6526 100%);
-            color: var(--parchment);
-        }
-        
-        .btn-random:hover {
-            border-color: var(--gold);
-            box-shadow: 0 8px 25px rgba(45, 80, 22, 0.5);
-        }
-        
-        /* CHAOS - Gradiente Loco */
-        .btn-chaos {
-            background: linear-gradient(135deg, #4b0082 0%, #8b0000 50%, #d4af37 100%);
-            background-size: 200% 200%;
-            animation: chaosGradient 3s ease infinite;
-            color: var(--parchment);
-            border-color: var(--gold);
-        }
-        
-        .btn-chaos:hover {
-            box-shadow: 0 8px 25px rgba(218, 165, 32, 0.8);
-            transform: translateY(-5px) rotate(-2deg);
-        }
-        
-        @keyframes chaosGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        .btn-icon {
-            font-size: 3rem;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .btn-title {
-            font-size: 1.5rem;
-            font-weight: 700;
+            border: 2px solid var(--gold);
+            padding: var(--space-md) var(--space-xl);
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
             text-transform: uppercase;
             letter-spacing: 0.1em;
-            position: relative;
-            z-index: 1;
         }
         
-        .btn-subtitle {
-            font-size: 0.9rem;
-            font-style: italic;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
+        .btn-launch:hover {
+            background: linear-gradient(135deg, #a00000 0%, var(--blood-red) 100%);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
         }
         
-        /* ═══════════════════════════════════════════════════════════
-           🐉 SECCIÓN BESTIARIO
-           ═══════════════════════════════════════════════════════════ */
-        
-        .divider {
-            text-align: center;
-            margin: 3rem 0;
-            position: relative;
-        }
-        
-        .divider::before,
-        .divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 3px;
-            background: linear-gradient(to right, transparent, var(--gold), transparent);
-        }
-        
-        .divider::before {
-            left: 0;
-        }
-        
-        .divider::after {
-            right: 0;
-        }
-        
-        .divider-text {
-            font-family: 'MedievalSharp', 'Cinzel', serif;
-            font-size: 2rem;
-            color: var(--gold);
-            background: var(--dark-brown);
-            padding: 0 2rem;
-            position: relative;
-            z-index: 1;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-        }
-        
-        .bestiary-section {
-            background: linear-gradient(135deg, rgba(26,15,8,0.95), rgba(58,37,23,0.95));
-            border: 5px double var(--gold);
-            border-radius: 12px;
-            padding: 3rem;
-            margin: 2rem auto;
-            max-width: 1200px;
-            box-shadow: 0 8px 30px var(--shadow);
-        }
-        
-        .bestiary-section .section-title {
-            color: var(--gold);
-        }
-        
-        .filter-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .filter-grid select {
-            font-family: 'Cinzel', serif;
-            padding: 0.75rem;
-            border: 2px solid var(--gold);
-            border-radius: 8px;
-            background: var(--parchment-dark);
-            color: var(--ink);
-            font-size: 1rem;
-        }
-        
-        .btn-generate {
-            width: 100%;
-            font-family: 'Cinzel', serif;
-            padding: 1.5rem;
-            border: 3px solid var(--gold);
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--blood-red), #a00000);
-            color: var(--gold);
-            font-size: 1.2rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-generate:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(139, 0, 0, 0.6);
-        }
-        
-        /* ═══════════════════════════════════════════════════════════
-           📊 GENERADOR DE ENCUENTROS
-           ═══════════════════════════════════════════════════════════ */
-        
-        .encounter-generator {
-            background: var(--parchment);
+        /* Sección de características especiales */
+        .features-section {
+            background: rgba(244, 233, 216, 0.9);
             border: 3px solid var(--ink);
             border-radius: 12px;
-            padding: 2rem;
-            margin-top: 2rem;
+            padding: var(--space-xl);
+            margin: var(--space-xxl) 0;
         }
         
-        .encounter-controls {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .encounter-controls input {
-            font-family: 'Cinzel', serif;
-            padding: 0.75rem;
-            border: 2px solid var(--ink);
-            border-radius: 8px;
-            background: var(--parchment-dark);
-            color: var(--ink);
-            font-size: 1rem;
-        }
-        
-        /* ═══════════════════════════════════════════════════════════
-           🌙 FOOTER
-           ═══════════════════════════════════════════════════════════ */
-        
-        .epic-footer {
-            background: rgba(244, 233, 216, 0.95);
-            border-top: 3px double var(--gold);
-            padding: 2rem;
+        .features-title {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            color: var(--blood-red);
             text-align: center;
-            margin-top: 3rem;
+            margin-bottom: var(--space-xl);
+            text-transform: uppercase;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+        }
+        
+        .feature-item {
+            text-align: center;
+            padding: var(--space-md);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .feature-name {
+            font-weight: bold;
+            color: var(--ink);
+            margin-bottom: var(--space-xs);
+        }
+        
+        .feature-desc {
+            color: var(--ink);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        /* Footer épico */
+        .epic-footer {
+            background: rgba(244, 233, 216, 0.9);
+            border-top: 3px solid var(--gold);
+            padding: var(--space-xl);
+            margin-top: var(--space-xxl);
+            text-align: center;
         }
         
         .epic-footer p {
             color: var(--ink);
-            margin-bottom: 0.5rem;
+            margin-bottom: var(--space-sm);
         }
         
-        .theme-toggle {
-            margin-top: 1rem;
-            padding: 0.75rem 1.5rem;
-            border: 2px solid var(--ink);
-            border-radius: 8px;
-            background: var(--parchment-dark);
-            color: var(--ink);
-            font-family: 'Cinzel', serif;
-            cursor: pointer;
-            transition: all 0.3s;
+        .epic-footer a {
+            color: var(--blood-red);
+            text-decoration: none;
+            font-weight: bold;
         }
         
-        .theme-toggle:hover {
-            border-color: var(--gold);
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        .epic-footer a:hover {
+            color: var(--gold);
         }
         
-        /* ═══════════════════════════════════════════════════════════
-           🎬 ANIMACIONES
-           ═══════════════════════════════════════════════════════════ */
-        
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0px);
-            }
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-        
-        /* ═══════════════════════════════════════════════════════════
-           📱 RESPONSIVE
-           ═══════════════════════════════════════════════════════════ */
-        
+        /* Responsive */
         @media (max-width: 768px) {
-            .main-title {
-                font-size: 2.5rem;
-            }
-            
-            .controls-grid {
+            .modes-grid {
                 grid-template-columns: 1fr;
             }
             
-            .generator-section,
-            .bestiary-section {
-                padding: 2rem 1rem;
+            .main-title {
+                font-size: 2rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- ═══════════════════════════════════════════════════════════
-         🐉 HEADER ÉPICO CON DRAGONES
-         ═══════════════════════════════════════════════════════════ -->
+    <!-- Header épico con título y selector de edición -->
     <header class="epic-header">
-        <h1 class="main-title">D&D Character Forge</h1>
-        <p class="subtitle">Generador Épico de Personajes y Bestiario</p>
+        <h1 class="main-title">⚔️ D&D CHARACTER FORGE ⚔️</h1>
+        <p class="subtitle">🎲 El Generador Definitivo de Personajes y Encuentros Épicos 🌌</p>
+        
+        <div class="edition-selector">
+            <label for="editionSelect">📖 Selecciona tu Edición de D&D:</label>
+            <select id="editionSelect">
+                <option value="5e">5ta Edición (2014) - La más popular</option>
+                <option value="3.5e">3.5 Edición (2003) - La clásica</option>
+                <option value="4e">4ta Edición (2008) - La táctica</option>
+            </select>
+        </div>
     </header>
 
     <div class="container">
-        <!-- SELECTOR DE EDICIÓN -->
-        <section class="edition-selector">
-            <label for="editionSelect">📖 Edición de D&D:</label>
-            <select id="editionSelect">
-                <option value="5e" selected>5ta Edición (2014)</option>
-                <option value="3.5e">3.5 Edición (2003)</option>
-                <option value="4e">4ta Edición (2008)</option>
-            </select>
-        </section>
-
-        <!-- GENERADOR DE PERSONAJES -->
-        <section class="generator-section">
-            <h2 class="section-title">
-                <span class="title-icons">⚔️</span>
-                Generador de Personajes
-                <span class="title-icons">⚔️</span>
-            </h2>
-
-            <div class="controls-grid">
-                <!-- WIZARD -->
-                <button class="btn-epic btn-wizard" id="wizardBtn">
-                    <div class="btn-icon">🧙</div>
-                    <div class="btn-title">WIZARD</div>
-                    <div class="btn-subtitle">Creación Paso a Paso</div>
-                </button>
-
-                <!-- RANDOM -->
-                <button class="btn-epic btn-random" id="randomBtn">
-                    <div class="btn-icon">🎲</div>
-                    <div class="btn-title">RANDOM</div>
-                    <div class="btn-subtitle">Personaje Equilibrado</div>
-                </button>
-
-                <!-- CHAOS -->
-                <button class="btn-epic btn-chaos" id="chaosBtn">
-                    <div class="btn-icon">🌀</div>
-                    <div class="btn-title">CHAOS</div>
-                    <div class="btn-subtitle">¡Combinación Loca!</div>
-                </button>
+        <!-- Grid principal de modos de generación -->
+        <div class="modes-grid">
+            <!-- Modo Wizard - Paso a paso -->
+            <div class="mode-card" onclick="launchMode('wizard')">
+                <span class="mode-icon">🧙</span>
+                <h2 class="mode-title">Modo Wizard</h2>
+                <p class="mode-description">
+                    Creación guiada paso a paso, perfecta para principiantes o cuando quieres control total sobre cada detalle.
+                </p>
+                <ul class="mode-features">
+                    <li>✨ Asistente paso a paso</li>
+                    <li>📊 Point Buy, Standard Array o 4d6</li>
+                    <li>🎨 Selección de equipo personalizada</li>
+                    <li>📜 Generación de trasfondo</li>
+                </ul>
+                <button class="btn-launch">Iniciar Wizard →</button>
             </div>
-        </section>
 
-        <!-- SEPARADOR ÉPICO -->
-        <div class="divider">
-            <span class="divider-text">🐉 BESTIARIO 🐉</span>
+            <!-- Modo Random - Equilibrado -->
+            <div class="mode-card" onclick="launchMode('random')">
+                <span class="mode-icon">🎲</span>
+                <h2 class="mode-title">Modo Random</h2>
+                <p class="mode-description">
+                    Generación rápida y equilibrada. Perfecto para one-shots o cuando necesitas un personaje listo en segundos.
+                </p>
+                <ul class="mode-features">
+                    <li>⚡ Generación en 3 segundos</li>
+                    <li>⚖️ Stats balanceados (4d6 drop lowest)</li>
+                    <li>🎯 Combinaciones coherentes</li>
+                    <li>📄 Listo para jugar</li>
+                </ul>
+                <button class="btn-launch">Generar Random →</button>
+            </div>
+
+            <!-- Modo Chaos - Locura total -->
+            <div class="mode-card" onclick="launchMode('chaos')">
+                <span class="mode-icon">🌀</span>
+                <h2 class="mode-title">Modo Chaos</h2>
+                <p class="mode-description">
+                    ¡Locura absoluta! Combinaciones imposibles, stats ridículos, y diversión caótica garantizada.
+                </p>
+                <ul class="mode-features">
+                    <li>🎪 Stats completamente aleatorios</li>
+                    <li>🃏 Combinaciones imposibles</li>
+                    <li>🎭 Mago con 18 FUE y 6 INT</li>
+                    <li>😂 Risas aseguradas</li>
+                </ul>
+                <button class="btn-launch">¡Activar Chaos! →</button>
+            </div>
+
+            <!-- Modo Multiverso - Crossovers épicos -->
+            <div class="mode-card" onclick="launchMode('multiverse')">
+                <span class="mode-icon">🌌</span>
+                <h2 class="mode-title">Modo Multiverso</h2>
+                <p class="mode-description">
+                    Cruza universos: Magic The Gathering, Elden Ring, Stranger Things y más en tus partidas de D&D.
+                </p>
+                <ul class="mode-features">
+                    <li>🎴 Magic: The Gathering crossover</li>
+                    <li>🗡️ Elden Ring characters</li>
+                    <li>👾 Stranger Things elements</li>
+                    <li>🌈 APIs de múltiples universos</li>
+                </ul>
+                <button class="btn-launch">Abrir Portal →</button>
+            </div>
         </div>
 
-        <!-- GENERADOR DE BESTIAS -->
-        <section class="bestiary-section">
-            <h2 class="section-title">
-                <span class="title-icons">👹</span>
-                Generador de Criaturas
-                <span class="title-icons">👹</span>
-            </h2>
-
-            <div class="filter-grid">
-                <select id="creatureTypeFilter">
-                    <option value="">Todos los tipos</option>
-                    <option value="Aberración">Aberración</option>
-                    <option value="Bestia">Bestia</option>
-                    <option value="Dragón">Dragón</option>
-                    <option value="Demonio">Demonio</option>
-                    <option value="Gigante">Gigante</option>
-                    <option value="Humanoide">Humanoide</option>
-                    <option value="No-muerto">No-muerto</option>
-                    <option value="Monstruosidad">Monstruosidad</option>
-                </select>
-
-                <select id="crFilter">
-                    <option value="">Todos los CR</option>
-                    <option value="0.25">CR 0-1</option>
-                    <option value="2">CR 2-3</option>
-                    <option value="5">CR 4-5</option>
-                    <option value="8">CR 6-8</option>
-                    <option value="13">CR 9+</option>
-                </select>
-
-                <select id="environmentFilter">
-                    <option value="">Todos los ambientes</option>
-                    <option value="Mazmorra">Mazmorra</option>
-                    <option value="Bosque">Bosque</option>
-                    <option value="Montaña">Montaña</option>
-                    <option value="Pantano">Pantano</option>
-                    <option value="Subterráneo">Subterráneo</option>
-                </select>
-            </div>
-
-            <button class="btn-generate" id="generateCreatureBtn">
-                🎲 Generar Criatura
-            </button>
-
-            <button class="btn-generate" id="chaosBeastBtn" style="margin-top: 1rem; background: linear-gradient(135deg, #4b0082, #8b0000);">
-                🌀 BESTIA CHAOS
-            </button>
-
-            <!-- GENERADOR DE ENCUENTROS -->
-            <div class="encounter-generator">
-                <h3 class="section-title" style="font-size: 1.5rem; margin-bottom: 1rem;">⚔️ Generador de Encuentros</h3>
-                <div class="encounter-controls">
-                    <input type="number" id="partyLevel" value="5" min="1" max="20" placeholder="Nivel del Grupo">
-                    <input type="number" id="partySize" value="4" min="1" max="8" placeholder="Tamaño del Grupo">
-                    <button class="btn-generate" id="generateEncounterBtn" style="grid-column: 1 / -1;">
-                        ⚔️ Generar Encuentro
-                    </button>
+        <!-- Sección de características del sistema -->
+        <section class="features-section">
+            <h2 class="features-title">🏆 Características Épicas del Sistema</h2>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">🐉</div>
+                    <div class="feature-name">Bestiario Completo</div>
+                    <div class="feature-desc">30+ criaturas con stats completos y modo CHAOS</div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">⚔️</div>
+                    <div class="feature-name">Generador de Encuentros</div>
+                    <div class="feature-desc">Balanceados por CR o completamente caóticos</div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🎨</div>
+                    <div class="feature-name">Sistema NFT</div>
+                    <div class="feature-desc">Rareza, valor y minteo en blockchain</div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">📄</div>
+                    <div class="feature-name">Export PDF Épico</div>
+                    <div class="feature-desc">Fichas profesionales listas para imprimir</div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">💾</div>
+                    <div class="feature-name">Export JSON</div>
+                    <div class="feature-desc">Backup completo de tus personajes</div>
+                </div>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">🌐</div>
+                    <div class="feature-name">APIs Integradas</div>
+                    <div class="feature-desc">DnD5eAPI, Open5e, Lexica y más</div>
                 </div>
             </div>
         </section>
     </div>
 
-    <!-- FOOTER -->
+    <!-- Footer con atribución -->
     <footer class="epic-footer">
-        <p>⚔️ D&D Character Forge © 2025 🐉</p>
-        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
-        <button class="theme-toggle" id="toggleTheme">🌙 Modo Oscuro</button>
+        <p>⚔️ D&D Character Forge v2.0 - Ultimate Edition</p>
+        <p>Creado con ❤️ por <a href="https://github.com/JCazorla90" target="_blank">José Cazorla</a></p>
+        <p>📜 Bajo licencia MIT | 🐉 Código abierto en <a href="https://github.com/JCazorla90/DnD-Character-Forge" target="_blank">GitHub</a></p>
     </footer>
 
     <script>
         // ═══════════════════════════════════════════════════════════
-        // ⚙️ LÓGICA BÁSICA
+        // 🎮 SISTEMA DE NAVEGACIÓN Y CONFIGURACIÓN
         // ═══════════════════════════════════════════════════════════
         
-        console.log('🐉 D&D Character Forge iniciado');
-        console.log('📖 Edición actual: 5e');
+        // Guardamos la edición seleccionada en localStorage para mantenerla entre páginas
+        const editionSelect = document.getElementById('editionSelect');
         
-        // Event Listeners
-        document.getElementById('wizardBtn').addEventListener('click', () => {
-            alert('🧙 WIZARD MODE\n\nAbriendo asistente paso a paso...\n\n(Próximamente: wizard.html)');
-            console.log('🧙 Wizard mode activated');
+        // Cargar edición guardada al iniciar
+        const savedEdition = localStorage.getItem('dnd_edition') || '5e';
+        editionSelect.value = savedEdition;
+        
+        // Guardar cuando cambie
+        editionSelect.addEventListener('change', function() {
+            localStorage.setItem('dnd_edition', this.value);
+            console.log(`📖 Edición cambiada a: ${this.value}`);
         });
         
-        document.getElementById('randomBtn').addEventListener('click', () => {
-            alert('🎲 RANDOM MODE\n\nGenerando personaje equilibrado aleatorio...\n\n(Próximamente: función completa)');
-            console.log('🎲 Random mode activated');
-        });
-        
-        document.getElementById('chaosBtn').addEventListener('click', () => {
-            const confirm = window.confirm(
-                '🌀 MODO CHAOS ACTIVADO\n\n' +
-                '• Stats completamente aleatorios\n' +
-                '• Combinaciones imposibles\n' +
-                '• Mago con 18 FUE y 6 INT\n' +
-                '• Bárbaro lanzando Bola de Fuego\n\n' +
-                '¿Estás preparado para la locura?'
-            );
+        /**
+         * Función principal de navegación entre modos
+         * Esta es la función que conecta el landing con los diferentes generadores
+         */
+        function launchMode(mode) {
+            const edition = editionSelect.value;
+            console.log(`🚀 Iniciando modo: ${mode} con edición ${edition}`);
             
-            if (confirm) {
-                alert('🌀 ¡CAOS TOTAL DESATADO!\n\nGenerando el personaje más loco de la historia...');
-                console.log('🌀 CHAOS MODE ACTIVATED!!!');
-            }
-        });
+            // Guardamos el modo seleccionado para que el siguiente archivo sepa qué cargar
+            sessionStorage.setItem('launch_mode', mode);
+            sessionStorage.setItem('launch_edition', edition);
+            
+            // Navegamos al generador principal que interpretará el modo
+            window.location.href = `forge.html?mode=${mode}&edition=${edition}`;
+        }
         
-        document.getElementById('generateCreatureBtn').addEventListener('click', () => {
-            alert('🐉 Generando criatura...\n\n(Próximamente: sistema completo de bestiario)');
-        });
-        
-        document.getElementById('chaosBeastBtn').addEventListener('click', () => {
-            alert('🌀 BESTIA CHAOS\n\nGoblin con aliento de dragón... ¿Por qué no?');
-        });
-        
-        document.getElementById('generateEncounterBtn').addEventListener('click', () => {
-            const level = document.getElementById('partyLevel').value;
-            const size = document.getElementById('partySize').value;
-            alert(`⚔️ Generando encuentro para:\n\nNivel: ${level}\nJugadores: ${size}\n\n(Próximamente: encuentros balanceados)`);
-        });
-        
-        // Modo Oscuro
-        document.getElementById('toggleTheme').addEventListener('click', function() {
-            document.body.style.filter = 
-                document.body.style.filter === 'invert(1) hue-rotate(180deg)' ? 
-                '' : 'invert(1) hue-rotate(180deg)';
-            this.textContent = this.textContent.includes('🌙') ? '☀️ Modo Claro' : '🌙 Modo Oscuro';
-        });
-        
-        // Selector de Edición
-        document.getElementById('editionSelect').addEventListener('change', function(e) {
-            console.log('📖 Edición cambiada a:', e.target.value);
-            alert(`📖 Edición seleccionada: ${e.target.value}`);
-        });
-        
+        // Log de bienvenida épico en la consola
         console.log(`
-╔════════════════════════════════════════════════════════════════╗
-║                                                                ║
-║     🐉 D&D CHARACTER FORGE v1.0                               ║
-║     https://github.com/JCazorla90/DnD-Character-Forge         ║
-║                                                                ║
-║     Copyright (c) 2025 José Cazorla                           ║
-║     Licensed under MIT License                                ║
-║                                                                ║
-║     "Roll for initiative... o crea 20 personajes en 5 min"   ║
-║                                                                ║
-╚════════════════════════════════════════════════════════════════╝
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║     🐉 D&D CHARACTER FORGE v2.0                          ║
+║     Ultimate Edition - Sistema Completo                  ║
+║                                                           ║
+║     Copyright (c) 2025 José Cazorla                      ║
+║     https://github.com/JCazorla90/DnD-Character-Forge    ║
+║                                                           ║
+║     📚 Edición activa: ${savedEdition.padEnd(33)}║
+║     ⚡ Sistema cargado y listo                           ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
         `);
     </script>
 </body>
