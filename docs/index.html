@@ -1,175 +1,185 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Multiverse Forge - Generador Épico</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="styles.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Multiverse Forge - Generador Épico</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-decoration">⚔️</div>
-        <div class="header-content">
-            <h1 class="main-title">D&D Multiverse Forge</h1>
-            <p class="subtitle">Generador Épico de Personajes, Bestiario y Mapas</p>
-        </div>
-        <div class="header-decoration">🐉</div>
-    </header>
+    <header class="main-header">
+        <div class="header-decoration">⚔️</div>
+        <div class="header-content">
+            <h1 class="main-title">D&D Multiverse Forge</h1>
+            <p class="subtitle">Generador Épico de Personajes, Bestiario y Mapas</p>
+        </div>
+        <div class="header-decoration">🐉</div>
+    </header>
 
-    <div class="container">
-        
-        <div id="characterForge" class="section-panel parchment-box">
-            <h2 class="section-title">⚔️ Forja de Héroes del Multiverso</h2>
+    <div class="container">
+        
+        <div id="characterForge" class="section-panel parchment-box">
+            <h2 class="section-title">⚔️ Forja de Héroes del Multiverso</h2>
 
-            <div class="multiverse-selector">
-                <label for="multiverseSelect">🌌 Selecciona el Universo:</label>
-                <select id="multiverseSelect" class="form-control"></select>
-            </div>
+            <div class="multiverse-selector">
+                <label for="multiverseSelect">🌌 Selecciona el Universo:</label>
+                <select id="multiverseSelect" class="form-control"></select>
+            </div>
 
-            <div class="custom-inputs">
-                <input type="text" id="customName" placeholder="Nombre del Héroe (Opcional)">
-                <select id="raceSelect" class="form-control" title="Raza"></select>
-                <select id="classSelect" class="form-control" title="Clase"></select>
-            </div>
+            <div class="custom-inputs">
+                <input type="text" id="customName" placeholder="Nombre del Héroe (Opcional)">
+                <select id="raceSelect" class="form-control" title="Raza"></select>
+                <select id="classSelect" class="form-control" title="Clase"></select>
+            </div>
 
-            <div class="controls-grid">
-                <button id="generateRandomBtn" class="btn btn-primary">
-                    🎲 Generar Random del Universo
-                </button>
-                <button id="generateCustomBtn" class="btn btn-secondary">
-                    ⚙️ Generar Custom
-                </button>
-                <button id="generateChaosBtn" class="btn btn-accent">
-                    🌀 Modo CHAOS (Mezcla de Universos)
-                </button>
-            </div>
-        </div>
-        
-        <div id="characterSheet" class="character-sheet parchment-box hidden">
-            <div class="sheet-header">
-                <h2 id="charName" class="char-name">Héroe Épico</h2>
-                <p id="charMeta" class="char-meta">Raza | Clase | Nivel 1</p>
-                <p class="char-universe">🌌 Universo: <span id="charUniverse"></span></p>
+            <div class="controls-grid">
+                <button id="generateRandomBtn" class="btn btn-primary">
+                    🎲 Generar Random del Universo
+                </button>
+                <button id="generateCustomBtn" class="btn btn-secondary">
+                    ⚙️ Generar Custom
+                </button>
+                <button id="generateChaosBtn" class="btn btn-accent">
+                    🌀 Modo CHAOS (Mezcla de Universos)
+                </button>
+            </div>
+        </div>
+        
+        <div id="characterSheet" class="character-sheet parchment-box hidden">
+            <div class="sheet-header">
+                <h2 id="charName" class="char-name">Héroe Épico</h2>
+                <p id="charMeta" class="char-meta">Raza | Clase | Nivel 1</p>
+                <p class="char-universe">🌌 Universo: <span id="charUniverse"></span></p>
+                
+                                <div id="apiBonus" class="api-bonus-detail">
+                    </div>
                 
-                <div id="apiBonus" class="api-bonus-detail">
-                    </div>
-            </div>
-
-            <div class="grid-2 character-details-grid">
-                
-                <div style="text-align: center;">
-                    <div id="nftCard" class="nft-card border-common"> 
-                        <div class="portrait-frame">
-                            <img id="charImage" src="placeholder.png" alt="Retrato del Personaje IA"> 
-                        </div>
-                        <div class="nft-metadata">
-                            <span id="nftRarity" class="rarity-badge">COMÚN</span> 
-                            <p>Token ID: <span id="tokenId">0x...</span></p>
-                            <p>Valor Est.: <span id="nftValue">1,000</span> Gold Pieces</p>
-                        </div>
-                    </div>
-                    <button id="mintNFTBtn" class="btn btn-gold mint-btn">🔗 Acuñar NFT</button>
-                </div>
-                
-                <div>
-                    <h3 class="section-subtitle">📊 Estadísticas Base</h3>
-                    <div id="statsDisplay" class="stats-grid">
-                        </div>
-                    
-                    <h3 class="section-subtitle">🛡️ Defensas y Vitalidad</h3>
-                    <div class="stats-grid">
-                        <div class="stat-box">PV: <span id="displayHP">--</span></div>
-                        <div class="stat-box">CA: <span id="displayAC">--</span></div>
-                    </div>
-                    
-                    </div>
-            </div>
-
-            <div class="action-buttons">
-                <button id="downloadPDFBtn" class="btn btn-action">📄 Exportar PDF</button>
-                <button id="showHistoryBtn" class="btn btn-action">📚 Historial</button>
-            </div>
-        </div>
-        
-        <div id="mapArea" class="section-panel parchment-box">
-            <h2 class="section-title">Generador de Mazmorras 🗺️</h2>
-            <div class="map-controls controls-grid">
-                <button id="generateMapBtn" class="btn btn-secondary">Generar Mazmorra</button>
-                <button id="addTokensBtn" class="btn btn-secondary">Añadir Tokens</button>
-            </div>
-            <canvas id="mapCanvas"></canvas>
-        </div>
-
-        <div id="bestiarySection" class="section-panel parchment-box">
-            <h2 class="section-title">Bestiario y Generador de Criaturas</h2>
-            <div class="controls-grid">
-                <button id="generateCreatureBtn" class="btn btn-primary">
-                    👹 Criatura D&D Random
-                </button>
-                <button id="generateChaosBeastBtn" class="btn btn-accent">
-                    💥 Criatura CHAOS
-                </button>
-            </div>
-
-            <div id="creatureSheet" class="character-sheet creature-sheet parchment-box hidden">
-                <div class="sheet-header">
-                    <h2 id="creatureName" class="char-name">Criatura Epica</h2>
-                    <p id="creatureMeta" class="char-meta">Tamaño | Tipo | CR XP</p>
+                <div class="api-bonus-detail">
+                    <h3 class="section-subtitle">💍 Lore Multiversal (LOTR)</h3>
+                    <p id="displayLore">Cargando trasfondo épico...</p>
                 </div>
 
-                <div class="grid-2 creature-details-grid">
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">📊 Estadísticas</h3>
-                        <div id="creatureStatsDisplay" class="stats-grid"></div>
-                    </div>
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">🏃 Movimiento / Defensas</h3>
-                        <p><strong>CA:</strong> <span id="creatureAC">--</span> | <strong>PV:</strong> <span id="creatureHP">--</span></p>
-                        <p><strong>Velocidad:</strong> <span id="creatureSpeed">--</span></p>
-                        <p><strong>Ambiente:</strong> <span id="creatureEnvironment">--</span></p>
-                    </div>
+                <div class="api-bonus-detail">
+                    <h3 class="section-subtitle">🪄 Tesoro Mágico (MTG)</h3>
+                    <p id="displayMagicItem">Cargando artefacto mágico...</p>
                 </div>
+                            </div>
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🔥 Rasgos Especiales</h3>
-                    <ul id="creatureTraits" class="trait-list"></ul>
-                </div>
+            <div class="grid-2 character-details-grid">
+                
+                <div style="text-align: center;">
+                    <div id="nftCard" class="nft-card border-common"> 
+                        <div class="portrait-frame">
+                            <img id="charImage" src="placeholder.png" alt="Retrato del Personaje IA"> 
+                        </div>
+                        <div class="nft-metadata">
+                            <span id="nftRarity" class="rarity-badge">COMÚN</span> 
+                            <p>Token ID: <span id="tokenId">0x...</span></p>
+                            <p>Valor Est.: <span id="nftValue">1,000</span> Gold Pieces</p>
+                        </div>
+                    </div>
+                    <button id="mintNFTBtn" class="btn btn-gold mint-btn">🔗 Acuñar NFT</button>
+                </div>
+                
+                <div>
+                    <h3 class="section-subtitle">📊 Estadísticas Base</h3>
+                    <div id="statsDisplay" class="stats-grid">
+                        </div>
+                    
+                    <h3 class="section-subtitle">🛡️ Defensas y Vitalidad</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">PV: <span id="displayHP">--</span></div>
+                        <div class="stat-box">CA: <span id="displayAC">--</span></div>
+                    </div>
+                    
+                    </div>
+            </div>
 
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">⚔️ Acciones</h3>
-                    <ul id="creatureActions" class="trait-list"></ul>
-                </div>
-                
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">👑 Acciones Legendarias</h3>
-                    <ul id="creatureLegendaryActions" class="trait-list"></ul>
-                </div>
-            </div>
-        </div>
+            <div class="action-buttons">
+                <button id="downloadPDFBtn" class="btn btn-action">📄 Exportar PDF</button>
+                <button id="showHistoryBtn" class="btn btn-action">📚 Historial</button>
+            </div>
+        </div>
+        
+        <div id="mapArea" class="section-panel parchment-box">
+            <h2 class="section-title">Generador de Mazmorras 🗺️</h2>
+            <div class="map-controls controls-grid">
+                <button id="generateMapBtn" class="btn btn-secondary">Generar Mazmorra</button>
+                <button id="addTokensBtn" class="btn btn-secondary">Añadir Tokens</button>
+            </div>
+            <canvas id="mapCanvas"></canvas>
+        </div>
 
-    </div>
+        <div id="bestiarySection" class="section-panel parchment-box">
+            <h2 class="section-title">Bestiario y Generador de Criaturas</h2>
+            <div class="controls-grid">
+                <button id="generateCreatureBtn" class="btn btn-primary">
+                    👹 Criatura D&D Random
+                </button>
+                <button id="generateChaosBeastBtn" class="btn btn-accent">
+                    💥 Criatura CHAOS
+                </button>
+            </div>
 
-    <div id="historyModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">✖️</span>
-            <h2>📚 Historial de Personajes</h2>
-            <div id="historyList" class="history-list"></div>
-        </div>
-    </div>
+            <div id="creatureSheet" class="character-sheet creature-sheet parchment-box hidden">
+                <div class="sheet-header">
+                    <h2 id="creatureName" class="char-name">Criatura Epica</h2>
+                    <p id="creatureMeta" class="char-meta">Tamaño | Tipo | CR XP</p>
+                </div>
 
-    <footer class="main-footer">
-        <p>⚔️ D&D Multiverse Forge © 2025 🐉</p>
-        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
-    </footer>
+                <div class="grid-2 creature-details-grid">
+                    <div class="detail-panel">
+                        <h3 class="section-subtitle">📊 Estadísticas</h3>
+                        <div id="creatureStatsDisplay" class="stats-grid"></div>
+                    </div>
+                    <div class="detail-panel">
+                        <h3 class="section-subtitle">🏃 Movimiento / Defensas</h3>
+                        <p><strong>CA:</strong> <span id="creatureAC">--</span> | <strong>PV:</strong> <span id="creatureHP">--</span></p>
+                        <p><strong>Velocidad:</strong> <span id="creatureSpeed">--</span></p>
+                        <p><strong>Ambiente:</strong> <span id="creatureEnvironment">--</span></p>
+                    </div>
+                </div>
 
-    <script src="dnd-data.js"></script>
-    <script src="bestiary.js"></script>
-    <script src="dnd-apis.js"></script>
-    <script src="app.js"></script>
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">🔥 Rasgos Especiales</h3>
+                    <ul id="creatureTraits" class="trait-list"></ul>
+                </div>
+
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">⚔️ Acciones</h3>
+                    <ul id="creatureActions" class="trait-list"></ul>
+                </div>
+                
+                <div class="detail-panel">
+                    <h3 class="section-subtitle">👑 Acciones Legendarias</h3>
+                    <ul id="creatureLegendaryActions" class="trait-list"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="historyModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal">✖️</span>
+            <h2>📚 Historial de Personajes</h2>
+            <div id="historyList" class="history-list"></div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <p>⚔️ D&D Multiverse Forge © 2025 🐉</p>
+        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
+    </footer>
+
+    <script src="dnd-data.js"></script>
+    <script src="bestiary.js"></script>
+    <script src="dnd-apis.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
