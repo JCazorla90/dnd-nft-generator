@@ -3,456 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐉 Forge - D&D Character Creator</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
-    
+    <title>D&D Forge: Multiverse Edition</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    
-    <style>
-        /* Importamos los mismos estilos medievales épicos */
-        :root {
-            --parchment: #f4e9d8;
-            --parchment-dark: #e8d5b7;
-            --ink: #2a1a0f;
-            --gold: #d4af37;
-            --blood-red: #8b0000;
-            --dark-brown: #3a2517;
-            --forest-green: #2d5016;
-            --rarity-legendary: #f39c12;
-            --space-xs: 4px;
-            --space-sm: 8px;
-            --space-md: 16px;
-            --space-lg: 24px;
-            --space-xl: 32px;
-            --font-title: 'MedievalSharp', 'Cinzel', serif;
-            --font-body: 'Cinzel', serif;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --shadow-epic: 0 10px 40px rgba(0, 0, 0, 0.4);
-            --transition: all 0.3s ease;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: var(--font-body);
-            background: linear-gradient(135deg, rgba(58, 37, 23, 0.95), rgba(26, 15, 8, 0.98)),
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%233a2517" width="100" height="100"/><path d="M0 0L100 100M100 0L0 100" stroke="%232a1a0f" stroke-width="0.5" opacity="0.1"/></svg>');
-            color: var(--parchment);
-            min-height: 100vh;
-        }
-        
-        /* Mini header con volver atrás */
-        .mini-header {
-            background: rgba(244, 233, 216, 0.95);
-            border-bottom: 3px solid var(--gold);
-            padding: var(--space-md) var(--space-lg);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 15px var(--shadow);
-        }
-        
-        .back-link {
-            color: var(--ink);
-            text-decoration: none;
-            font-weight: bold;
-            transition: var(--transition);
-        }
-        
-        .back-link:hover {
-            color: var(--blood-red);
-        }
-        
-        .mode-indicator {
-            color: var(--blood-red);
-            font-weight: bold;
-            font-size: 1.1rem;
-        }
-        
-        /* Contenedor principal */
-        .forge-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: var(--space-lg);
-        }
-        
-        /* Loader épico mientras carga */
-        .loader {
-            text-align: center;
-            padding: var(--space-xl);
-        }
-        
-        .loader-spinner {
-            border: 4px solid var(--parchment-dark);
-            border-top: 4px solid var(--gold);
-            border-radius: 50%;
-            width: 60px;
-            height: 60px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto var(--space-md);
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Panel de control superior */
-        .control-panel {
-            background: rgba(244, 233, 216, 0.95);
-            border: 3px solid var(--ink);
-            border-radius: 12px;
-            padding: var(--space-lg);
-            margin-bottom: var(--space-xl);
-        }
-        
-        .control-title {
-            font-family: var(--font-title);
-            font-size: 1.5rem;
-            color: var(--blood-red);
-            margin-bottom: var(--space-md);
-            text-align: center;
-        }
-        
-        .control-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: var(--space-md);
-        }
-        
-        .control-btn {
-            padding: var(--space-md);
-            border: 2px solid var(--ink);
-            border-radius: 8px;
-            background: var(--parchment);
-            color: var(--ink);
-            font-family: var(--font-body);
-            font-weight: bold;
-            cursor: pointer;
-            transition: var(--transition);
-            text-align: center;
-        }
-        
-        .control-btn:hover {
-            background: var(--gold);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px var(--shadow);
-        }
-        
-        .control-btn.primary {
-            background: linear-gradient(135deg, var(--blood-red), #a00000);
-            color: var(--gold);
-            border-color: var(--gold);
-        }
-        
-        /* Ficha de personaje (misma estética del original) */
-        .character-sheet {
-            background: var(--parchment);
-            border: 5px double var(--ink);
-            border-radius: 12px;
-            padding: var(--space-xl);
-            margin: var(--space-xl) 0;
-            box-shadow: var(--shadow-epic);
-            position: relative;
-            display: none; /* Oculto por defecto hasta generar */
-        }
-        
-        .character-sheet.active {
-            display: block;
-            animation: fadeIn 0.6s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .character-sheet::before,
-        .character-sheet::after {
-            position: absolute;
-            font-size: 4rem;
-            opacity: 0.15;
-            color: var(--ink);
-        }
-        
-        .character-sheet::before {
-            content: '🐉';
-            top: 10px;
-            left: 10px;
-        }
-        
-        .character-sheet::after {
-            content: '💀';
-            bottom: 10px;
-            right: 10px;
-        }
-        
-        .sheet-header {
-            text-align: center;
-            border-bottom: 3px solid var(--ink);
-            padding-bottom: var(--space-lg);
-            margin-bottom: var(--space-lg);
-        }
-        
-        .char-name {
-            font-family: var(--font-title);
-            font-size: 2.5rem;
-            color: var(--blood-red);
-            margin-bottom: var(--space-sm);
-        }
-        
-        .char-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: var(--space-md);
-            margin-bottom: var(--space-lg);
-        }
-        
-        .info-box {
-            background: rgba(232, 213, 183, 0.5);
-            border: 2px solid var(--ink);
-            border-radius: 8px;
-            padding: var(--space-md);
-            text-align: center;
-        }
-        
-        .info-label {
-            font-size: 0.85rem;
-            color: var(--ink);
-            opacity: 0.7;
-            text-transform: uppercase;
-        }
-        
-        .info-value {
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: var(--blood-red);
-            margin-top: var(--space-xs);
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: var(--space-md);
-            margin: var(--space-lg) 0;
-        }
-        
-        .stat-box {
-            background: rgba(232, 213, 183, 0.5);
-            border: 3px solid var(--ink);
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto;
-            transition: var(--transition);
-        }
-        
-        .stat-box:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px var(--gold);
-        }
-        
-        .stat-name {
-            font-size: 0.75rem;
-            color: var(--ink);
-            text-transform: uppercase;
-        }
-        
-        .stat-value {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--blood-red);
-        }
-        
-        .stat-modifier {
-            font-size: 1rem;
-            color: var(--forest-green);
-        }
-        
-        .section-title {
-            font-family: var(--font-title);
-            font-size: 1.5rem;
-            color: var(--blood-red);
-            margin: var(--space-lg) 0 var(--space-md);
-            text-align: center;
-            border-bottom: 2px solid var(--ink);
-            padding-bottom: var(--space-sm);
-        }
-        
-        .abilities-section {
-            background: rgba(232, 213, 183, 0.3);
-            border: 2px solid var(--ink);
-            border-radius: 8px;
-            padding: var(--space-md);
-            margin: var(--space-md) 0;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .ability-item {
-            margin-bottom: var(--space-sm);
-            padding: var(--space-sm);
-            background: rgba(244, 233, 216, 0.7);
-            border-left: 3px solid var(--gold);
-            border-radius: 4px;
-        }
-        
-        .ability-name {
-            font-weight: bold;
-            color: var(--blood-red);
-        }
-        
-        .action-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: var(--space-md);
-            margin-top: var(--space-xl);
-        }
-        
-        .btn-action {
-            padding: var(--space-md);
-            border: 2px solid var(--ink);
-            border-radius: 8px;
-            background: var(--parchment-dark);
-            color: var(--ink);
-            font-family: var(--font-body);
-            font-weight: bold;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .btn-action:hover {
-            background: var(--gold);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px var(--shadow);
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .control-grid {
-                grid-template-columns: 1fr;
-            }
-            .stats-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-    </style>
 </head>
 <body>
-    <div class="mini-header">
-        <a href="index.html" class="back-link">← Volver al inicio</a>
-        <div class="mode-indicator" id="modeIndicator">⚔️ D&D Character Forge</div>
-    </div>
-
     <div class="forge-container">
-        <div id="loader" class="loader">
-            <div class="loader-spinner"></div>
-            <p>Cargando el poder de los antiguos...</p>
-        </div>
-
-        <div id="controlPanel" class="control-panel" style="display: none;">
-            <h2 class="control-title" id="controlTitle">🎲 Generador de Personajes</h2>
-            <div class="control-grid">
-                <button class="control-btn primary" onclick="generateCharacter()">
-                    ⚡ Generar Personaje
-                </button>
-                <button class="control-btn" onclick="generateBestiary()">
-                    🐉 Generar Criatura
-                </button>
-                <button class="control-btn" onclick="generateEncounter()">
-                    ⚔️ Generar Encuentro
-                </button>
-                <button class="control-btn" onclick="showMultiverse()">
-                    🌌 Portal Multiverso
-                </button>
+        
+        <div class="panel" style="text-align: center;">
+            <h1 style="color:var(--blood); margin:0; font-size:3rem;">D&D CHARACTER FORGE</h1>
+            <p>Ultimate Edition: Multiverse & NFT</p>
+            
+            <div style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 8px;">
+                <label style="font-weight:bold; font-size:1.2rem;">🌌 SELECCIONA TU UNIVERSO:</label>
+                <select id="multiverseSelect" onchange="updateUniverse()" style="padding: 10px; font-size: 1rem; width: 100%; max-width: 300px; margin-top: 10px;">
+                    <option value="DND">Dungeons & Dragons (Clásico)</option>
+                    <option value="MTG">Magic: The Gathering</option>
+                    <option value="EldenRing">Elden Ring (Lands Between)</option>
+                    <option value="StrangerThings">Stranger Things</option>
+                    <option value="LOTR">Señor de los Anillos</option>
+                </select>
             </div>
         </div>
 
-        <div id="characterSheet" class="character-sheet">
-            <div class="sheet-header">
-                <h2 class="char-name" id="charName">Personaje</h2>
-                <div class="char-info">
-                    <div class="info-box">
-                        <div class="info-label">Raza</div>
-                        <div class="info-value" id="charRace">-</div>
-                    </div>
-                    <div class="info-box">
-                        <div class="info-label">Clase</div>
-                        <div class="info-value" id="charClass">-</div>
-                    </div>
-                    <div class="info-box">
-                        <div class="info-label">Nivel</div>
-                        <div class="info-value" id="charLevel">1</div>
-                    </div>
-                    <div class="info-box">
-                        <div class="info-label">HP</div>
-                        <div class="info-value" id="charHP">0</div>
-                    </div>
-                    <div class="info-box">
-                        <div class="info-label">AC</div>
-                        <div class="info-value" id="charAC">10</div>
-                    </div>
+        <div class="grid-2">
+            <div class="panel">
+                <h2>🧙 Creador de Personajes</h2>
+                
+                <div class="grid-2" style="margin-bottom: 15px;">
+                    <select id="raceSelect" class="btn" style="text-align:left; background:white;"></select>
+                    <select id="classSelect" class="btn" style="text-align:left; background:white;"></select>
                 </div>
+
+                <button class="btn btn-primary" onclick="forgeCharacter('custom')">✨ Crear Personaje Custom</button>
+                <button class="btn btn-primary" style="background: #444;" onclick="forgeCharacter('random')">🎲 Crear Aleatorio</button>
+                <button class="btn btn-magic" onclick="forgeCharacter('chaos')">🌀 MODO CAOS (Fusión)</button>
             </div>
 
-            <div class="section-title">⚡ CARACTERÍSTICAS</div>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="stat-name">FUE</span>
-                    <span class="stat-value" id="strVal">10</span>
-                    <span class="stat-modifier" id="strMod">+0</span>
+            <div class="panel" style="text-align: center;">
+                <h2>🗺️ Generador de Mapas Tácticos</h2>
+                <canvas id="mapCanvas"></canvas>
+                <div style="margin-top:10px;">
+                    <button class="btn btn-primary" onclick="generateMap()">Generar Mazmorra</button>
+                    <button class="btn btn-primary" onclick="addTokens()">Añadir Tokens</button>
                 </div>
-                <div class="stat-box">
-                    <span class="stat-name">DES</span>
-                    <span class="stat-value" id="dexVal">10</span>
-                    <span class="stat-modifier" id="dexMod">+0</span>
+            </div>
+        </div>
+
+        <div id="outputArea" class="panel hidden" style="display:none;">
+            <div class="grid-2">
+                <div>
+                    <h2 id="charName" style="color:var(--blood); font-size:2rem;">Nombre</h2>
+                    <p><strong id="charMeta">Raza / Clase</strong></p>
+                    <p><strong>Universo de Origen:</strong> <span id="charUniverse">D&D</span></p>
+                    
+                    <div class="grid-3" id="statsDisplay" style="margin: 20px 0;">
+                        </div>
+                    
+                    <div style="background: rgba(0,0,0,0.05); padding: 10px; border-radius: 4px;">
+                        <h4>🎒 Equipo y Rasgos</h4>
+                        <ul id="charTraits" style="padding-left: 20px;"></ul>
+                    </div>
                 </div>
-                <div class="stat-box">
-                    <span class="stat-name">CON</span>
-                    <span class="stat-value" id="conVal">10</span>
-                    <span class="stat-modifier" id="conMod">+0</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-name">INT</span>
-                    <span class="stat-value" id="intVal">10</span>
-                    <span class="stat-modifier" id="intMod">+0</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-name">SAB</span>
-                    <span class="stat-value" id="wisVal">10</span>
-                    <span class="stat-modifier" id="wisMod">+0</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-name">CAR</span>
-                    <span class="stat-value" id="chaVal">10</span>
-                    <span class="stat-modifier" id="chaMod">+0</span>
+
+                <div id="nftCard" class="nft-card">
+                    <div style="position: absolute; top: 10px; right: 10px;" id="nftBadge">💎</div>
+                    <img id="charImage" src="" style="width: 100%; border-radius: 8px; border: 2px solid #fff;">
+                    <h3 id="nftName" style="margin: 10px 0;">Nombre</h3>
+                    <p id="nftRarity" style="font-weight: bold; color: gold;">LEGENDARIO</p>
+                    <p style="font-size: 0.8rem;">Token ID: <span id="tokenId">---</span></p>
+                    <button class="btn btn-magic" style="margin-top:10px;" onclick="mintNFT()">⛏️ MINT NFT</button>
                 </div>
             </div>
             
-            <div class="section-title">📜 HABILIDADES Y RASGOS</div>
-            <div class="abilities-section" id="abilitiesList">
-                </div>
-            
-            <div class="action-buttons">
-                <button class="btn-action" onclick="window.print()">🖨️ Imprimir</button>
-                <button class="btn-action" onclick="exportToJSON()">💾 Guardar JSON</button>
-            </div>
+            <button class="btn btn-primary" style="margin-top: 20px;" onclick="downloadPDF()">📄 Descargar PDF Profesional</button>
         </div>
+
     </div>
 
     <script src="dnd-data.js"></script>
+    <script src="multiverse-data.js"></script>
+    <script src="map-engine.js"></script>
     <script src="dnd-apis.js"></script>
-    <script src="forge.js"></script> </body>
+    <script src="forge.js"></script>
+</body>
 </html>
