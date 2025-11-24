@@ -1,235 +1,195 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🧙 D&D CHARACTER FORGE - FORGE LOGIC (ROBUST)
- * Controla la página de generación específica (forge.html)
+ * 🧙 D&D CHARACTER FORGE - MAIN LOGIC
+ * Soporta Multiverso, Mapas y NFT
+ * Copyright (c) 2025 José Cazorla
  * ═══════════════════════════════════════════════════════════════════
  */
 
 'use strict';
 
-// ===== INICIALIZACIÓN SEGURA =====
-window.addEventListener('load', () => {
-    console.log("🔨 Forge cargada. Iniciando sistemas...");
+let currentUniverse = 'DND';
+let activeCharacter = null;
 
-    // Pequeño retardo para ver la animación (estético) y asegurar carga de datos
-    setTimeout(() => {
-        try {
-            // 1. Ocultar Loader
-            const loader = document.getElementById('loader');
-            const panel = document.getElementById('controlPanel');
-            
-            if (loader) loader.style.display = 'none';
-            if (panel) panel.style.display = 'block';
-
-            // 2. Verificar Datos Críticos
-            if (typeof DND_DATA === 'undefined') {
-                throw new Error("El archivo 'dnd-data.js' no se ha cargado correctamente.");
-            }
-
-            // 3. Configurar UI Inicial
-            setupForgeUI();
-
-            // 4. Detectar Modo Automático (si venimos del index)
-            const mode = sessionStorage.getItem('launch_mode');
-            if (mode === 'random' || mode === 'chaos') {
-                console.log(`🚀 Auto-lanzando modo: ${mode}`);
-                generateCharacter(mode);
-                // Limpiar para que no se ejecute al recargar
-                sessionStorage.removeItem('launch_mode');
-            }
-
-        } catch (error) {
-            console.error("❌ Error crítico en Forge:", error);
-            alert("Error iniciando la Forja: " + error.message + "\n\nVerifica que todos los archivos .js estén en la misma carpeta.");
-            // Intentar mostrar la interfaz de todos modos
-            if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none';
-            if(document.getElementById('controlPanel')) document.getElementById('controlPanel').style.display = 'block';
-        }
-    }, 800);
+// 1. INICIALIZACIÓN
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("⚔️ Sistema Forge V2 Iniciado");
+    updateUniverse(); // Carga datos iniciales
+    MapEngine.init('mapCanvas'); // Inicia motor de mapas
 });
 
-// ===== CONFIGURACIÓN UI =====
-function setupForgeUI() {
-    const edition = sessionStorage.getItem('launch_edition') || '5e';
-    const indicator = document.getElementById('modeIndicator');
-    if(indicator) indicator.textContent = `Forja Activa: D&D ${edition}`;
-
-    // Poblar selectores del panel personalizado
-    populateSelect('raceSelect', Object.keys(DND_DATA.races));
-    populateSelect('classSelect', Object.keys(DND_DATA.classes));
-    populateSelect('backgroundSelect', Object.keys(DND_DATA.backgrounds));
-    populateSelect('alignmentSelect', DND_DATA.alignments);
-}
-
-function populateSelect(id, options) {
-    const select = document.getElementById(id);
-    if (!select) return;
+// 2. SISTEMA DE MULTIVERSO
+function updateUniverse() {
+    currentUniverse = document.getElementById('multiverseSelect').value;
+    const raceSelect = document.getElementById('raceSelect');
+    const classSelect = document.getElementById('classSelect');
     
-    // Limpiar excepto la primera opción (Aleatorio)
-    select.innerHTML = '<option value="">Aleatorio</option>';
+    // Limpiar
+    raceSelect.innerHTML = '';
+    classSelect.innerHTML = '';
     
-    options.forEach(opt => {
-        const option = document.createElement('option');
-        option.value = opt;
-        option.textContent = opt;
-        select.appendChild(option);
-    });
-}
-
-// ===== LÓGICA DE GENERACIÓN =====
-function generateCharacter(mode = 'custom') {
-    // Validar datos
-    if (typeof DND_DATA === 'undefined') {
-        alert("Error crítico: Datos no cargados.");
-        return;
-    }
-
-    let charRace, charClass, charBg, charAlign, charName;
-
-    // A. MODO CAOS
-    if (mode === 'chaos') {
-        charRace = randomFromArray(Object.keys(DND_DATA.races));
-        charClass = randomFromArray(Object.keys(DND_DATA.classes));
-        charBg = randomFromArray(Object.keys(DND_DATA.backgrounds));
-        charAlign = randomFromArray(DND_DATA.alignments);
-    } 
-    // B. MODO CUSTOM (Lee los inputs)
-    else if (mode === 'custom') {
-        charName = document.getElementById('charName').value;
-        charRace = document.getElementById('raceSelect').value || randomFromArray(Object.keys(DND_DATA.races));
-        charClass = document.getElementById('classSelect').value || randomFromArray(Object.keys(DND_DATA.classes));
-        charBg = document.getElementById('backgroundSelect').value || randomFromArray(Object.keys(DND_DATA.backgrounds));
-        charAlign = document.getElementById('alignmentSelect').value || randomFromArray(DND_DATA.alignments);
-    }
-    // C. MODO RANDOM (Por defecto)
-    else {
-        charRace = randomFromArray(Object.keys(DND_DATA.races));
-        charClass = randomFromArray(Object.keys(DND_DATA.classes));
-        charBg = randomFromArray(Object.keys(DND_DATA.backgrounds));
-        charAlign = randomFromArray(DND_DATA.alignments);
-    }
-
-    // Generar Stats
-    let stats;
-    if (mode === 'chaos') {
-        // Stats rotos para modo caos (3d20)
-        stats = {
-            strength: rollDice(20) + 5, dexterity: rollDice(20) + 5, constitution: rollDice(20) + 5,
-            intelligence: rollDice(20) + 5, wisdom: rollDice(20) + 5, charisma: rollDice(20) + 5
+    let data;
+    
+    if (currentUniverse === 'DND') {
+        data = { 
+            races: Object.keys(DND_DATA.races), 
+            classes: Object.keys(DND_DATA.classes) 
         };
     } else {
-        stats = generateStats(); // De dnd-data.js
+        // Cargar de MULTIVERSE_DATA
+        data = MULTIVERSE_DATA[currentUniverse];
     }
-
-    // Calcular Mods
-    const mods = {
-        str: Math.floor((stats.strength - 10) / 2),
-        dex: Math.floor((stats.dexterity - 10) / 2),
-        con: Math.floor((stats.constitution - 10) / 2),
-        int: Math.floor((stats.intelligence - 10) / 2),
-        wis: Math.floor((stats.wisdom - 10) / 2),
-        cha: Math.floor((stats.charisma - 10) / 2)
-    };
-
-    // Datos derivados
-    const raceData = DND_DATA.races[charRace];
-    const classData = DND_DATA.classes[charClass];
-    const bgData = DND_DATA.backgrounds[charBg];
-
-    // Construir Personaje
-    const char = {
-        name: charName || generateRandomName(charRace, charClass),
-        race: charRace,
-        class: charClass,
-        background: charBg,
-        alignment: charAlign,
-        level: 1,
-        hp: classData.hitDie + mods.con,
-        ac: 10 + mods.dex,
-        stats: stats,
-        mods: mods,
-        traits: raceData.traits || [],
-        features: classData.features || [],
-        equipment: ["Equipo de Aventurero"].concat(bgData.equipment || []),
-        bgFeature: bgData.feature,
-        skills: bgData.skills
-    };
-
-    updateUI(char);
+    
+    // Llenar selects
+    data.races.forEach(r => raceSelect.innerHTML += `<option value="${r}">${r}</option>`);
+    data.classes.forEach(c => classSelect.innerHTML += `<option value="${c}">${c}</option>`);
+    
+    console.log(`🌌 Universo cambiado a: ${currentUniverse}`);
 }
 
-// ===== ACTUALIZAR INTERFAZ =====
-function updateUI(char) {
-    const sheet = document.getElementById('characterSheet');
-    sheet.classList.add('active'); // Mostrar ficha
-    sheet.style.display = 'block'; // Forzar display
+// 3. GENERACIÓN DE PERSONAJE
+async function forgeCharacter(mode) {
+    const output = document.getElementById('outputArea');
+    output.style.display = 'block';
     
-    // Scroll suave hacia la ficha
-    sheet.scrollIntoView({ behavior: 'smooth' });
+    // Obtener datos base
+    let race, charClass, name;
+    
+    if (mode === 'custom') {
+        race = document.getElementById('raceSelect').value;
+        charClass = document.getElementById('classSelect').value;
+    } else if (mode === 'random') {
+        // Elegir aleatorio del universo actual
+        const options = currentUniverse === 'DND' 
+            ? { r: Object.keys(DND_DATA.races), c: Object.keys(DND_DATA.classes) }
+            : { r: MULTIVERSE_DATA[currentUniverse].races, c: MULTIVERSE_DATA[currentUniverse].classes };
+            
+        race = options.r[Math.floor(Math.random() * options.r.length)];
+        charClass = options.c[Math.floor(Math.random() * options.c.length)];
+    } else if (mode === 'chaos') {
+        // Fusión loca de universos
+        race = "Híbrido Mutante";
+        charClass = "Hechicero de los Puños";
+    }
+    
+    name = `Héroe de ${currentUniverse}`; // Simplificado para ejemplo
 
-    // Textos
-    setText('charName', char.name);
-    setText('charRace', char.race);
-    setText('charClass', char.class);
-    setText('charHP', char.hp);
-    setText('charAC', char.ac);
+    // Generar Stats
+    const stats = generateStats();
+    
+    // Calcular Rareza NFT
+    const nftData = calculateNFTRarity();
+    
+    // Guardar Objeto Personaje
+    activeCharacter = {
+        name, race, class: charClass, universe: currentUniverse,
+        stats, nft: nftData,
+        hp: 10 + Math.floor((stats.con - 10)/2),
+        ac: 10 + Math.floor((stats.dex - 10)/2)
+    };
 
-    // Stats
-    updateStat('str', char.stats.strength, char.mods.str);
-    updateStat('dex', char.stats.dexterity, char.mods.dex);
-    updateStat('con', char.stats.constitution, char.mods.con);
-    updateStat('int', char.stats.intelligence, char.mods.int);
-    updateStat('wis', char.stats.wisdom, char.mods.wis);
-    updateStat('cha', char.stats.charisma, char.mods.cha);
+    // Renderizar UI
+    renderCharacter(activeCharacter);
+    
+    // Generar Imagen IA (Simulada o API)
+    const imgQuery = `${race} ${charClass} ${currentUniverse} fantasy portrait`;
+    const imgUrl = await DND_API.Images.getEpicImage(imgQuery, 'character');
+    document.getElementById('charImage').src = imgUrl;
+}
 
-    // Listas
-    const listContainer = document.getElementById('abilitiesList');
-    listContainer.innerHTML = '';
-
-    // Helper para añadir items
-    const addItem = (title, text, icon) => {
-        listContainer.innerHTML += `
-            <div class="ability-item">
-                <div class="ability-name">${icon} ${title}</div>
-                <div style="font-size:0.9rem; color:#2a1a0f;">${text}</div>
+// 4. RENDERIZADO
+function renderCharacter(char) {
+    document.getElementById('charName').textContent = char.name;
+    document.getElementById('charMeta').textContent = `${char.race} | ${char.class} | Nivel 1`;
+    document.getElementById('charUniverse').textContent = MULTIVERSE_DATA[char.universe]?.name || "D&D Estándar";
+    
+    // Stats HTML
+    const statsDiv = document.getElementById('statsDisplay');
+    statsDiv.innerHTML = '';
+    for (const [key, val] of Object.entries(char.stats)) {
+        statsDiv.innerHTML += `
+            <div style="background:#222; color:white; padding:5px; text-align:center; border-radius:4px; border:1px solid gold;">
+                <div style="font-size:0.8rem; text-transform:uppercase;">${key}</div>
+                <div style="font-size:1.5rem; font-weight:bold;">${val}</div>
             </div>
         `;
-    };
-
-    // Llenar listas
-    char.traits.forEach(t => addItem(t, "Rasgo Racial", "🧬"));
-    char.features.forEach(f => addItem(f, "Rasgo de Clase", "⚔️"));
-    addItem(char.bgFeature, `Trasfondo: ${char.background}`, "📜");
+    }
     
-    // Equipo
-    const equipList = char.equipment.join(', ');
-    addItem("Equipo", equipList, "🎒");
+    // NFT Card Visuals
+    const card = document.getElementById('nftCard');
+    const badge = document.getElementById('nftRarity');
+    
+    // Reset clases
+    card.className = 'nft-card';
+    
+    if (char.nft.isFoil) card.classList.add('nft-foil');
+    if (char.nft.rarity === 'Legendaria') card.classList.add('border-legendary');
+    
+    badge.textContent = char.nft.rarity.toUpperCase();
+    badge.style.color = getRarityColor(char.nft.rarity);
+    
+    document.getElementById('tokenId').textContent = Math.floor(Math.random() * 999999);
+}
 
-    // Imagen (Si existe la función en dnd-apis.js)
-    if (typeof fetchAIPortrait === 'function') {
-        fetchAIPortrait(char.race, char.class);
-    } else {
-        // Fallback simple si la API no está
-        const img = document.getElementById('aiPortrait');
-        if(img) img.src = `https://placehold.co/320x420/3e2723/ffd700?text=${char.race}`;
+// 5. LÓGICA NFT Y RAREZA
+function calculateNFTRarity() {
+    const roll = Math.random();
+    let rarity = 'Común';
+    if (roll > 0.98) rarity = 'Legendaria';
+    else if (roll > 0.90) rarity = 'Épica';
+    else if (roll > 0.70) rarity = 'Rara';
+    
+    return {
+        rarity,
+        isFoil: Math.random() > 0.8, // 20% chance de ser foil
+        value: Math.floor(Math.random() * 1000)
+    };
+}
+
+function getRarityColor(rarity) {
+    if (rarity === 'Legendaria') return '#f1c40f'; // Gold
+    if (rarity === 'Épica') return '#9b59b6'; // Purple
+    if (rarity === 'Rara') return '#3498db'; // Blue
+    return '#bdc3c7'; // Grey
+}
+
+function mintNFT() {
+    alert(`🔗 Conectando a Wallet...\n\n¡NFT "${activeCharacter.name}" acuñado en la Blockchain!\nRareza: ${activeCharacter.nft.rarity}\nValor Estimado: ${activeCharacter.nft.value} Gold Pieces`);
+}
+
+// 6. MAPA
+function generateMap() {
+    MapEngine.generateDungeon();
+}
+
+function addTokens() {
+    // Dibuja tokens simples sobre el mapa
+    if(!MapEngine.ctx) return;
+    const ctx = MapEngine.ctx;
+    for(let i=0; i<5; i++) {
+        const x = Math.floor(Math.random() * 10) * 40 + 20;
+        const y = Math.floor(Math.random() * 8) * 40 + 20;
+        ctx.beginPath();
+        ctx.arc(x, y, 15, 0, 2*Math.PI);
+        ctx.fillStyle = i===0 ? 'blue' : 'red'; // 1 Heroe, 4 Enemigos
+        ctx.fill();
+        ctx.stroke();
     }
 }
 
-// ===== UTILIDADES DOM =====
-function setText(id, text) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = text;
+// 7. UTILIDADES
+function generateStats() {
+    return {
+        str: roll(20), dex: roll(20), con: roll(20),
+        int: roll(20), wis: roll(20), cha: roll(20)
+    };
 }
-
-function updateStat(id, val, mod) {
-    setText(`${id}Val`, val);
-    setText(`${id}Mod`, (mod >= 0 ? '+' : '') + mod);
+function roll(sides) { return Math.floor(Math.random() * sides) + 1; }
+function downloadPDF() {
+    const doc = new window.jspdf.jsPDF();
+    doc.setFont("times");
+    doc.text(`FICHA DE PERSONAJE: ${activeCharacter.name}`, 10, 10);
+    doc.text(`Universo: ${activeCharacter.universe}`, 10, 20);
+    doc.text(`Clase: ${activeCharacter.class}`, 10, 30);
+    doc.save("personaje_epico.pdf");
 }
-
-function exportToJSON() {
-    alert("Funcionalidad de guardar JSON simulada.");
-}
-
-// Helpers locales por si dnd-data.js falla
-function randomFromArray(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-function rollDice(sides) { return Math.floor(Math.random() * sides) + 1; }
