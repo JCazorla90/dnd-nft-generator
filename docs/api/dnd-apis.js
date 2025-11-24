@@ -1,90 +1,151 @@
-/**
- * ═══════════════════════════════════════════════════════════════════
- * 🌐 D&D CHARACTER FORGE - API INTEGRATION (NON-SIMULATED)
- * * Módulos para peticiones a APIs externas reales (DnD5eAPI.co y Open5e)
- * * Copyright (c) 2025 José Cazorla
- * https://github.com/JCazorla90/DnD-Character-Forge
- * Licensed under MIT License
- * ═══════════════════════════════════════════════════════════════════
- */
+// ==========================================
+// 🌐 INTEGRACIÓN DE APIs D&D - SISTEMA COMPLETO Y MULTIVERSAL
+// APIs: DnD5eAPI.co + Open5e + Elden Ring + LOTR + Scryfall (MTG)
+// ==========================================
 
-const CORE_API = { 
-    // URLs base (placeholders)
+const DND_API = {
+    // URLs base de las APIs
     dnd5e: 'https://www.dnd5eapi.co/api',
     open5e: 'https://api.open5e.com',
-    
-    // Cache de datos (útil para expansiones)
-    cache: { monsters: {}, spells: {}, equipment: {}, /* ... */ },
-    
-    // ===== 🖼️ GENERADOR DE IMAGEN IA MEJORADO (SIMULACIÓN PROFESIONAL) =====
-    async getEpicImage(query, universe = 'DND', type = 'character') {
-        console.log(`📡 Solicitando retrato para: ${query} en ${universe}`);
-        
-        await new Promise(resolve => setTimeout(resolve, 800)); // Simula latencia de API
-        
-        const seed = encodeURIComponent(query).length % 1000;
-        const placeholderBase = 'https://placehold.co/320x420';
+    eldenRing: 'https://eldenring.fanapis.com/api',
+    lotr: 'https://the-one-api.dev/v2', 
+    scryfall: 'https://api.scryfall.com',
 
-        // Lógica de estilo por Universo
-        if (universe === 'SPARK') {
-             // Mock de imagen estilo South Park (fondo verde, texto blanco)
-             return `${placeholderBase}/54A45A/ffffff?text=SP+${query.replace(/ /g, '+')}`;
+    // Nota: La API de LotR requiere una clave. Sustitúyela si la tienes.
+    LOTR_API_KEY: 'YOUR_LOTR_API_KEY_HERE', 
+
+    // Cache para optimizar llamadas
+    cache: {
+        monsters: {},
+        spells: {},
+        equipment: {},
+        classes: {},
+        races: {},
+        feats: {},
+        magicItems: {},
+        bossNames: [], 
+        lotrCharacters: []
+    },
+
+    // ==========================================
+    // ⚔️ UTILIDADES BASE ASÍNCRONAS
+    // ==========================================
+
+    async fetchData(url, headers = {}) {
+        try {
+            const res = await fetch(url, { headers });
+            if (!res.ok) {
+                // Notificar error pero no detener la ejecución.
+                throw new Error(`HTTP error! status: ${res.status} from ${url}`);
+            }
+            return await res.json();
+        } catch (e) {
+            console.error(`Error fetching data from ${url}:`, e);
+            return null;
         }
-        if (universe === 'ELDRING') {
-             // Mock oscuro y épico
-             return `https://picsum.photos/seed/${seed}/320/420?grayscale&blur=2`; 
-        }
-        
-        // Default D&D/Fantasy (Imagen de stock con semilla)
-        return `https://picsum.photos/seed/${seed}/320/420`; 
     },
     
-    // ===== 📖 ENRIQUECIMIENTO DE PERSONAJE POR UNIVERSO (MOCK) =====
-    // Recoge información detallada de la "API" del universo para enriquecer la partida.
-    async fetchUniverseDetails(universe, race, charClass) {
-        console.log(`📡 Buscando datos enriquecidos para ${universe}, ${race}, ${charClass}...`);
-        
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        let details = { bonus: 'Ninguno', flavor: 'Datos base D&D.' };
-        const randomElement = randomFromArray;
-
-        if (universe === 'ELDRING') {
-            details.bonus = 'Talismán: Marika’s Soreseal (Aumenta todas las estadísticas en +3)';
-            details.flavor = 'Has sido bendecido/a por la gracia de la Gran Runa. Un Sinluz con determinación.';
-        } else if (universe === 'ESDLA') {
-            details.bonus = 'Objeto Épico: Anillo Élfico (Ventaja en salvaciones contra miedo)';
-            details.flavor = 'Has jurado lealtad a la Compañía del Anillo y a la protección de la Tierra Media.';
-        } else if (universe === 'SPARK') {
-            details.bonus = `Arma: **${charClass}’s ${randomElement(['Espada de Cartón', 'Bastón de Mago', 'Pistola Láser'])}** (Daño 2d6 extra)`;
-            details.flavor = `¡Eres un ${charClass} del Reino de Zaron! La misión de recuperar la Vara de la Verdad recae sobre ti.`;
-        } else if (universe === 'STRANGERTHINGS') {
-            details.bonus = 'Habilidad Psíquica: Rastrear al Demogorgon (Rastreo +10)';
-            details.flavor = 'Tienes un vínculo psíquico con el Otro Lado, nacido de un trauma en Hawkins.';
-        } else if (universe === 'HARRYPOTTER') {
-            details.bonus = 'Hechizo Patronus: Expecto Patronum (Expulsa Dementores)';
-            details.flavor = `Perteneces a la casa de ${randomElement(['Gryffindor', 'Slytherin', 'Hufflepuff', 'Ravenclaw'])}.`;
+    // Funciones base de D&D (Se asume su reescritura a asíncrona)
+    async getRaceDetails(raceName) {
+        // Implementación simplificada. El propósito es mostrar la estructura asíncrona.
+        console.log(`📡 Obteniendo detalles de raza: ${raceName}`);
+        const apiName = raceName.toLowerCase().replace(/ /g, '-').replace('á', 'a');
+        const res = await this.fetchData(`${this.dnd5e}/races/${apiName}`);
+        if (res && res.traits) {
+            return { traits: res.traits.map(t => t.name) };
         }
-        
-        return details;
+        return { traits: [`Rasgos básicos de ${raceName}.`] };
     },
-    
-    // ===== 🐉 PLACEHOLDERS DE BESTIARIO (Para usar con una API real) =====
-    async listMonsters() {
-        // En una implementación real, esto consultaría a dnd5eapi.co/api/monsters
-        // Usamos el DND_BESTIARY local como fallback para garantizar funcionalidad
-        if (typeof DND_BESTIARY !== 'undefined') {
-            return Object.keys(DND_BESTIARY).map(key => ({ name: key }));
+
+    async getClassDetails(className) {
+        console.log(`📡 Obteniendo detalles de clase: ${className}`);
+        const apiName = className.toLowerCase().replace(/ /g, '-').replace('ó', 'o');
+        const res = await this.fetchData(`${this.dnd5e}/classes/${apiName}`);
+        if (res && res.proficiencies) {
+            return { 
+                features: [`Competente con: ${res.proficiencies.map(p => p.name).slice(0, 3).join(', ')}`]
+            };
         }
-        return [];
+        return { features: [`Características básicas de ${className}.`] };
     },
-    
-    async getMonsterDetails(monsterName) {
-        // En una implementación real, consultaría la API.
-        // Usamos el DND_BESTIARY local para garantizar funcionalidad
-        if (typeof DND_BESTIARY !== 'undefined' && DND_BESTIARY[monsterName]) {
-            return DND_BESTIARY[monsterName];
+
+    // ==========================================
+    // 🐉 ELDEN RING - BESTIAS CAÓTICAS (Para generateChaosBeast)
+    // ==========================================
+
+    async getRandomEldenRingBossName() {
+        console.log('📡 Obteniendo nombre de Jefe de Elden Ring...');
+        if (this.cache.bossNames.length === 0) {
+            try {
+                const data = await this.fetchData(`${this.eldenRing}/bosses?limit=100`);
+                if (data && data.data && data.data.length > 0) {
+                    this.cache.bossNames = data.data.map(boss => boss.name).filter(n => n);
+                }
+            } catch (e) {
+                console.warn(`⚠️ Error en Elden Ring API, usando fallback: ${e.message}`);
+            }
         }
-        return null;
+        
+        const names = this.cache.bossNames.length > 0 ? this.cache.bossNames : ['Margit', 'Malenia', 'Radahn', 'Godrick'];
+        return names[Math.floor(Math.random() * names.length)] || 'Entidad Desconocida';
+    },
+
+    // ==========================================
+    // 💍 LORD OF THE RINGS - LORE MULTIVERSAL (Para generateCharacter)
+    // ==========================================
+
+    async getLotrUniverseDescription() {
+        console.log('📡 Obteniendo cita épica de LotR...');
+        
+        // Cita de Fallback
+        const fallbackQuotes = [
+            "No todos los que vagan están perdidos.",
+            "La oscuridad debe enfrentarse a la luz.",
+            "Una gran aventura es lo que se avecina."
+        ];
+
+        // Intentamos cargar personajes una vez para usarlos en el lore
+        if (this.cache.lotrCharacters.length === 0 && this.LOTR_API_KEY !== 'YOUR_LOTR_API_KEY_HERE') {
+            try {
+                const data = await this.fetchData(`${this.lotr}/character?limit=100`, { 'Authorization': `Bearer ${this.LOTR_API_KEY}` });
+                if (data && data.docs && data.docs.length > 0) {
+                    this.cache.lotrCharacters = data.docs.map(c => c.name).filter(n => n && n !== 'NaN');
+                }
+            } catch (e) {
+                console.warn(`⚠️ Fallo en LotR API: ${e.message}. Usando fallback.`);
+            }
+        }
+        
+        if (this.cache.lotrCharacters.length > 0) {
+            const randomCharacter = this.cache.lotrCharacters[Math.floor(Math.random() * this.cache.lotrCharacters.length)];
+            return `Este héroe lleva consigo el linaje de ${randomCharacter}, listo para la próxima Senda.`;
+        }
+
+        return fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+    },
+
+    // ==========================================
+    // 🪄 MAGIC: THE GATHERING (SCRYFALL) - OBJETOS MÁGICOS (Para generateCharacter)
+    // ==========================================
+    
+    async getRandomMagicItemDescription() {
+        console.log('📡 Obteniendo objeto mágico de Scryfall (MTG)...');
+        try {
+            // Filtramos por tipo de carta "Artifact" o "Land" en español
+            const uri = `${this.scryfall}/cards/random?q=type%3Aartifact+OR+type%3Aland+lang%3Aes`;
+            const data = await this.fetchData(uri);
+            
+            if (data && data.name) {
+                const name = data.name;
+                // Usamos la primera parte del texto de oráculo
+                const oracleText = data.oracle_text ? data.oracle_text.split('.')[0] : "Un objeto de gran poder arcano.";
+                
+                return `**${name}** (Rareza: ${data.rarity.toUpperCase()}): ${oracleText}.`;
+            }
+        } catch (e) {
+            console.error(`Error Scryfall API:`, e);
+        }
+        
+        return "Un objeto mágico menor, con inscripciones arcanas ilegibles.";
     }
 };
