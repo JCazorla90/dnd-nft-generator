@@ -1,14 +1,21 @@
 // ==========================================
-// 🧙 D&D CHARACTER FORGE - MAIN APPLICATION LOGIC (V3.0 - FINAL)
-// Integra Multiverso, NFT, Mapas, Bestiario y Chaos.
+// 🧙 D&D CHARACTER FORGE - MAIN APPLICATION LOGIC (V3.1 - FINAL ASÍNCRONO)
+// Integra Multiverso, NFT, Mapas, Bestiario y Chaos con llamadas API robustas.
 // ==========================================
 
 'use strict';
 
 // Asegurar que las dependencias están cargadas
-if (typeof CORE_API === 'undefined' || typeof MULTIVERSE_DATA === 'undefined' || typeof DND_BESTIARY === 'undefined') {
+if (typeof CORE_API === 'undefined' || typeof MULTIVERSE_DATA === 'undefined' || typeof DND_BESTIARY === 'undefined' || typeof DND_API === 'undefined') {
     console.error("ERROR: Dependencias 'dnd-data.js', 'dnd-apis.js' o 'bestiary.js' no cargadas.");
 }
+
+// ===== ESTADO GLOBAL (Asegúrate de que estas variables están definidas en dnd-data.js o globalmente)
+let currentCharacter = null;
+let currentCreature = null;
+const STORAGE_KEY = 'dnd_character_history';
+
+// Nota: Asumiendo que las funciones de utilidad (rollDice, calculateModifier, generateStats, generateRandomName, randomFromArray, saveToHistory) están definidas en `dnd-data.js` o antes.
 
 // ==========================================
 // 🗺️ MAP ENGINE (Profesional, Canvas-based)
@@ -99,7 +106,7 @@ const app = {
     currentUniverse: 'DND',
     
     init() {
-        console.log("⚔️ D&D Forge V3.0 (Multiverso) Iniciado");
+        console.log("⚔️ D&D Forge V3.1 (Multiverso Asíncrono) Iniciado");
         this.setupMultiverseSelector();
         MapEngine.init('mapCanvas');
         this.setupEventListeners();
@@ -107,9 +114,10 @@ const app = {
     
     setupEventListeners() {
         // Personaje
-        document.getElementById('generateRandomBtn')?.addEventListener('click', () => this.forgeCharacter('random'));
-        document.getElementById('generateCustomBtn')?.addEventListener('click', () => this.forgeCharacter('custom'));
-        document.getElementById('generateChaosBtn')?.addEventListener('click', () => this.forgeCharacter('chaos'));
+        // Envolver en .catch para manejar errores de promesas en las llamadas API
+        document.getElementById('generateRandomBtn')?.addEventListener('click', () => this.forgeCharacter('random').catch(console.error));
+        document.getElementById('generateCustomBtn')?.addEventListener('click', () => this.forgeCharacter('custom').catch(console.error));
+        document.getElementById('generateChaosBtn')?.addEventListener('click', () => this.forgeCharacter('chaos').catch(console.error));
         document.getElementById('mintNFTBtn')?.addEventListener('click', () => this.mintNFT());
         document.getElementById('downloadPDFBtn')?.addEventListener('click', () => this.downloadPDF());
         document.getElementById('showHistoryBtn')?.addEventListener('click', () => this.showHistory());
@@ -119,8 +127,8 @@ const app = {
         document.getElementById('addTokensBtn')?.addEventListener('click', () => MapEngine.addTokens());
 
         // Bestiario
-        document.getElementById('generateCreatureBtn')?.addEventListener('click', () => this.generateCreature('random'));
-        document.getElementById('generateChaosBeastBtn')?.addEventListener('click', () => this.generateCreature('chaos'));
+        document.getElementById('generateCreatureBtn')?.addEventListener('click', () => this.generateCreature('random').catch(console.error)); // Ahora es async
+        document.getElementById('generateChaosBeastBtn')?.addEventListener('click', () => this.generateCreature('chaos').catch(console.error)); // Ahora es async
         document.querySelector('.close-modal')?.addEventListener('click', () => document.getElementById('historyModal').classList.add('hidden'));
     },
 
@@ -150,12 +158,17 @@ const app = {
         
         let data = MULTIVERSE_DATA[this.currentUniverse];
         
-        data.races.forEach(r => raceSelect.innerHTML += `<option value="${r}">${r}</option>`);
-        data.classes.forEach(c => classSelect.innerHTML += `<option value="${c}">${c}</option>`);
+        // Asumiendo que RACES y CLASSES están disponibles globalmente si no se usan los datos de MULTIVERSE_DATA
+        (data.races || []).forEach(r => raceSelect.innerHTML += `<option value="${r}">${r}</option>`);
+        (data.classes || []).forEach(c => classSelect.innerHTML += `<option value="${c}">${c}</option>`);
     },
 
+    // ==========================================
+    // ⚔️ FORJA DE PERSONAJE (ASÍNCRONA)
+    // ==========================================
     async forgeCharacter(mode) {
         document.getElementById('characterSheet').classList.add('hidden');
+        // Usar un placeholder mientras carga
         document.getElementById('charImage').src = 'loading.gif'; 
         document.getElementById('charName').textContent = 'Forjando...';
 
@@ -181,26 +194,47 @@ const app = {
         
         name = document.getElementById('customName').value || generateRandomName(race, charClass, universe);
         
-        // Generación de datos
         const stats = generateStats(); 
         const nftData = this.calculateNFTRarity(universe);
         
-        // Llamada a APIs
-        const [apiDetails, imgUrl] = await Promise.all([
-            CORE_API.fetchUniverseDetails(universe, race, charClass),
+        // 🚀 LLAMADAS ASÍNCRONAS MULTIVERSALES (CRÍTICO: USO DE DND_API)
+        // Usamos Promise.all para cargar todo a la vez
+        const [
+            raceData, 
+            classData, 
+            lotrLore, 
+            magicItem, 
+            imgUrl // Asumiendo que CORE_API sigue manejando la imagen
+        ] = await Promise.all([
+            DND_API.getRaceDetails(race),
+            DND_API.getClassDetails(charClass),
+            DND_API.getLotrUniverseDescription(),
+            DND_API.getRandomMagicItemDescription(),
             CORE_API.getEpicImage(`${race} ${charClass} ${universeData.name} portrait`, universe)
         ]);
         
-        // Objeto Personaje Global
+        // Objeto Personaje Global (Nuevos campos integrados)
         window.currentCharacter = {
             name, race, class: charClass, universe,
-            stats, nft: nftData, apiDetails,
+            stats, nft: nftData, 
+            // 🆕 Datos de APIs Enriquecidos
+            lore: lotrLore,
+            magicItem: magicItem,
+            racialTraits: raceData.traits || [], 
+            classFeatures: classData.features || [], 
+            // Datos originales (manteniendo la estructura necesaria para renderCharacter y PDF)
             hp: 10 + calculateModifier(stats.constitution),
             ac: 10 + calculateModifier(stats.dexterity),
+            // Adaptar apiDetails para compatibilidad con el renderizado base (si se necesita)
+            apiDetails: { 
+                bonus: `Rasgos Principales: ${raceData.traits[0] || 'N/A'}`,
+                flavor: `Clase Principal: ${classData.features[0] || 'N/A'}`,
+            }
         };
 
         this.renderCharacter(window.currentCharacter, imgUrl);
         saveToHistory(window.currentCharacter);
+        console.log('✅ Personaje generado con contenido multiversal:', window.currentCharacter);
     },
     
     renderCharacter(char, imgUrl) {
@@ -241,18 +275,22 @@ const app = {
         document.getElementById('tokenId').textContent = char.nft.tokenId;
         document.getElementById('nftValue').textContent = char.nft.value.toLocaleString();
 
-        // Detalle Enriquecido de API
+        // Detalle Enriquecido de API (Combinando D&D 5e Race/Class details)
         document.getElementById('apiBonus').innerHTML = `
-            <strong>Bonus Épico:</strong> ${char.apiDetails.bonus || 'No Aplica'}
-            <p class="flavor-text">${char.apiDetails.flavor || 'Datos base D&D.'}</p>
+            <strong>Rasgos de Raza:</strong> ${char.racialTraits.join(', ') || 'Rasgos base D&D.'}
+            <p class="flavor-text"><strong>Características de Clase:</strong> ${char.classFeatures.join(', ') || 'Características de clase base.'}</p>
         `;
+        
+        // 🆕 Renderizado de Lore y Objeto Mágico (Nuevos campos)
+        document.getElementById('displayLore').innerHTML = char.lore || 'No se pudo contactar con el multiverso LOTR.';
+        document.getElementById('displayMagicItem').innerHTML = char.magicItem || 'No se encontró ningún artefacto mágico.';
     },
 
     // ===== LÓGICA BESTIARIO Y CHAOS =====
-    generateCreature(mode) {
+    async generateCreature(mode) { // Ahora es ASÍNCRONO
         let creature;
         if (mode === 'chaos') {
-            creature = this.generateChaosBeast();
+            creature = await this.generateChaosBeast(); // CRÍTICO: await
         } else {
             const monsterNames = Object.keys(DND_BESTIARY).filter(k => k !== 'version' && k !== 'creatureTypes' && k !== 'environments' && k !== 'challengeRatings');
             const randomName = randomFromArray(monsterNames);
@@ -264,19 +302,23 @@ const app = {
         this.displayCreature(creature);
     },
 
-    generateChaosBeast() {
+    // 🐉 Generador de Criaturas CHAOS (ASÍNCRONO)
+    async generateChaosBeast() {
         const allTypes = DND_BESTIARY.creatureTypes;
         const allEnvironments = DND_BESTIARY.environments;
         
         const randomType = randomFromArray(allTypes);
         const randomEnvironment = randomFromArray(allEnvironments);
         const randomCR = randomFromArray(DND_BESTIARY.challengeRatings).cr;
+
+        // 🆕 LLAMADA ASÍNCRONA A API EXTERNA (Elden Ring)
+        const epicName = await DND_API.getRandomEldenRingBossName(); 
         
         const creature = {
-            name: `${generateRandomName('Desconocido', 'Caos')} el Terrible`,
+            name: `${epicName} el Caos Encarnado`, 
             type: randomType,
             cr: randomCR,
-            xp: 0, // No calculamos XP para el caos
+            xp: 0, 
             environment: randomEnvironment,
             hp: rollDice(20) * (parseFloat(randomCR) || 1) + 50,
             ac: 10 + rollDice(10),
@@ -287,7 +329,8 @@ const app = {
                 `Ataque Caótico: +${calculateModifier(generateStats().strength) + 5}, ${rollDice(6)}d${rollDice(12)} de daño de ${randomFromArray(['Fuego', 'Frío', 'Nigromancia'])}`,
                 `Habilidad Especial: Desaparición Dimensional (Teletransporte)`
             ],
-            description: `Una criatura ${randomType} de CR ${randomCR} que habita en ${randomEnvironment}. ¡TOTALMENTE IMPREDECIBLE!`
+            description: `Una criatura ${randomType} de CR ${randomCR} que habita en ${randomEnvironment}. ¡TOTALMENTE IMPREDECIBLE!`,
+            rarity: randomFromArray(['rare', 'epic', 'legendary', 'mythic']) // Para NFT
         };
         
         return creature;
@@ -317,7 +360,7 @@ const app = {
         document.getElementById('creatureEnvironment').textContent = Array.isArray(creature.environments) ? creature.environments.join(', ') : creature.environment || '--';
     },
 
-    // ===== LÓGICA NFT Y RAREZA PROFESIONAL =====
+    // ===== LÓGICA NFT Y RAREZA PROFESIONAL (Sin cambios) =====
     calculateNFTRarity(universe) {
         const roll = Math.random();
         let rarity = 'Común';
@@ -327,7 +370,7 @@ const app = {
         else if (roll > 0.95) rarity = 'Épica';
         else if (roll > 0.8) rarity = 'Rara';
         
-        if (universe !== 'DND' && Math.random() > 0.90) { // Bonus por Crossover (10% más de rareza)
+        if (universe !== 'DND' && Math.random() > 0.90) { 
              if (rarity === 'Rara') rarity = 'Épica';
              if (rarity === 'Común') rarity = 'Rara';
         }
@@ -365,7 +408,7 @@ const app = {
         `);
     },
     
-    // ===== EXPORTACIÓN PDF =====
+    // ===== EXPORTACIÓN PDF (Sin cambios, usa los datos existentes) =====
     downloadPDF() {
         if (!window.currentCharacter || typeof window.jspdf === 'undefined') {
             return alert("❌ Genera un personaje y asegúrate de que jsPDF esté cargado en tu HTML.");
@@ -393,15 +436,16 @@ const app = {
             doc.text(`${key.toUpperCase()}: ${val} (${mod >= 0 ? '+' : ''}${mod})`, 10, y += 6);
         }
         
+        // Incluir el nuevo Lore y Objeto Mágico en el PDF
         doc.text("BONUS DE UNIVERSO", 100, 45);
         doc.setFontSize(10);
-        doc.text(`Bonus: ${window.currentCharacter.apiDetails.bonus}`, 100, 52, { maxWidth: 100 });
-        doc.text(`Flavor: ${window.currentCharacter.apiDetails.flavor}`, 100, 65, { maxWidth: 100 });
+        doc.text(`Lore: ${window.currentCharacter.lore || 'N/A'}`, 100, 52, { maxWidth: 100 });
+        doc.text(`Artefacto: ${window.currentCharacter.magicItem || 'N/A'}`, 100, 65, { maxWidth: 100 });
         
         doc.save(`${window.currentCharacter.name.replace(/ /g, '_')}_ficha_epic.pdf`);
     },
     
-    // ===== HISTORIAL =====
+    // ===== HISTORIAL (Sin cambios significativos) =====
     showHistory() {
         const modal = document.getElementById('historyModal');
         const list = document.getElementById('historyList');
@@ -409,9 +453,9 @@ const app = {
             modal.classList.remove('hidden');
             let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
             list.innerHTML = history.map(item => `
-                <div class="history-item ${this.getRarityClass(item.rarity)}">
+                <div class="history-item ${this.getRarityClass(item.nft.rarity || 'Común')}">
                     <strong>${item.name}</strong> (${item.race} ${item.class})<br>
-                    <small>Universo: ${MULTIVERSE_DATA[item.universe].name} | Rareza: ${item.rarity}</small>
+                    <small>Universo: ${MULTIVERSE_DATA[item.universe].name} | Rareza: ${item.nft.rarity || 'N/A'}</small>
                 </div>
             `).join('');
             
