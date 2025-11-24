@@ -1,186 +1,531 @@
+/* ==========================================
+   D&D CHARACTER FORGE - ESTILOS ÉPICOS PROFESIONALES (UNIFICADO V3.0)
+   - Combina la base de pergamino del usuario con la funcionalidad NFT/Mapa/Bestiario
+   ========================================== */
+
+/* ===== IMPORTS Y VARIABLES ===== */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap');
 
 :root {
-  --parchment-light: #f4e9d8;
-  --parchment: #e8d5b7;
-  --parchment-dark: #d4c4a8;
-  --ink-black: #1a0f08;
-  --gold: #d4af37;
-  --blood-red: #8b0000;
-  --royal-purple: #4b0082;
-  --font-title: 'Cinzel', serif;
-  --font-body: 'MedievalSharp', cursive;
-  --font-cursive: 'Marck Script', cursive;
-  --box-shadow-parchment: 6px 6px 30px rgba(0,0,0,0.12);
-  --spacing-sm: 8px;
-  --spacing-md: 16px;
-  --spacing-lg: 36px;
-  --spacing-xl: 70px;
+    /* Colores principales del usuario (Parchment) */
+    --parchment-light: #f4e9d8;
+    --parchment: #e8d5b7;
+    --parchment-dark: #d4c4a8;
+    --ink-black: #1a0f08;
+    
+    /* Colores funcionales añadidos (Ink, Gold, Red) */
+    --ink-dark: #2a1a0f;
+    --ink-medium: #5d4037;
+    --gold: #d4af37;
+    --gold-light: #f4d03f;
+    --blood-red: #8b0000;
+    --dark-red: #5c0000;
+    --royal-purple: #4b0082;
+    --steel-blue: #4682b4; /* Para botones primarios / visuales */
+
+    /* Tipografía */
+    --font-title: 'Cinzel', serif;
+    --font-body: 'MedievalSharp', cursive;
+    --font-cursive: 'Marck Script', cursive;
+
+    /* Sombras y espaciado (Adoptados del usuario) */
+    --box-shadow-parchment: 6px 6px 30px rgba(0,0,0,0.12);
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 36px;
+    --spacing-xl: 70px;
 }
 
+/* ===== BASE LAYOUT ===== */
 body {
-  background: linear-gradient(to top, var(--parchment-dark) 0, var(--ink-black) 85%);
-  color: var(--ink-black);
-  font-family: var(--font-body);
-  margin: 0;
+    /* Fondo con degradado del usuario */
+    background: linear-gradient(to top, var(--parchment-dark) 0, var(--ink-black) 85%);
+    color: var(--ink-black); /* Texto oscuro dentro de los paneles */
+    font-family: var(--font-body);
+    line-height: 1.6;
+    margin: 0;
 }
 
 .main-header {
-  background: var(--parchment-light);
-  padding: var(--spacing-lg) 0 var(--spacing-sm) 0;
-  box-shadow: var(--box-shadow-parchment);
+    /* Header del usuario */
+    background: var(--parchment-light);
+    padding: var(--spacing-lg) 0 var(--spacing-sm) 0;
+    box-shadow: var(--box-shadow-parchment);
+    text-align: center;
 }
 
 .main-title {
-  font-family: var(--font-title);
-  font-size: 2.7rem;
-  color: var(--blood-red);
-  text-align: center;
-  margin-bottom: var(--spacing-md);
-  text-shadow: 0 2px 12px var(--parchment-dark);
-  letter-spacing: 2px;
+    /* Título del usuario */
+    font-family: var(--font-title);
+    font-size: 2.7rem;
+    color: var(--blood-red);
+    margin-bottom: var(--spacing-md);
+    text-shadow: 0 2px 12px var(--parchment-dark);
+    letter-spacing: 2px;
 }
 
 .subtitle {
-  font-family: var(--font-cursive);
-  font-size: 1.09rem;
-  color: var(--gold);
-  text-align: center;
-  margin-bottom: var(--spacing-sm);
+    /* Subtítulo del usuario */
+    font-family: var(--font-cursive);
+    font-size: 1.09rem;
+    color: var(--gold);
+    margin-bottom: var(--spacing-sm);
 }
 
-.container, main {
-  max-width: 950px;
-  margin: var(--spacing-lg) auto;
-  background: var(--parchment);
-  border-radius: 16px;
-  box-shadow: var(--box-shadow-parchment);
-  padding: var(--spacing-lg);
+.container {
+    /* Contenedor del usuario */
+    max-width: 950px;
+    margin: var(--spacing-lg) auto;
+    background: var(--parchment);
+    border-radius: 16px;
+    box-shadow: var(--box-shadow-parchment);
+    padding: var(--spacing-lg);
 }
 
-.selector-panel {
-  background: var(--parchment-dark);
-  border-radius: 10px;
-  padding: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-}
-
-.main-section {
-  margin-bottom: var(--spacing-xl);
-  padding: var(--spacing-md);
-  background: var(--parchment-light);
-  border-radius: 16px;
-  box-shadow: var(--box-shadow-parchment);
+/* ===== SECCIONES Y PANELES ===== */
+.section-panel {
+    /* Base para todas las secciones interiores (Personaje, Bestiario, Mapa) */
+    margin-bottom: var(--spacing-xl);
+    padding: var(--spacing-md);
+    background: var(--parchment-light);
+    border-radius: 16px;
+    box-shadow: var(--box-shadow-parchment);
 }
 
 .section-title, h2 {
-  font-family: var(--font-title);
-  color: var(--blood-red);
-  font-size: 1.55rem;
-  margin-top: 0;
-  margin-bottom: var(--spacing-sm);
-  letter-spacing: 1.5px;
+    font-family: var(--font-title);
+    color: var(--blood-red);
+    font-size: 1.55rem;
+    margin-top: 0;
+    margin-bottom: var(--spacing-sm);
+    letter-spacing: 1.5px;
 }
 
-.btn-group {
-  display: flex;
-  gap: var(--spacing-md);
-  flex-wrap: wrap;
-  align-items: flex-end;
-  margin: var(--spacing-md) 0;
+.section-subtitle, h3 {
+    font-family: var(--font-title);
+    color: var(--ink-medium);
+    font-size: 1.2rem;
+    margin-top: 20px;
+    border-bottom: 1px solid var(--parchment-dark);
 }
 
-input[type="number"], select {
-  border-radius: 9px;
-  border: 1.7px solid var(--parchment-dark);
-  font-family: var(--font-body);
-  padding: 9px 15px;
-  margin: 6px;
-  font-size: 1.07rem;
-  background: var(--parchment);
-  color: var(--ink-black);
-}
-
-input[type="text"] {
-  border-radius: 6px;
-  border: 1.7px solid var(--parchment-dark);
-  font-family: var(--font-body);
-  margin: 6px;
-  font-size: 1.08rem;
-  background: var(--parchment-light);
-  color: var(--ink-black);
-}
-
-.btn {
-  border-radius: 8px;
-  border: none;
-  padding: 19px 32px;
-  font-size: 1rem;
-  font-weight: bold;
-  box-shadow: 0 1px 7px #2e2618;
-  transition: box-shadow 0.18s, background 0.18s;
-  cursor: pointer;
-  margin: 8px 0;
-  outline: none;
-}
-.btn-large { font-size: 1.18rem; padding: 21px 38px;}
-.btn-special {
-  background: linear-gradient(90deg, var(--royal-purple), var(--parchment-dark));
-  color: var(--gold);
-  border: 2px solid var(--gold);
-}
-.btn-success {
-  background: linear-gradient(90deg, #378a2c, #8be84d 77%);
-  color: #fff;
-}
-.btn-chaos {
-  background: linear-gradient(90deg, #b01d1d, #D43B3B, #962424 89%);
-  color: #fff;
-  border: 2px solid var(--blood-red);
-}
-.btn-danger {
-  background: linear-gradient(90deg, var(--blood-red), var(--gold));
-  color: #fff;
-  border: 2px solid var(--blood-red);
-}
-.btn-gold {
-  background: linear-gradient(90deg, var(--gold), var(--gold-light));
-  color: var(--ink-black);
-  border: 2px solid var(--gold);
-}
-.btn:hover, .btn:focus { box-shadow: 0 4px 16px #222; opacity: 0.96; }
-
-.selection-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md);
-  justify-content: center;
-}
-.selection-card {
-  background: var(--parchment-dark);
-  border: 2.2px solid var(--gold);
-  border-radius: 12px;
-  box-shadow: var(--box-shadow-parchment);
-  padding: 20px 14px;
-  min-width: 170px;
-  max-width: 220px;
-  cursor: pointer;
-  margin: 0 10px 24px 0;
-  text-align: center;
-}
-.selection-card.selected { border-color: var(--blood-red); }
-
+/* Estructura de la hoja de personaje/criatura */
 .character-sheet, .creature-sheet {
-  background: var(--parchment-dark);
-  border-radius: 11px;
-  box-shadow: var(--box-shadow-parchment);
-  padding: var(--spacing-md) var(--spacing-lg);
-  font-size: 1.09rem;
-  margin: var(--spacing-md) 0;
+    background: var(--parchment-dark);
+    border-radius: 11px;
+    box-shadow: var(--box-shadow-parchment);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: 1.09rem;
+    margin: var(--spacing-md) 0;
 }
 
-.hidden { display: none !important; }
-.stat-box { background: #fff; padding: 10px; border-radius: 5px; font-weight: bold; border: 1px solid var(--ink-black); }
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: var(--spacing-lg);
+    align-items: flex-start;
+}
+
+/* ===== FORMULARIOS Y BOTONES ===== */
+.custom-inputs {
+    display: flex;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin: var(--spacing-md) 0;
+}
+
+.controls-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+}
+
+input[type="text"], select {
+    /* Estilos del usuario */
+    border-radius: 9px;
+    border: 1.7px solid var(--parchment-dark);
+    font-family: var(--font-body);
+    padding: 9px 15px;
+    margin: 6px;
+    font-size: 1.07rem;
+    background: var(--parchment);
+    color: var(--ink-black);
+    flex-grow: 1; /* Para que ocupen espacio en el grid */
+    box-sizing: border-box;
+    min-width: 150px;
+}
+
+/* Botones base del usuario */
+.btn {
+    border-radius: 8px;
+    border: none;
+    padding: 19px 32px;
+    font-size: 1rem;
+    font-weight: bold;
+    box-shadow: 0 1px 7px #2e2618;
+    transition: box-shadow 0.18s, background 0.18s, transform 0.1s;
+    cursor: pointer;
+    margin: 8px 0;
+    outline: none;
+    font-family: var(--font-title); /* Usar fuente de título para los botones */
+    text-transform: uppercase;
+}
+
+.btn:hover, .btn:focus { 
+    box-shadow: 0 4px 16px #222; 
+    opacity: 0.98; 
+    transform: translateY(-1px);
+}
+
+/* Mapeo y uso de los degradados del usuario para mantener la estética */
+.btn-primary { 
+    /* Usado para Random */
+    background: linear-gradient(90deg, var(--steel-blue), #5c9fd9 77%);
+    color: #fff;
+    border: 2px solid var(--steel-blue);
+}
+
+.btn-secondary {
+    /* Usado para Custom / Mapa */
+    background: linear-gradient(90deg, var(--ink-medium), var(--parchment-dark));
+    color: var(--parchment-light);
+    border: 2px solid var(--ink-medium);
+}
+
+.btn-accent, .btn-chaos {
+    /* Usado para CHAOS (Universo y Bestiario) */
+    background: linear-gradient(135deg, var(--royal-purple) 0%, var(--blood-red) 50%, var(--gold) 100%);
+    background-size: 200% 200%;
+    animation: chaosGradient 3s ease infinite alternate;
+    border: 3px solid var(--gold-light);
+    box-shadow: 0 0 20px rgba(218, 165, 32, 0.5);
+    position: relative;
+    overflow: hidden;
+    color: white;
+}
+
+.btn-gold {
+    /* Usado para Acuñar NFT */
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    color: var(--ink-black);
+    border: 2px solid var(--gold);
+}
+
+.btn-action {
+    /* Usado para PDF, Historial */
+    background: var(--ink-dark);
+    color: var(--parchment-light);
+    border: 2px solid var(--ink-medium);
+}
+
+@keyframes chaosGradient {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+}
+
+
+/* ===== FICHA DE PERSONAJE Y CRIATURA ===== */
+.hidden {
+    display: none !important;
+}
+
+.sheet-header {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.char-name {
+    font-size: 2.2rem;
+    color: var(--dark-red);
+    margin: 0 0 5px 0;
+}
+
+.char-meta, .char-universe {
+    font-size: 0.95rem;
+    font-style: italic;
+    color: var(--ink-medium);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.stat-box {
+    text-align: center;
+    border: 2px solid var(--ink-dark);
+    padding: 10px 5px;
+    width: 60px;
+    background-color: var(--parchment-light);
+    /* Mantener el estilo base del usuario, pero mejorar el look */
+    border-radius: 5px; 
+    font-weight: bold; 
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+.stat-name {
+    font-family: var(--font-title);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-value {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: var(--blood-red);
+}
+
+.stat-modifier {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--ink-medium);
+}
+
+.trait-list {
+    list-style-type: '⚔️ ';
+    padding-left: 20px;
+    margin: 10px 0;
+}
+
+/* ===== DETALLES DE API ENRIQUECIDOS ===== */
+.api-bonus-detail {
+    margin: 15px 0;
+    padding: 12px;
+    border: 1px dashed var(--gold);
+    background-color: var(--ink-dark);
+    font-size: 0.95rem;
+    color: var(--parchment-light);
+    border-radius: 5px;
+}
+.flavor-text {
+    margin-top: 5px;
+    font-style: italic;
+    opacity: 0.8;
+    color: var(--parchment-dark);
+}
+
+
+/* ========================================= */
+/* 🔗 NFT CARD (NUEVO Y CRÍTICO) */
+/* ========================================= */
+.nft-card {
+    position: relative;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: var(--ink-dark);
+    border: 3px solid var(--parchment-dark);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.7);
+    transition: all 0.3s ease;
+    border-radius: 5px;
+}
+
+.portrait-frame {
+    border: 3px solid var(--gold);
+    overflow: hidden;
+    height: 320px;
+    max-height: 420px;
+}
+
+.portrait-frame img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.nft-metadata {
+    text-align: center;
+    padding: 8px 0;
+    font-family: var(--font-title);
+    color: var(--parchment-light);
+    font-size: 0.9rem;
+}
+
+.rarity-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 2px;
+    font-family: var(--font-title);
+}
+
+/* CLASES DE RAREZA */
+.rarity-common { border-color: #95a5a6; } 
+.rarity-common .rarity-badge { background-color: #95a5a6; color: var(--ink-black); }
+
+.rarity-rare { border-color: #3498db; } 
+.rarity-rare .rarity-badge { background-color: #3498db; color: #ffffff; }
+
+.rarity-epic { border-color: #9b59b6; } 
+.rarity-epic .rarity-badge { background-color: #9b59b6; color: #ffffff; }
+
+.rarity-legendary { border-color: var(--gold); } 
+.rarity-legendary .rarity-badge { background-color: var(--gold); color: var(--ink-black); }
+
+.rarity-mythic { 
+    border-color: #ff1493; 
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.8);
+    animation: mythicGlow 2s infinite alternate;
+}
+.rarity-mythic .rarity-badge { background-color: #ff1493; color: #ffffff; }
+
+@keyframes mythicGlow {
+    from { box-shadow: 0 0 10px rgba(255, 20, 147, 0.5); }
+    to { box-shadow: 0 0 25px rgba(255, 20, 147, 1); }
+}
+
+/* EFECTO FOIL (Holográfico) - CRÍTICO */
+.nft-foil {
+    position: relative;
+    overflow: hidden;
+}
+.nft-foil::before {
+    content: '';
+    position: absolute;
+    top: -150%;
+    left: -150%;
+    width: 300%;
+    height: 300%;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.5) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(45deg);
+    pointer-events: none;
+    opacity: 0.3;
+    animation: foil-shine 3s infinite linear;
+    z-index: 10;
+}
+
+@keyframes foil-shine {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(50%, 50%) rotate(360deg); }
+}
+
+
+/* ========================================= */
+/* 🗺️ MAPA INTERACTIVO (NUEVO Y CRÍTICO) */
+/* ========================================= */
+#mapCanvas {
+    display: block;
+    border: 5px solid var(--ink-black);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    background-color: #3a2517; /* Fondo de mazmorra */
+    margin: var(--spacing-md) auto;
+    max-width: 100%;
+}
+
+.map-controls {
+    margin-bottom: 10px;
+}
+
+
+/* ========================================= */
+/* 📚 MODAL DE HISTORIAL (NUEVO Y CRÍTICO) */
+/* ========================================= */
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.8); 
+}
+
+.modal-content {
+    background-color: var(--parchment);
+    margin: 10% auto;
+    padding: var(--spacing-lg);
+    border: 5px solid var(--ink-black);
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    color: var(--ink-black);
+    border-radius: 10px;
+    box-shadow: 0 0 30px rgba(0,0,0,0.9);
+}
+
+.close-modal {
+    color: var(--blood-red);
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.history-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 15px;
+}
+
+/* Estilo de la barra de desplazamiento para listas de historial */
+.history-list::-webkit-scrollbar {
+  width: 10px;
+}
+.history-list::-webkit-scrollbar-track {
+  background: var(--parchment-dark);
+}
+.history-list::-webkit-scrollbar-thumb {
+  background: var(--ink-medium);
+  border-radius: 5px;
+}
+.history-list::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-dark);
+}
+
+.history-item {
+    padding: 10px;
+    margin-bottom: 8px;
+    border-left: 5px solid;
+    background-color: var(--parchment-light);
+    color: var(--ink-black);
+    font-size: 0.95rem;
+    border-radius: 3px;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Bordes de rareza en el historial */
+.history-item.rarity-rare { border-left-color: #3498db; }
+.history-item.rarity-epic { border-left-color: #9b59b6; }
+.history-item.rarity-legendary { border-left-color: var(--gold); }
+.history-item.rarity-mythic { border-left-color: #ff1493; }
+
+/* ===== FOOTER ===== */
+.main-footer {
+    text-align: center;
+    padding: 15px 0;
+    background-color: var(--ink-dark);
+    color: var(--parchment-dark);
+    margin-top: var(--spacing-lg);
+    border-top: 2px solid var(--ink-medium);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .grid-2, .controls-grid, .custom-inputs {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+    }
+    .main-title {
+        font-size: 2rem;
+    }
+    .container {
+        padding: var(--spacing-md);
+    }
+}
