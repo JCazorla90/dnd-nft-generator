@@ -169,40 +169,11 @@ input[type="text"] {
   max-width: 220px;
   cursor: pointer;
   margin: 0 10px 24px 0;
+  text-align: center;
 }
 .selection-card.selected { border-color: var(--blood-red); }
 
-.wizard-title {
-  color: var(--blood-red);
-  font-family: var(--font-title);
-  margin-bottom: 12px;
-  letter-spacing: 1px;
-}
-
-.stat-box, .card-header, .card-body { margin-bottom: var(--spacing-md); }
-
-.badge, .badge--success {
-  background: var(--gold);
-  color: var(--blood-red);
-  padding: 2px 12px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 1.01rem;
-}
-
-#wizard-container {
-  background: var(--parchment-light);
-  padding: var(--spacing-lg);
-  box-shadow: var(--box-shadow-parchment);
-  border-radius: 19px;
-  max-width: 800px;
-  margin: var(--spacing-xl) auto;
-  display: none;
-}
-.wizard-container.active,
-#wizard-container:not(.hidden) { display: block; }
-
-.character-sheet, .creature-sheet, #creatureSheet, #encounterSheet {
+.character-sheet, .creature-sheet {
   background: var(--parchment-dark);
   border-radius: 11px;
   box-shadow: var(--box-shadow-parchment);
@@ -211,11 +182,5 @@ input[type="text"] {
   margin: var(--spacing-md) 0;
 }
 
-@media only screen and (max-width: 800px) {
-  .container, main { padding: var(--spacing-md); }
-  .main-title { font-size: 1.6rem; }
-  .main-header { padding: var(--spacing-sm); }
-  .main-section { padding: var(--spacing-sm); }
-  .btn-group { flex-direction: column; gap: var(--spacing-sm); }
-}
 .hidden { display: none !important; }
+.stat-box { background: #fff; padding: 10px; border-radius: 5px; font-weight: bold; border: 1px solid var(--ink-black); }
