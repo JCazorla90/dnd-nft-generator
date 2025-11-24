@@ -1,792 +1,433 @@
-"use strict";
-/* =========================
- * DATOS BASE DE D&D
- * ========================= */
+// ==========================================
+// 🧙 D&D CHARACTER FORGE - MAIN APPLICATION LOGIC (V3.0 - FINAL)
+// Integra Multiverso, NFT, Mapas, Bestiario y Chaos.
+// ==========================================
 
-const DND_DATA = {
-  races: {
-    Humano: { description: 'Versátiles y adaptativos.', speed: 30, size: 'Mediano', traits: ['+1 a todas las características', 'Idiomas: común'] },
-    Elfo: { description: 'Ágiles y perceptivos.', speed: 30, size: 'Mediano', traits: ['Visión en la oscuridad', '+2 Destreza'] }
-  },
-  classes: {
-    Guerrero: { description: 'Maestro en armas y defensa.', hitDie: 10, primaryAbility: 'Fuerza/Destreza', spellcasting: false },
-    Mago: { description: 'Dominio del arcano.', hitDie: 6, primaryAbility: 'Inteligencia', spellcasting: true }
-  },
-  backgrounds: {
-    Noble: { feature: 'Contactos privilegiados', skills: ['Historia', 'Persuasión'] },
-    Forajido: { feature: 'Refugio secreto', skills: ['Sigilo', 'Juego de manos'] }
-  },
-  alignments: [
-    'Legal Bueno','Neutral Bueno','Caótico Bueno',
-    'Legal Neutral','Neutral','Caótico Neutral',
-    'Legal Malvado','Neutral Malvado','Caótico Malvado'
-  ],
-  pointBuyCosts: { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 }
+'use strict';
+
+// Asegurar que las dependencias están cargadas
+if (typeof CORE_API === 'undefined' || typeof MULTIVERSE_DATA === 'undefined' || typeof DND_BESTIARY === 'undefined') {
+    console.error("ERROR: Dependencias 'dnd-data.js', 'dnd-apis.js' o 'bestiary.js' no cargadas.");
+}
+
+// ==========================================
+// 🗺️ MAP ENGINE (Profesional, Canvas-based)
+// ==========================================
+
+const MapEngine = {
+    ctx: null,
+    canvas: null,
+    
+    init(canvasId) {
+        this.canvas = document.getElementById(canvasId);
+        if (this.canvas) {
+            this.ctx = this.canvas.getContext('2d');
+            this.canvas.width = 800;
+            this.canvas.height = 600;
+            this.drawInitialScreen();
+        }
+    },
+    
+    drawInitialScreen() {
+        if (!this.ctx) return;
+        this.ctx.fillStyle = '#1a0f08'; 
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.font = '30px Cinzel';
+        this.ctx.fillStyle = '#d4af37'; 
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText("FORJA CARTOGRÁFICA ÉPICA", this.canvas.width / 2, this.canvas.height / 2 - 30);
+        this.ctx.font = '20px MedievalSharp';
+        this.ctx.fillText("Pulsa 'Generar Mazmorra' para empezar", this.canvas.width / 2, this.canvas.height / 2 + 10);
+    },
+    
+    generateDungeon() {
+        if (!this.ctx) return;
+        
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = '#3a2517'; 
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        const cellSize = 40;
+        const cols = this.canvas.width / cellSize;
+        const rows = this.canvas.height / cellSize;
+
+        // Generación de salas y pasillos simples
+        for (let r = 1; r < rows - 1; r++) {
+            for (let c = 1; c < cols - 1; c++) {
+                if (Math.random() > 0.7) {
+                    this.ctx.fillStyle = '#8b7355'; 
+                    this.ctx.fillRect(c * cellSize, r * cellSize, cellSize, cellSize);
+                }
+            }
+        }
+
+        this.ctx.font = '28px Cinzel';
+        this.ctx.fillStyle = '#ff4500'; 
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText("Mazmorra Generada", 20, 40);
+    },
+    
+    addTokens() {
+        if(!this.ctx) return;
+        this.generateDungeon(); 
+        
+        const cellSize = 40;
+        for(let i=0; i<5; i++) {
+            const x = Math.floor(Math.random() * 18) * cellSize + cellSize + cellSize/2;
+            const y = Math.floor(Math.random() * 13) * cellSize + cellSize + cellSize/2;
+            this.ctx.beginPath();
+            this.ctx.arc(x, y, 15, 0, 2*Math.PI);
+            this.ctx.fillStyle = i===0 ? 'rgba(65, 105, 225, 0.9)' : 'rgba(139, 0, 0, 0.9)'; 
+            this.ctx.fill();
+            this.ctx.strokeStyle = '#ffd700'; 
+            this.ctx.lineWidth = 2;
+            this.ctx.stroke();
+            
+            this.ctx.font = '12px Cinzel';
+            this.ctx.fillStyle = '#ffffff';
+            this.ctx.textAlign = 'center';
+            this.ctx.fillText(i===0 ? 'H' : 'M', x, y+5);
+        }
+    }
 };
 
-/* =========================
- * MONSTRUOS
- * ========================= */
+// ==========================================
+// 🚀 APP - LÓGICA PRINCIPAL DEL PROYECTO
+// ==========================================
 
-const DND_MONSTERS = [
-  { name: "Goblin", type: "Humanoide", cr: "1/4", xp: 50, ac: 15, hp: 7, speed: "30 ft", stats: { str: 8, dex: 14, con: 10, int: 10, wis: 8, cha: 8 }, environment: ["Bosque", "Mazmorra"], traits: ["Nimble Escape"], actions: ["Hoja curva: +4, 1d6 + 2 daño cortante."], legendaryActions: [] },
-  { name: "Ogro", type: "Gigante", cr: "2", xp: 450, ac: 11, hp: 59, speed: "40 ft", stats: { str: 19, dex: 8, con: 17, int: 5, wis: 7, cha: 7 }, environment: ["Montaña", "Bosque"], traits: [], actions: ["Garrote grande: +6, 2d8 + 4 daño contundente."], legendaryActions: [] }
-];
+const app = {
+    currentUniverse: 'DND',
+    
+    init() {
+        console.log("⚔️ D&D Forge V3.0 (Multiverso) Iniciado");
+        this.setupMultiverseSelector();
+        MapEngine.init('mapCanvas');
+        this.setupEventListeners();
+    },
+    
+    setupEventListeners() {
+        // Personaje
+        document.getElementById('generateRandomBtn')?.addEventListener('click', () => this.forgeCharacter('random'));
+        document.getElementById('generateCustomBtn')?.addEventListener('click', () => this.forgeCharacter('custom'));
+        document.getElementById('generateChaosBtn')?.addEventListener('click', () => this.forgeCharacter('chaos'));
+        document.getElementById('mintNFTBtn')?.addEventListener('click', () => this.mintNFT());
+        document.getElementById('downloadPDFBtn')?.addEventListener('click', () => this.downloadPDF());
+        document.getElementById('showHistoryBtn')?.addEventListener('click', () => this.showHistory());
 
-/* =========================
- * METADATOS Y HELPERS BESTIARIO
- * ========================= */
+        // Mapa
+        document.getElementById('generateMapBtn')?.addEventListener('click', () => MapEngine.generateDungeon());
+        document.getElementById('addTokensBtn')?.addEventListener('click', () => MapEngine.addTokens());
 
-const DND_BESTIARY = {
-  version: "5e",
-  creatureTypes: ["Aberración","Bestia","Celestial","Constructo","Dragón","Elemental","Feérico","Demonio","Gigante","Humanoide","Monstruosidad","Cieno","Planta","No-muerto"],
-  environments: ["Mazmorra","Bosque","Montaña","Pantano","Desierto","Subterráneo","Ciudad","Costa","Ártico","Plano Abismal"],
-  challengeRatings: [ { cr: "0", xp: 10 }, { cr: "1/8", xp: 25 }, { cr: "1/4", xp: 50 }, { cr: "1/2", xp: 100 }, { cr: "1", xp: 200 }, { cr: "2", xp: 450 }]
+        // Bestiario
+        document.getElementById('generateCreatureBtn')?.addEventListener('click', () => this.generateCreature('random'));
+        document.getElementById('generateChaosBeastBtn')?.addEventListener('click', () => this.generateCreature('chaos'));
+        document.querySelector('.close-modal')?.addEventListener('click', () => document.getElementById('historyModal').classList.add('hidden'));
+    },
+
+    setupMultiverseSelector() {
+        const multiverseSelect = document.getElementById('multiverseSelect');
+        if (!multiverseSelect) return;
+        
+        for (const key in MULTIVERSE_DATA) {
+            const option = document.createElement('option');
+            option.value = key;
+            option.textContent = MULTIVERSE_DATA[key].name;
+            multiverseSelect.appendChild(option);
+        }
+        
+        this.updateUniverse(); 
+        multiverseSelect.onchange = () => this.updateUniverse();
+    },
+
+    updateUniverse() {
+        const multiverseSelect = document.getElementById('multiverseSelect');
+        this.currentUniverse = multiverseSelect.value;
+        const raceSelect = document.getElementById('raceSelect');
+        const classSelect = document.getElementById('classSelect');
+        
+        raceSelect.innerHTML = '<option value="">— Raza (Random) —</option>';
+        classSelect.innerHTML = '<option value="">— Clase (Random) —</option>';
+        
+        let data = MULTIVERSE_DATA[this.currentUniverse];
+        
+        data.races.forEach(r => raceSelect.innerHTML += `<option value="${r}">${r}</option>`);
+        data.classes.forEach(c => classSelect.innerHTML += `<option value="${c}">${c}</option>`);
+    },
+
+    async forgeCharacter(mode) {
+        document.getElementById('characterSheet').classList.add('hidden');
+        document.getElementById('charImage').src = 'loading.gif'; 
+        document.getElementById('charName').textContent = 'Forjando...';
+
+        const universeKeys = Object.keys(MULTIVERSE_DATA);
+        let universe, race, charClass, name, universeData;
+        
+        if (mode === 'chaos') {
+            universe = randomFromArray(universeKeys);
+            universeData = MULTIVERSE_DATA[universe];
+            race = randomFromArray(universeData.races);
+            charClass = randomFromArray(universeData.classes);
+            document.getElementById('multiverseSelect').value = universe; 
+        } else {
+            universe = document.getElementById('multiverseSelect').value;
+            universeData = MULTIVERSE_DATA[universe];
+            
+            const customRace = document.getElementById('raceSelect').value;
+            const customClass = document.getElementById('classSelect').value;
+            
+            race = (mode === 'custom' && customRace) ? customRace : randomFromArray(universeData.races);
+            charClass = (mode === 'custom' && customClass) ? customClass : randomFromArray(universeData.classes);
+        }
+        
+        name = document.getElementById('customName').value || generateRandomName(race, charClass, universe);
+        
+        // Generación de datos
+        const stats = generateStats(); 
+        const nftData = this.calculateNFTRarity(universe);
+        
+        // Llamada a APIs
+        const [apiDetails, imgUrl] = await Promise.all([
+            CORE_API.fetchUniverseDetails(universe, race, charClass),
+            CORE_API.getEpicImage(`${race} ${charClass} ${universeData.name} portrait`, universe)
+        ]);
+        
+        // Objeto Personaje Global
+        window.currentCharacter = {
+            name, race, class: charClass, universe,
+            stats, nft: nftData, apiDetails,
+            hp: 10 + calculateModifier(stats.constitution),
+            ac: 10 + calculateModifier(stats.dexterity),
+        };
+
+        this.renderCharacter(window.currentCharacter, imgUrl);
+        saveToHistory(window.currentCharacter);
+    },
+    
+    renderCharacter(char, imgUrl) {
+        const sheet = document.getElementById('characterSheet');
+        sheet.classList.remove('hidden'); 
+        sheet.scrollIntoView({ behavior: 'smooth' });
+
+        document.getElementById('charName').textContent = char.name;
+        document.getElementById('charMeta').textContent = `${char.race} | ${char.class} | Nivel 1`;
+        document.getElementById('charUniverse').textContent = MULTIVERSE_DATA[char.universe].name;
+        document.getElementById('charImage').src = imgUrl; 
+        
+        // Stats
+        const statsDiv = document.getElementById('statsDisplay');
+        statsDiv.innerHTML = '';
+        for (const [key, val] of Object.entries(char.stats)) {
+            const mod = calculateModifier(val);
+            statsDiv.innerHTML += `
+                <div class="stat-box">
+                    <div class="stat-name">${key.toUpperCase()}</div>
+                    <div class="stat-value">${val}</div>
+                    <div class="stat-modifier">${mod >= 0 ? '+' : ''}${mod}</div>
+                </div>
+            `;
+        }
+
+        document.getElementById('displayHP').textContent = char.hp;
+        document.getElementById('displayAC').textContent = char.ac;
+
+        // Renderizado NFT
+        const card = document.getElementById('nftCard');
+        const badge = document.getElementById('nftRarity');
+        
+        card.className = 'nft-card ' + this.getRarityClass(char.nft.rarity);
+        if (char.nft.isFoil) card.classList.add('nft-foil');
+        
+        badge.textContent = char.nft.rarity.toUpperCase();
+        document.getElementById('tokenId').textContent = char.nft.tokenId;
+        document.getElementById('nftValue').textContent = char.nft.value.toLocaleString();
+
+        // Detalle Enriquecido de API
+        document.getElementById('apiBonus').innerHTML = `
+            <strong>Bonus Épico:</strong> ${char.apiDetails.bonus || 'No Aplica'}
+            <p class="flavor-text">${char.apiDetails.flavor || 'Datos base D&D.'}</p>
+        `;
+    },
+
+    // ===== LÓGICA BESTIARIO Y CHAOS =====
+    generateCreature(mode) {
+        let creature;
+        if (mode === 'chaos') {
+            creature = this.generateChaosBeast();
+        } else {
+            const monsterNames = Object.keys(DND_BESTIARY).filter(k => k !== 'version' && k !== 'creatureTypes' && k !== 'environments' && k !== 'challengeRatings');
+            const randomName = randomFromArray(monsterNames);
+            creature = DND_BESTIARY[randomName];
+            creature.name = randomName;
+        }
+        
+        window.currentCreature = creature;
+        this.displayCreature(creature);
+    },
+
+    generateChaosBeast() {
+        const allTypes = DND_BESTIARY.creatureTypes;
+        const allEnvironments = DND_BESTIARY.environments;
+        
+        const randomType = randomFromArray(allTypes);
+        const randomEnvironment = randomFromArray(allEnvironments);
+        const randomCR = randomFromArray(DND_BESTIARY.challengeRatings).cr;
+        
+        const creature = {
+            name: `${generateRandomName('Desconocido', 'Caos')} el Terrible`,
+            type: randomType,
+            cr: randomCR,
+            xp: 0, // No calculamos XP para el caos
+            environment: randomEnvironment,
+            hp: rollDice(20) * (parseFloat(randomCR) || 1) + 50,
+            ac: 10 + rollDice(10),
+            speed: `${rollDice(6) * 10} ft`,
+            stats: generateStats(),
+            traits: [`Aura de Caos (Todos los tiros con Desventaja)`, `Mimetismo de ${randomType}`],
+            actions: [
+                `Ataque Caótico: +${calculateModifier(generateStats().strength) + 5}, ${rollDice(6)}d${rollDice(12)} de daño de ${randomFromArray(['Fuego', 'Frío', 'Nigromancia'])}`,
+                `Habilidad Especial: Desaparición Dimensional (Teletransporte)`
+            ],
+            description: `Una criatura ${randomType} de CR ${randomCR} que habita en ${randomEnvironment}. ¡TOTALMENTE IMPREDECIBLE!`
+        };
+        
+        return creature;
+    },
+
+    displayCreature(creature) {
+        document.getElementById('creatureSheet').classList.remove('hidden');
+        document.getElementById('creatureSheet').scrollIntoView({ behavior: 'smooth' });
+
+        document.getElementById('creatureName').textContent = creature.name;
+        document.getElementById('creatureMeta').textContent = `${creature.size || 'Mediano'} ${creature.type} | CR ${creature.cr} (${creature.xp ? creature.xp + ' XP' : '-- XP'})`;
+        document.getElementById('creatureHP').textContent = creature.hp;
+        document.getElementById('creatureAC').textContent = creature.ac;
+        document.getElementById('creatureSpeed').textContent = creature.speed || '30 ft';
+        
+        const statsDiv = document.getElementById('creatureStatsDisplay');
+        statsDiv.innerHTML = '';
+        for (const [key, val] of Object.entries(creature.stats || {str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10})) {
+            const mod = calculateModifier(val);
+            statsDiv.innerHTML += `<div class="stat-box"><div class="stat-name">${key.toUpperCase()}</div><div class="stat-value">${val}</div><div class="stat-modifier">${mod >= 0 ? '+' : ''}${mod}</div></div>`;
+        }
+        
+        document.getElementById('creatureTraits').innerHTML = (creature.traits || []).map(t => `<li>${t}</li>`).join('');
+        document.getElementById('creatureActions').innerHTML = (creature.actions || []).map(a => `<li>${a}</li>`).join('');
+        document.getElementById('creatureLegendaryActions').innerHTML = (creature.legendaryActions || []).map(a => `<li>${a}</li>`).join('');
+
+        document.getElementById('creatureEnvironment').textContent = Array.isArray(creature.environments) ? creature.environments.join(', ') : creature.environment || '--';
+    },
+
+    // ===== LÓGICA NFT Y RAREZA PROFESIONAL =====
+    calculateNFTRarity(universe) {
+        const roll = Math.random();
+        let rarity = 'Común';
+        
+        if (roll > 0.999) rarity = 'Mítica'; 
+        else if (roll > 0.99) rarity = 'Legendaria';
+        else if (roll > 0.95) rarity = 'Épica';
+        else if (roll > 0.8) rarity = 'Rara';
+        
+        if (universe !== 'DND' && Math.random() > 0.90) { // Bonus por Crossover (10% más de rareza)
+             if (rarity === 'Rara') rarity = 'Épica';
+             if (rarity === 'Común') rarity = 'Rara';
+        }
+
+        return {
+            rarity,
+            isFoil: Math.random() > 0.85, 
+            value: Math.floor(Math.random() * 50000) + 1000,
+            tokenId: `0x${(Math.random() * 0xFFFFFFFFFFFFFFFF).toString(16).padStart(16, '0').toUpperCase()}` 
+        };
+    },
+
+    getRarityClass(rarity) {
+        if (rarity === 'Mítica') return 'rarity-mythic'; 
+        if (rarity === 'Legendaria') return 'rarity-legendary';
+        if (rarity === 'Épica') return 'rarity-epic';
+        if (rarity === 'Rara') return 'rarity-rare';
+        return 'rarity-common';
+    },
+
+    mintNFT() {
+        if (!window.currentCharacter) {
+            return alert("❌ ¡Debes generar un personaje primero para acuñar!");
+        }
+        
+        alert(`
+        ✅ ¡NFT Acuñado con Éxito!
+        ------------------------------------
+        Personaje: ${window.currentCharacter.name}
+        Rareza: ${window.currentCharacter.nft.rarity} ${window.currentCharacter.nft.isFoil ? '(Holográfico)' : ''}
+        Token ID: ${window.currentCharacter.nft.tokenId}
+        Valor Estimado: ${window.currentCharacter.nft.value.toLocaleString()} Gold Pieces
+        
+        (Simulación de conexión a Wallet)
+        `);
+    },
+    
+    // ===== EXPORTACIÓN PDF =====
+    downloadPDF() {
+        if (!window.currentCharacter || typeof window.jspdf === 'undefined') {
+            return alert("❌ Genera un personaje y asegúrate de que jsPDF esté cargado en tu HTML.");
+        }
+        
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFont("Cinzel", "bold");
+        doc.setFontSize(18);
+        doc.text(`FICHA DE PERSONAJE: ${window.currentCharacter.name}`, 10, 20);
+        
+        doc.setFontSize(10);
+        doc.text(`Universo: ${MULTIVERSE_DATA[window.currentCharacter.universe].name}`, 10, 28);
+        doc.text(`Raza: ${window.currentCharacter.race}`, 10, 34);
+        doc.text(`Clase: ${window.currentCharacter.class}`, 50, 34);
+        
+        let y = 45;
+        doc.setFontSize(12);
+        doc.text("ESTADÍSTICAS", 10, y);
+        y += 5;
+        
+        for (const [key, val] of Object.entries(window.currentCharacter.stats)) {
+            const mod = calculateModifier(val);
+            doc.text(`${key.toUpperCase()}: ${val} (${mod >= 0 ? '+' : ''}${mod})`, 10, y += 6);
+        }
+        
+        doc.text("BONUS DE UNIVERSO", 100, 45);
+        doc.setFontSize(10);
+        doc.text(`Bonus: ${window.currentCharacter.apiDetails.bonus}`, 100, 52, { maxWidth: 100 });
+        doc.text(`Flavor: ${window.currentCharacter.apiDetails.flavor}`, 100, 65, { maxWidth: 100 });
+        
+        doc.save(`${window.currentCharacter.name.replace(/ /g, '_')}_ficha_epic.pdf`);
+    },
+    
+    // ===== HISTORIAL =====
+    showHistory() {
+        const modal = document.getElementById('historyModal');
+        const list = document.getElementById('historyList');
+        if (modal) {
+            modal.classList.remove('hidden');
+            let history = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            list.innerHTML = history.map(item => `
+                <div class="history-item ${this.getRarityClass(item.rarity)}">
+                    <strong>${item.name}</strong> (${item.race} ${item.class})<br>
+                    <small>Universo: ${MULTIVERSE_DATA[item.universe].name} | Rareza: ${item.rarity}</small>
+                </div>
+            `).join('');
+            
+            // Cierra con el overlay
+            window.onclick = (event) => {
+                if (event.target == modal) {
+                    modal.classList.add('hidden');
+                    window.onclick = null; // Limpiar para evitar conflictos
+                }
+            }
+        }
+    }
 };
 
-/* =========================
- * API D&D EXTERNA
- * ========================= */
-const DND_API = {
-  dnd5e: 'https://www.dnd5eapi.co/api',
-  open5e: 'https://api.open5e.com/v1',
-  cache: { details: {}, lists: {} },
-  async fetchData(url) {
-    if (this.cache.details[url]) return this.cache.details[url];
-    try {
-      const resp = await fetch(url);
-      if (!resp.ok) throw new Error('Error en la API');
-      const data = await resp.json();
-      this.cache.details[url] = data;
-      return data;
-    } catch (err) { console.error(err); return null; }
-  }
-};
-
-/* =========================
- * WIZARD AVANZADO PERSONAJES
- * ========================= */
-
-class CharacterWizard {
-  constructor() {
-    this.currentStep = 1;
-    this.totalSteps = 6;
-    this.character = { name: '', race: null, class: null, background: null, alignment: 'Neutral', stats: { strength: 8, dexterity: 8, constitution: 8, intelligence: 8, wisdom: 8, charisma: 8 }, hp: 0, ac: 10, equipment: [] };
-    this.pointBuyRemaining = 27;
-  }
-  start() {
-    document.getElementById('mainContainer').classList.add('hidden');
-    document.getElementById('wizard-container').classList.remove('hidden');
-    this.renderWizard();
-  }
-  finishWizard() {
-    setTimeout(() => {
-      document.getElementById('wizard-container').classList.add('hidden');
-      document.getElementById('mainContainer').classList.remove('hidden');
-      alert("Personaje creado:\n" + JSON.stringify(this.character, null, 2));
-    }, 700);
-  }
-  renderWizard() {
-    document.getElementById('wizard-container').innerHTML =
-      `<div class="wizard">
-        <h2 class="wizard-title">Paso ${this.currentStep} / ${this.totalSteps}</h2>
-        <!-- Renderiza contenidos según el paso actual aquí -->
-        <button onclick="window.wizard.finishWizard()" class="btn btn-success">Finalizar</button>
-      </div>`;
-  }
-}
-window.wizard = new CharacterWizard();
-
-/* =========================
- * FUNCIONES Y EVENTOS PRINCIPALES
- * ========================= */
-
-// --- Eventos principales de botones ---
-document.getElementById('wizardBtn').addEventListener('click', () => window.wizard.start());
-document.getElementById('randomBtn').addEventListener('click', generateRandomCharacter);
-document.getElementById('chaosCharacterBtn').addEventListener('click', generateChaosCharacter);
-document.getElementById('generateCreatureBtn').addEventListener('click', generateCreature);
-document.getElementById('generateEncounterBtn').addEventListener('click', generateEncounter);
-
-// --- Paneles de filtro para bestiario ---
-function initFilters() {
-  populateSelect('filterType', DND_BESTIARY.creatureTypes);
-  populateSelect('filterEnv', DND_BESTIARY.environments);
-  populateSelect('filterCR', DND_BESTIARY.challengeRatings.map(c => c.cr));
-}
-function populateSelect(selectId, values) {
-  const select = document.getElementById(selectId);
-  select.innerHTML = `<option value="">Todos</option>` + values.map(v => `<option value="${v}">${v}</option>`).join('');
-}
-initFilters();
-
-/* ========== Generador de Personaje Aleatorio ========== */
-
-function generateRandomCharacter() {
-  const race = randomFromArray(Object.keys(DND_DATA.races));
-  const clazz = randomFromArray(Object.keys(DND_DATA.classes));
-  const bg = randomFromArray(Object.keys(DND_DATA.backgrounds));
-  const stats = generateRandomStats();
-  const align = randomFromArray(DND_DATA.alignments);
-  const char = {
-    name: 'Héroe Aleatorio',
-    race, class: clazz, background: bg, alignment: align,
-    stats,
-    hp: DND_DATA.classes[clazz].hitDie + calculateModifier(stats.constitution)
-  };
-  displayCharacter(char);
-}
-function generateRandomStats() {
-  const base = [15,14,13,12,10,8];
-  return ['strength','dexterity','constitution','intelligence','wisdom','charisma']
-    .reduce((obj, stat, i) => { obj[stat]=base[i]; return obj; }, {});
-}
-function calculateModifier(stat) { return Math.floor((stat-10)/2); }
-function displayCharacter(char) {
-  const html = `
-    <div class="character-sheet">
-      <h3>${char.name}</h3>
-      <ul>
-        <li><strong>Raza:</strong> ${char.race}</li>
-        <li><strong>Clase:</strong> ${char.class}</li>
-        <li><strong>Trasfondo:</strong> ${char.background}</li>
-        <li><strong>Alineamiento:</strong> ${char.alignment}</li>
-        <li><strong>HP:</strong> ${char.hp}</li>
-      </ul>
-      <h4>Características:</h4>
-      <ul>${Object.entries(char.stats).map(
-          ([k, v]) => `<li>${k}: ${v} (${formatMod(calculateModifier(v))})</li>`
-        ).join('')}</ul>
-    </div>`;
-  openModal(html);
-}
-function formatMod(mod) { return (mod>=0?'+':'')+mod; }
-
-/* ========== Generador modo Caos ========== */
-function generateChaosCharacter() {
-  const stats = {};
-  ["strength","dexterity","constitution","intelligence","wisdom","charisma"].forEach(stat => {
-    stats[stat] = 16 + Math.floor(Math.random()*3);
-  });
-  displayCharacter({
-    name: 'Personaje Caótico',
-    race: randomFromArray(Object.keys(DND_DATA.races)),
-    class: randomFromArray(Object.keys(DND_DATA.classes)),
-    background: randomFromArray(Object.keys(DND_DATA.backgrounds)),
-    alignment: randomFromArray(DND_DATA.alignments),
-    stats,
-    hp: 26
-  });
-}
-
-/* ========== Generador de Criatura ========== */
-function generateCreature() {
-  let type = document.getElementById('filterType').value;
-  let env = document.getElementById('filterEnv').value;
-  let cr = document.getElementById('filterCR').value;
-  let monsters = DND_MONSTERS;
-  if(type) monsters = monsters.filter(m => m.type === type);
-  if(env) monsters = monsters.filter(m => m.environment.includes(env));
-  if(cr) monsters = monsters.filter(m => m.cr === cr);
-  const monster = monsters.length ? randomFromArray(monsters) : randomFromArray(DND_MONSTERS);
-  displayCreature(monster);
-}
-function displayCreature(monster) {
-  document.getElementById('creatureSheet').innerHTML = `
-    <div class="creature-sheet">
-      <h3>${monster.name}</h3>
-      <p><strong>Tipo:</strong> ${monster.type} | <strong>CR:</strong> ${monster.cr}</p>
-      <p><strong>HP:</strong> ${monster.hp} | <strong>AC:</strong> ${monster.ac}</p>
-      <ul>
-        ${Object.entries(monster.stats).map(([k, v])=>`<li>${k}: ${v}</li>`).join('')}
-        <li><strong>Entorno:</strong> ${monster.environment.join(', ')}</li>
-        <li><strong>Acciones:</strong> ${monster.actions.join(', ')}</li>
-        <li><strong>Rasgos:</strong> ${monster.traits.join(', ')}</li>
-      </ul>
-    </div>`;
-}
-
-/* ========== Generador criatura desde API ========== */
-async function generateApiCreature() {
-  const data = await DND_API.fetchData(DND_API.open5e + '/monsters/?limit=1&ordering=random');
-  if(data && data.results && data.results.length) {
-    const m = data.results[0];
-    const html = `
-      <div class="creature-sheet">
-        <h3>${m.name}</h3>
-        <p><strong>Tipo:</strong> ${m.type || ''} | <strong>CR:</strong> ${m.challenge_rating}</p>
-        <p><strong>HP:</strong> ${m.hit_points} | <strong>AC:</strong> ${m.armor_class}</p>
-        <ul>
-          <li><strong>Alineamiento:</strong> ${m.alignment || '-'}</li>
-          <li><strong>Size:</strong> ${m.size}</li>
-          <li><strong>Environment:</strong> ${m.environment || '-'}</li>
-        </ul>
-      </div>`;
-    document.getElementById('creatureSheet').innerHTML = html;
-  }
-}
-
-/* ========== Encuentros D&D ========== */
-function generateEncounter() {
-  const lvl = Number(document.getElementById('groupLevel').value) || 1;
-  const size = Number(document.getElementById('groupSize').value) || 4;
-  let pool = DND_MONSTERS;
-  let monsters = [];
-  for(let i = 0; i < size; i++) {
-    monsters.push(randomFromArray(pool));
-  }
-  document.getElementById('encounterSheet').innerHTML =
-    `<strong>Encuentro nivel ${lvl}, grupo ${size}:</strong>` +
-    monsters.map(m => `<div>${m.name} (CR ${m.cr})</div>`).join('');
-}
-
-/* ========== Helpers generales ========== */
-function randomFromArray(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
-function openModal(content) {
-  // Simple: alert. Expande fácil a modal visual.
-  alert(content.replace(/<\/?[^>]+(>|$)/g, ""));
-}
-
-/* ==========================
- * WIZARD PASO A PASO AVANZADO
- * ========================== */
-
-class CharacterWizard {
-  constructor() {
-    this.currentStep = 1;
-    this.totalSteps = 6;
-    this.character = this.getInitialState();
-    this.statGenerationMethod = 'point-buy';
-    this.pointBuyRemaining = 27;
-    window.wizard = this;
-  }
-
-  getInitialState() {
-    return {
-      name: '',
-      race: null,
-      class: null,
-      background: null,
-      alignment: 'Neutral',
-      stats: { strength: 8, dexterity: 8, constitution: 8, intelligence: 8, wisdom: 8, charisma: 8 },
-      hp: 0,
-      ac: 10,
-      equipment: []
-    };
-  }
-
-  /* --- Navegación Wizard --- */
-  
-  start() {
-    this.character = this.getInitialState();
-    this.currentStep = 1;
-    document.getElementById('mainContainer').classList.add('hidden');
-    document.getElementById('wizard-container').classList.remove('hidden');
-    this.renderWizard();
-  }
-  goToStep(step) {
-    if (step < 1 || step > this.totalSteps) return;
-    if (step > this.currentStep && !this.validateCurrentStep()) return;
-    this.currentStep = step;
-    this.renderWizard();
-  }
-  nextStep() {
-    if (!this.validateCurrentStep()) return;
-    this.goToStep(this.currentStep + 1);
-  }
-  previousStep() {
-    this.goToStep(this.currentStep - 1);
-  }
-
-  validateCurrentStep() {
-    switch (this.currentStep) {
-      case 1: return this.character.race !== null;
-      case 2: return this.character.class !== null;
-      case 3: return this.character.background !== null;
-      case 4: return this.validateStats();
-      case 5: return true; // Equipo auto-asignado
-      case 6: return this.character.name.trim().length > 0;
-      default: return true;
-    }
-  }
-  validateStats() {
-    const stats = Object.values(this.character.stats);
-    switch (this.statGenerationMethod) {
-      case 'point-buy': return this.pointBuyRemaining === 0 && stats.every(s => s >= 8 && s <= 15);
-      case 'standard-array': return stats.every(s => s >= 8 && s <= 15);
-      case 'roll': return stats.every(s => s >= 3 && s <= 18);
-      default: return true;
-    }
-  }
-
-  /* --- Renderización Wizard --- */
-  
-  renderWizard() {
-    const html = `
-      <div class="wizard">
-        <div class="wizard-header">
-          <h2 class="wizard-title">Paso ${this.currentStep} / ${this.totalSteps}: ${this.getStepTitle()}</h2>
-        </div>
-        <div class="wizard-content">
-          ${this.renderStepContent()}
-        </div>
-        <div class="wizard-footer">
-          <button class="btn btn-special" onclick="wizard.previousStep()" ${this.currentStep === 1 ? 'disabled' : ''}">← Anterior</button>
-          <button class="btn btn-success" onclick="wizard.nextStep()">${this.currentStep === this.totalSteps ? 'Finalizar' : 'Siguiente →'}</button>
-        </div>
-      </div>
-    `;
-    document.getElementById('wizard-container').innerHTML = html;
-    this.attachEventListeners();
-  }
-
-  getStepTitle() {
-    const titles = [
-      'Elige tu Raza', 'Elige tu Clase', 'Elige tu Trasfondo', 'Asignación de Stats', 'Equipo Inicial', 'Detalles Finales'
-    ];
-    return titles[this.currentStep - 1];
-  }
-
-  /* --- Render de los pasos --- */
-  renderStepContent() {
-    switch (this.currentStep) {
-      case 1: return this.renderRaceSelection();
-      case 2: return this.renderClassSelection();
-      case 3: return this.renderBackgroundSelection();
-      case 4: return this.renderStatsSelection();
-      case 5: return this.renderEquipmentSelection();
-      case 6: return this.renderFinalDetails();
-      default: return '<p>Error</p>';
-    }
-  }
-
-  renderRaceSelection() {
-    const races = Object.keys(DND_DATA.races);
-    return `<div class="selection-grid">${races.map(raceName => {
-      const race = DND_DATA.races[raceName];
-      const isSelected = this.character.race === raceName;
-      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectRace('${raceName}')">
-        <div class="card-header"><h3>${raceName}</h3>${isSelected ? '<span class="badge badge--success">✓ Seleccionado</span>' : ''}</div>
-        <div class="card-body">
-          <p>${race.description}</p>
-          <ul>${race.traits.map(t => `<li>${t}</li>`).join('')}</ul>
-          <span>Velocidad: ${race.speed} ft</span> | <span>Tamaño: ${race.size}</span>
-        </div>
-      </div>`;
-    }).join('')}</div>`;
-  }
-  selectRace(raceName) {
-    this.character.race = raceName;
-    this.renderWizard();
-  }
-
-  renderClassSelection() {
-    const classes = Object.keys(DND_DATA.classes);
-    return `<div class="selection-grid">${classes.map(className => {
-      const clazz = DND_DATA.classes[className];
-      const isSelected = this.character.class === className;
-      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectClass('${className}')">
-        <div class="card-header"><h3>${className}</h3>${isSelected ? '<span class="badge badge--success">✓ Seleccionado</span>' : ''}</div>
-        <div class="card-body">
-          <p>${clazz.description}</p>
-          <div>Dado de Golpe: d${clazz.hitDie}</div>
-          <div>Primaria: ${clazz.primaryAbility}</div>
-          ${clazz.spellcasting ? '<span class="badge">✨ Magia</span>' : ''}
-        </div>
-      </div>`;
-    }).join('')}</div>`;
-  }
-  selectClass(className) {
-    this.character.class = className;
-    this.character.hp = DND_DATA.classes[className].hitDie + calculateModifier(this.character.stats.constitution);
-    this.renderWizard();
-  }
-
-  renderBackgroundSelection() {
-    const backgrounds = Object.keys(DND_DATA.backgrounds);
-    return `<div class="selection-grid">${backgrounds.map(bgName => {
-      const bg = DND_DATA.backgrounds[bgName];
-      const isSelected = this.character.background === bgName;
-      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectBackground('${bgName}')">
-        <div class="card-header"><h3>${bgName}</h3>${isSelected ? '<span class="badge badge--success">✓</span>' : ''}</div>
-        <div class="card-body">
-          <p>${bg.feature}</p>
-          <div><strong>Competencias:</strong> ${bg.skills.join(', ')}</div>
-        </div>
-      </div>`;
-    }).join('')}</div>`;
-  }
-  selectBackground(bgName) {
-    this.character.background = bgName;
-    this.renderWizard();
-  }
-
-  renderStatsSelection() {
-    return `
-      <div class="stats-methods">
-        <button class="btn ${this.statGenerationMethod === 'point-buy' ? 'btn-success' : ''}" onclick="wizard.setStatMethod('point-buy')">Point Buy</button>
-        <button class="btn ${this.statGenerationMethod === 'standard-array' ? 'btn-success' : ''}" onclick="wizard.setStatMethod('standard-array')">Standard Array</button>
-        <button class="btn ${this.statGenerationMethod === 'roll' ? 'btn-success' : ''}" onclick="wizard.setStatMethod('roll')">Roll</button>
-      </div>
-      ${this.renderStatInputs()}
-    `;
-  }
-  renderStatInputs() {
-    const stats = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
-    const labels = ['Fuerza','Destreza','Constitución','Inteligencia','Sabiduría','Carisma'];
-    return `<div class="stats-grid">${stats.map((stat,i) => {
-      const value = this.character.stats[stat];
-      const mod = calculateModifier(value);
-      return `<div class="stat-box">
-        <label>${labels[i]}</label>
-        <div>
-          <button onclick="wizard.decreaseStat('${stat}')">-</button>
-          <span>${value}</span>
-          <button onclick="wizard.increaseStat('${stat}')">+</button>
-          <span style="margin-left:6px;">(${mod>=0?'+':''}${mod})</span>
-        </div>
-      </div>`;
-    }).join('')}</div>
-    ${this.statGenerationMethod === 'point-buy' ? `<div class="points-remaining"><strong>Puntos restantes:</strong> ${this.pointBuyRemaining}</div>` : ''}`;
-  }
-  setStatMethod(method) {
-    this.statGenerationMethod = method;
-    if (method === 'standard-array') {
-      const array = [15,14,13,12,10,8];
-      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach((stat,i) => this.character.stats[stat]=array[i]);
-    } else if (method === 'roll') {
-      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach(stat => {
-        this.character.stats[stat] = this.roll4d6DropLowest();
-      });
-    } else { // point-buy
-      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach(stat => {
-        this.character.stats[stat]=8;
-      });
-      this.pointBuyRemaining=27;
-    }
-    this.renderWizard();
-  }
-  roll4d6DropLowest() {
-    let rolls = Array.from({length:4},()=>Math.floor(Math.random()*6)+1);
-    rolls.sort((a,b)=>a-b);
-    return rolls.slice(1).reduce((a,b)=>a+b,0);
-  }
-  increaseStat(stat) {
-    if(this.statGenerationMethod!=='point-buy') return;
-    let v = this.character.stats[stat];
-    if(v>=15||this.pointBuyRemaining<=0) return;
-    const cost = DND_DATA.pointBuyCosts[v+1]-DND_DATA.pointBuyCosts[v];
-    if(cost<=this.pointBuyRemaining) {
-      this.character.stats[stat]++;
-      this.pointBuyRemaining -= cost;
-      this.renderWizard();
-    }
-  }
-  decreaseStat(stat) {
-    if(this.statGenerationMethod!=='point-buy') return;
-    let v = this.character.stats[stat];
-    if(v<=8) return;
-    const refund = DND_DATA.pointBuyCosts[v]-DND_DATA.pointBuyCosts[v-1];
-    this.character.stats[stat]--;
-    this.pointBuyRemaining += refund;
-    this.renderWizard();
-  }
-
-  renderEquipmentSelection() {
-    return `<div><p>Equipo inicial asignado según tu clase. Ejemplo: <strong>Armas, armadura, mochila de explorador, 50 po</strong></p></div>`;
-  }
-
-  renderFinalDetails() {
-    return `
-      <div>
-        <label>Nombre del Personaje *</label>
-        <input type="text" id="characterNameInput" value="${this.character.name}" placeholder="Ej: Thorin Escudo de Roble" style="width:98%; font-size:1.09rem;" oninput="wizard.character.name = this.value">
-        <label>Alineamiento:</label>
-        <select id="characterAlignmentSelect" onchange="wizard.character.alignment = this.value">${DND_DATA.alignments.map(al => `<option value="${al}"${this.character.alignment===al?' selected':''}>${al}</option>`).join('')}</select>
-        <div style="margin-top:15px;">
-          <h4>Resumen:</h4>
-          <ul>
-            <li>Raza: ${this.character.race || 'No seleccionada'}</li>
-            <li>Clase: ${this.character.class || 'No seleccionada'}</li>
-            <li>Trasfondo: ${this.character.background || 'No seleccionado'}</li>
-            <li>Nivel: 1</li>
-            <li>HP: ${this.character.hp}</li>
-            <li>Alineamiento: ${this.character.alignment}</li>
-          </ul>
-        </div>
-      </div>
-    `;
-  }
-
-  attachEventListeners() {
-    // Puedes gestionar listeners extras aquí si usas modales, autocomplete, imágenes, etc.
-  }
-}
-window.wizard = new CharacterWizard();
-class CharacterWizard {
-  constructor() {
-    this.currentStep = 1;
-    this.totalSteps = 6;
-    this.character = this.getInitialState();
-    this.statGenerationMethod = 'point-buy';
-    this.pointBuyRemaining = 27;
-    window.wizard = this;
-  }
-
-  getInitialState() {
-    return {
-      name: '',
-      race: null,
-      class: null,
-      background: null,
-      alignment: 'Neutral',
-      stats: { strength: 8, dexterity: 8, constitution: 8, intelligence: 8, wisdom: 8, charisma: 8 },
-      hp: 0,
-      ac: 10,
-      equipment: []
-    };
-  }
-
-  start() {
-    this.character = this.getInitialState();
-    this.currentStep = 1;
-    document.getElementById('mainContainer').classList.add('hidden');
-    document.getElementById('wizard-container').classList.remove('hidden');
-    this.renderWizard();
-  }
-
-  finishWizard() {
-    document.getElementById('wizard-container').innerHTML = `<div class="wizard">
-      <h2 class="wizard-title" style="color:var(--gold)">¡Personaje creado!</h2>
-      <div class="character-sheet">
-        <h3>${this.character.name}</h3>
-        <ul>
-          <li><strong>Raza:</strong> ${this.character.race}</li>
-          <li><strong>Clase:</strong> ${this.character.class}</li>
-          <li><strong>Trasfondo:</strong> ${this.character.background}</li>
-          <li><strong>Alineamiento:</strong> ${this.character.alignment}</li>
-          <li><strong>HP:</strong> ${this.character.hp}</li>
-        </ul>
-        <h4>Características:</h4>
-        <ul>${Object.entries(this.character.stats).map(([k, v]) =>
-            `<li>${k}: ${v} (${calculateModifier(v)>=0?'+':''}${calculateModifier(v)})</li>`).join('')}</ul>
-      </div>
-      <button class="btn btn-success" onclick="wizard.returnToMain()">Volver</button>
-    </div>`;
-  }
-
-  returnToMain() {
-    document.getElementById('wizard-container').classList.add('hidden');
-    document.getElementById('mainContainer').classList.remove('hidden');
-  }
-
-  renderWizard() {
-    // Barra de progreso visual
-    const steps = Array.from({length:this.totalSteps},(_,i)=>`<div class="progress-step ${this.currentStep>i+1?'complete':''} ${this.currentStep===i+1?'current':''}">${this.currentStep>i+1?'✓':i+1}</div>`).join('<div class="progress-connector"></div>');
-    const html = `
-      <div class="wizard">
-        <div class="wizard-header">
-          <div class="wizard-progress" style="display:flex;justify-content:center;gap:12px;margin-bottom:18px;">${steps}</div>
-          <h2 class="wizard-title">${this.getStepTitle()}</h2>
-        </div>
-        <div class="wizard-content">${this.renderStepContent()}</div>
-        <div class="wizard-footer" style="text-align:center;margin-top:20px;">
-          <button class="btn btn-special" onclick="wizard.previousStep()" ${this.currentStep === 1 ? 'disabled' : ''}>← Anterior</button>
-          <button class="btn btn-success" onclick="wizard.nextStep()">${this.currentStep === this.totalSteps ? 'Finalizar' : 'Siguiente →'}</button>
-        </div>
-      </div>`;
-    document.getElementById('wizard-container').innerHTML = html;
-  }
-
-  getStepTitle() {
-    const titles = [
-      '🧬 Selecciona tu raza', '⚔️ Selecciona tu clase', '📜 Selecciona tu trasfondo',
-      '🧠 Asigna tus atributos', '🎒 Equipo inicial', '✨ Detalles del personaje'
-    ];
-    return titles[this.currentStep - 1];
-  }
-
-  renderStepContent() {
-    switch (this.currentStep) {
-      case 1: return this.renderRaceSelection();
-      case 2: return this.renderClassSelection();
-      case 3: return this.renderBackgroundSelection();
-      case 4: return this.renderStatsSelection();
-      case 5: return this.renderEquipmentSelection();
-      case 6: return this.renderFinalDetails();
-      default: return '<p>Error</p>';
-    }
-  }
-
-  renderRaceSelection() {
-    const races = Object.keys(DND_DATA.races);
-    return `<div class="selection-grid">${races.map(raceName => {
-      const race = DND_DATA.races[raceName];
-      const isSelected = this.character.race === raceName;
-      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectRace('${raceName}')">
-        <div class="card-header">
-          <h3>${raceName}</h3>
-          ${isSelected ? '<span class="badge badge--success">✓ Seleccionado</span>' : ''}
-        </div>
-        <div class="card-body">
-          <p>${race.description}</p>
-          <ul>${race.traits.map(t => `<li>${t}</li>`).join('')}</ul>
-          <span>Velocidad: ${race.speed} ft</span> | <span>Tamaño: ${race.size}</span>
-        </div>
-      </div>`;
-    }).join('')}</div>`;
-  }
-  selectRace(raceName) {
-    this.character.race = raceName;
-    this.renderWizard();
-  }
-
-  renderClassSelection() {
-    const classes = Object.keys(DND_DATA.classes);
-    return `<div class="selection-grid">${classes.map(className => {
-      const clazz = DND_DATA.classes[className];
-      const isSelected = this.character.class === className;
-      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectClass('${className}')">
-        <div class="card-header">
-          <h3>${className}</h3>
-          ${isSelected ? '<span class="badge badge--success">✓ Seleccionado</span>' : ''}
-        </div>
-        <div class="card-body">
-          <p>${clazz.description}</p>
-          <div>Dado de Golpe: d${clazz.hitDie}</div>
-          <div>Principal: ${clazz.primaryAbility}</div>
-          ${clazz.spellcasting ? '<span class="badge">✨ Magia</span>' : ''}
-        </div>
-      </div>`;
-    }).join('')}</div>`;
-  }
-  selectClass(className) {
-    this.character.class = className;
-    this.character.hp = DND_DATA.classes[className].hitDie + calculateModifier(this.character.stats.constitution);
-    this.renderWizard();
-  }
-
-  renderBackgroundSelection() {
-    const backgrounds = Object.keys(DND_DATA.backgrounds);
-    return `<div class="selection-grid">${backgrounds.map(bgName => {
-      const bg = DND_DATA.backgrounds[bgName];
-      const isSelected = this.character.background === bgName;
-      return `<div class="selection-card ${isSelected ? 'selected' : ''}" onclick="wizard.selectBackground('${bgName}')">
-        <div class="card-header">
-          <h3>${bgName}</h3>
-          ${isSelected ? '<span class="badge badge--success">✓</span>' : ''}
-        </div>
-        <div class="card-body">
-          <p>${bg.feature}</p>
-          <div><strong>Competencias:</strong> ${bg.skills.join(', ')}</div>
-        </div>
-      </div>`;
-    }).join('')}</div>`;
-  }
-  selectBackground(bgName) {
-    this.character.background = bgName;
-    this.renderWizard();
-  }
-
-  renderStatsSelection() {
-    return `<div>
-      <div class="stats-methods" style="margin-bottom:14px;">
-        <button class="btn ${this.statGenerationMethod==='point-buy'?'btn-success':''}" onclick="wizard.setStatMethod('point-buy')">Point Buy</button>
-        <button class="btn ${this.statGenerationMethod==='standard-array'?'btn-success':''}" onclick="wizard.setStatMethod('standard-array')">Standard Array</button>
-        <button class="btn ${this.statGenerationMethod==='roll'?'btn-success':''}" onclick="wizard.setStatMethod('roll')">Roll</button>
-      </div>
-      ${this.renderStatInputs()}
-    </div>`;
-  }
-  renderStatInputs() {
-    const stats = ['strength','dexterity','constitution','intelligence','wisdom','charisma'];
-    const labels = ['Fuerza','Destreza','Constitución','Inteligencia','Sabiduría','Carisma'];
-    return `<div class="stats-grid">${stats.map((stat,i) => {
-      const value = this.character.stats[stat];
-      const mod = calculateModifier(value);
-      return `<div class="stat-box">
-        <label>${labels[i]}</label>
-        <div>
-          <button onclick="wizard.decreaseStat('${stat}')">-</button>
-          <span style="display:inline-block;width:28px;">${value}</span>
-          <button onclick="wizard.increaseStat('${stat}')">+</button>
-          <span style="margin-left:10px;font-size:0.95em;">(${mod>=0?'+':''}${mod})</span>
-        </div>
-      </div>`;
-    }).join('')}</div>
-    ${this.statGenerationMethod==='point-buy'?`<div class="points-remaining"><strong>Puntos restantes:</strong> ${this.pointBuyRemaining}</div>`:''}`;
-  }
-  setStatMethod(method) {
-    this.statGenerationMethod = method;
-    if (method === 'standard-array') {
-      const array = [15,14,13,12,10,8];
-      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach((stat,i)=>this.character.stats[stat]=array[i]);
-    } else if (method === 'roll') {
-      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach(stat=>{ this.character.stats[stat]=this.roll4d6DropLowest(); });
-    } else {
-      ['strength','dexterity','constitution','intelligence','wisdom','charisma'].forEach(stat=>{ this.character.stats[stat]=8; });
-      this.pointBuyRemaining=27;
-    }
-    this.renderWizard();
-  }
-  roll4d6DropLowest() {
-    let rolls = Array.from({length:4},()=>Math.floor(Math.random()*6)+1);
-    rolls.sort((a,b)=>a-b);
-    return rolls.slice(1).reduce((a,b)=>a+b,0);
-  }
-  increaseStat(stat) {
-    if(this.statGenerationMethod!=='point-buy') return;
-    let v = this.character.stats[stat];
-    if(v>=15||this.pointBuyRemaining<=0) return;
-    const cost = DND_DATA.pointBuyCosts[v+1]-DND_DATA.pointBuyCosts[v];
-    if(cost<=this.pointBuyRemaining) {
-      this.character.stats[stat]++;
-      this.pointBuyRemaining -= cost;
-      this.renderWizard();
-    }
-  }
-  decreaseStat(stat) {
-    if(this.statGenerationMethod!=='point-buy') return;
-    let v = this.character.stats[stat];
-    if(v<=8) return;
-    const refund = DND_DATA.pointBuyCosts[v]-DND_DATA.pointBuyCosts[v-1];
-    this.character.stats[stat]--;
-    this.pointBuyRemaining += refund;
-    this.renderWizard();
-  }
-
-  renderEquipmentSelection() {
-    return `<div>
-      <p>Equipo inicial te asignado según clase. Incluye:</p>
-      <ul>
-        <li>Armas y armadura base</li>
-        <li>Mochila de explorador</li>
-        <li>50 piezas de oro</li>
-      </ul>
-    </div>`;
-  }
-
-  renderFinalDetails() {
-    return `<div>
-      <label>Nombre del Personaje *</label>
-      <input type="text" id="characterNameInput" value="${this.character.name}" placeholder="Ej: Thorin Escudo de Roble" style="width:96%;font-size:1.09rem;" oninput="wizard.character.name = this.value">
-      <label>Alineamiento:</label>
-      <select id="characterAlignmentSelect" onchange="wizard.character.alignment = this.value">
-        ${DND_DATA.alignments.map(al=>`<option value="${al}"${this.character.alignment===al?' selected':''}>${al}</option>`).join('')}
-      </select>
-      <div style="margin-top:15px;">
-        <h4>Resumen:</h4>
-        <ul>
-          <li>Raza: ${this.character.race||'No seleccionada'}</li>
-          <li>Clase: ${this.character.class||'No seleccionada'}</li>
-          <li>Trasfondo: ${this.character.background||'No seleccionado'}</li>
-          <li>Nivel: 1</li>
-          <li>HP: ${this.character.hp}</li>
-          <li>Alineamiento: ${this.character.alignment}</li>
-        </ul>
-      </div>
-    </div>`;
-  }
-}
-
-window.wizard = new CharacterWizard();
+// Inicializa la aplicación
+document.addEventListener('DOMContentLoaded', () => {
+    window.app = app;
+    window.app.init();
+});
