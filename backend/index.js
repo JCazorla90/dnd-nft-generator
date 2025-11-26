@@ -20,23 +20,64 @@ const ipfs = create({
 });
 
 // Datos de D&D
-const races = ["Elfo", "Enano", "Humano", "Orco", "Mediano", "Tiefling", "Dracónido"];
-const classes = ["Guerrero", "Mago", "Bardo", "Pícaro", "Clérigo", "Paladín", "Brujo"];
-const backgrounds = ["Noble", "Criminal", "Erudito", "Soldado", "Artista", "Ermitaño"];
-const alignments = ["Legal Bueno", "Neutral Bueno", "Caótico Bueno", "Legal Neutral", "Neutral", "Caótico Neutral"];
+const races = [
+  'Elfo',
+  'Enano',
+  'Humano',
+  'Orco',
+  'Mediano',
+  'Tiefling',
+  'Dracónido'
+];
+const classes = ['Guerrero', 'Mago', 'Bardo', 'Pícaro', 'Clérigo', 'Paladín', 'Brujo'];
+const backgrounds = ['Noble', 'Criminal', 'Erudito', 'Soldado', 'Artista', 'Ermitaño'];
+const alignments = ['Legal Bueno', 'Neutral Bueno', 'Caótico Bueno', 'Legal Neutral', 'Neutral', 'Caótico Neutral'];
 
 function randomFromArray(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
+function rollAbilityScore() {
+  const dice = Array.from({ length: 4 }, () => Math.floor(Math.random() * 6) + 1);
+  dice.sort((a, b) => b - a);
+  return dice[0] + dice[1] + dice[2];
+}
+
 function generateStats() {
   return {
-    fuerza: Math.floor(Math.random() * 15) + 6,
-    destreza: Math.floor(Math.random() * 15) + 6,
-    constitución: Math.floor(Math.random() * 15) + 6,
-    inteligencia: Math.floor(Math.random() * 15) + 6,
-    sabiduría: Math.floor(Math.random() * 15) + 6,
-    carisma: Math.floor(Math.random() * 15) + 6
+    fuerza: rollAbilityScore(),
+    destreza: rollAbilityScore(),
+    constitución: rollAbilityScore(),
+    inteligencia: rollAbilityScore(),
+    sabiduría: rollAbilityScore(),
+    carisma: rollAbilityScore()
+  };
+}
+
+function abilityModifier(score) {
+  return Math.floor((score - 10) / 2);
+}
+
+function buildCharacter({ race, charClass, background, alignment, level = 1 }) {
+  const stats = generateStats();
+  const selectedRace = race || randomFromArray(races);
+  const selectedClass = charClass || randomFromArray(classes);
+  const selectedBackground = background || randomFromArray(backgrounds);
+  const selectedAlignment = alignment || randomFromArray(alignments);
+  const dexMod = abilityModifier(stats.destreza);
+
+  return {
+    name: `${selectedRace} ${selectedClass}`,
+    race: selectedRace,
+    class: selectedClass,
+    background: selectedBackground,
+    alignment: selectedAlignment,
+    level,
+    stats,
+    hp: Math.max(8 + abilityModifier(stats.constitución), 1),
+    ac: 10 + dexMod,
+    initiative: dexMod,
+    proficiencyBonus: 2
   };
 }
 
@@ -99,33 +140,21 @@ async function uploadToIPFS(metadata) {
 
 // Endpoint: Generar personaje aleatorio
 app.get('/api/generate-character', (req, res) => {
-  const character = {
-    name: `${randomFromArray(races)} el ${randomFromArray(classes)}`,
-    race: randomFromArray(races),
-    class: randomFromArray(classes),
-    background: randomFromArray(backgrounds),
-    alignment: randomFromArray(alignments),
-    level: 1,
-    stats: generateStats(),
-    hp: Math.floor(Math.random() * 10) + 10
-  };
-  res.json(character);
+  res.json(buildCharacter({}));
 });
 
 // Endpoint: Crear personaje personalizado
 app.post('/api/create-character', (req, res) => {
   const { race, class: charClass } = req.body;
-  const character = {
-    name: `${race || randomFromArray(races)} el ${charClass || randomFromArray(classes)}`,
-    race: race || randomFromArray(races),
-    class: charClass || randomFromArray(classes),
-    background: randomFromArray(backgrounds),
-    alignment: randomFromArray(alignments),
-    level: 1,
-    stats: generateStats(),
-    hp: Math.floor(Math.random() * 10) + 10
-  };
-  res.json(character);
+
+  const sanitizedRace = race?.trim();
+  const sanitizedClass = charClass?.trim();
+  res.json(
+    buildCharacter({
+      race: sanitizedRace || undefined,
+      charClass: sanitizedClass || undefined
+    })
+  );
 });
 
 // Endpoint: Crear NFT completo (imagen + metadata IPFS)
@@ -149,6 +178,9 @@ app.post('/api/create-nft', async (req, res) => {
         { trait_type: 'Trasfondo', value: character.background },
         { trait_type: 'Alineamiento', value: character.alignment },
         { trait_type: 'Nivel', value: character.level },
+        { trait_type: 'Clase de Armadura', value: character.ac },
+        { trait_type: 'Iniciativa', value: character.initiative },
+        { trait_type: 'Bonificador de competencia', value: character.proficiencyBonus },
         { trait_type: 'HP', value: character.hp },
         { trait_type: 'Fuerza', value: character.stats.fuerza },
         { trait_type: 'Destreza', value: character.stats.destreza },
