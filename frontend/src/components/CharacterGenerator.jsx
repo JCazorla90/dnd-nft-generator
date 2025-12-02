@@ -2,6 +2,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import { mintNFT } from "../utils/web3";
 
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:3000",
+  timeout: 15000
+});
+
 export default function CharacterGenerator() {
   const [character, setCharacter] = useState(null);
   const [customRace, setCustomRace] = useState("");
@@ -13,7 +18,7 @@ export default function CharacterGenerator() {
   const generateRandom = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.get("http://localhost:3000/api/generate-character");
+      const { data } = await api.get("/api/generate-character");
       setCharacter(data);
       setNftData(null);
     } catch (error) {
@@ -26,7 +31,7 @@ export default function CharacterGenerator() {
   const generateCustom = async () => {
     setLoading(true);
     try {
-      const { data } = await axios.post("http://localhost:3000/api/create-character", {
+      const { data } = await api.post("/api/create-character", {
         race: customRace,
         class: customClass
       });
@@ -45,7 +50,7 @@ export default function CharacterGenerator() {
     setMinting(true);
     try {
       // 1. Crear imagen y metadata en IPFS
-      const { data } = await axios.post("http://localhost:3000/api/create-nft", character);
+      const { data } = await api.post("/api/create-nft", character);
       setNftData(data);
       
       // 2. Mintear NFT en blockchain
@@ -56,6 +61,37 @@ export default function CharacterGenerator() {
       alert("Error creando NFT: " + error.message);
     }
     setMinting(false);
+  };
+
+  const downloadSheet = () => {
+    if (!character) return;
+    const lines = [
+      `Nombre: ${character.name}`,
+      `Raza: ${character.race}`,
+      `Clase: ${character.class}`,
+      `Trasfondo: ${character.background}`,
+      `Alineamiento: ${character.alignment}`,
+      `Nivel: ${character.level}`,
+      `HP: ${character.hp}`,
+      `CA: ${character.ac}`,
+      `Iniciativa: ${character.initiative}`,
+      `Bonificador de competencia: ${character.proficiencyBonus}`,
+      "-- Estadísticas --",
+      `Fuerza: ${character.stats.fuerza}`,
+      `Destreza: ${character.stats.destreza}`,
+      `Constitución: ${character.stats.constitución}`,
+      `Inteligencia: ${character.stats.inteligencia}`,
+      `Sabiduría: ${character.stats.sabiduría}`,
+      `Carisma: ${character.stats.carisma}`
+    ];
+
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `${character.name.replace(/\s+/g, "_")}_sheet.txt`;
+    anchor.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -88,10 +124,10 @@ export default function CharacterGenerator() {
       {loading && <p>⏳ Generando personaje...</p>}
 
       {character && (
-        <div style={{ 
-          marginTop: '30px', 
-          border: '2px solid #333', 
-          padding: '20px', 
+        <div style={{
+          marginTop: '30px',
+          border: '2px solid #333',
+          padding: '20px',
           borderRadius: '10px',
           background: '#f9f9f9'
         }}>
@@ -103,7 +139,10 @@ export default function CharacterGenerator() {
           <p><strong>Alineamiento:</strong> {character.alignment}</p>
           <p><strong>Nivel:</strong> {character.level}</p>
           <p><strong>HP:</strong> {character.hp}</p>
-          
+          <p><strong>CA:</strong> {character.ac}</p>
+          <p><strong>Iniciativa:</strong> {character.initiative >= 0 ? `+${character.initiative}` : character.initiative}</p>
+          <p><strong>Bonificador de competencia:</strong> +{character.proficiencyBonus}</p>
+
           <h4>Estadísticas:</h4>
           <ul>
             <li>Fuerza: {character.stats.fuerza}</li>
@@ -114,11 +153,24 @@ export default function CharacterGenerator() {
             <li>Carisma: {character.stats.carisma}</li>
           </ul>
 
-          <button 
-            onClick={createNFT} 
+          <button
+            onClick={downloadSheet}
+            style={{
+              padding: '8px 14px',
+              borderRadius: '6px',
+              border: '1px solid #444',
+              marginRight: '10px',
+              cursor: 'pointer'
+            }}
+          >
+            💾 Descargar ficha
+          </button>
+
+          <button
+            onClick={createNFT}
             disabled={minting}
-            style={{ 
-              marginTop: '15px', 
+            style={{
+              marginTop: '15px',
               padding: '10px 20px', 
               background: '#4CAF50', 
               color: 'white', 
