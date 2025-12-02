@@ -1,185 +1,901 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>D&D Multiverse Forge - Generador Épico</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Marck+Script&family=MedievalSharp&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="styles.css">
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐉 D&D Character Forge - Ultimate Edition</title>
+    
+    <!-- Fuentes épicas medievales -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=MedievalSharp&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ═══════════════════════════════════════════════════════════
+           🎨 SISTEMA DE DISEÑO MEDIEVAL ÉPICO
+           Mantenimiento de la UX/UI original.
+           ═══════════════════════════════════════════════════════════ */
+        
+        :root {
+            /* Colores base del pergamino y tinta */
+            --parchment: #f4e9d8;
+            --parchment-dark: #e8d5b7;
+            --ink: #2a1a0f;
+            --gold: #d4af37;
+            --blood-red: #8b0000;
+            --dark-brown: #3a2517;
+            --forest-green: #2d5016;
+            
+            /* Sistema de rarezas para NFTs */
+            --rarity-common: #95a5a6;
+            --rarity-uncommon: #27ae60;
+            --rarity-rare: #3498db;
+            --rarity-epic: #9b59b6;
+            --rarity-legendary: #f39c12;
+            
+            /* Espaciado consistente */
+            --space-xs: 4px;
+            --space-sm: 8px;
+            --space-md: 16px;
+            --space-lg: 24px;
+            --space-xl: 32px;
+            --space-xxl: 48px;
+            
+            /* Fuentes medievales */
+            --font-title: 'MedievalSharp', 'Cinzel', serif;
+            --font-body: 'Cinzel', serif;
+            
+            /* Efectos y sombras */
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-epic: 0 10px 40px rgba(0, 0, 0, 0.4);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, rgba(58, 37, 23, 0.95), rgba(26, 15, 8, 0.98)),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><rect fill="%233a2517" width="100" height="100"/><path d="M0 0L100 100M100 0L0 100" stroke="%232a1a0f" stroke-width="0.5" opacity="0.1"/></svg>');
+            color: var(--parchment);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        /* Header épico con decoraciones */
+        .epic-header {
+            background: linear-gradient(to bottom, rgba(244, 233, 216, 0.95), rgba(232, 213, 183, 0.9));
+            border-bottom: 5px double var(--gold);
+            padding: var(--space-xxl) var(--space-lg);
+            text-align: center;
+            position: relative;
+            box-shadow: var(--shadow-epic);
+            margin-bottom: var(--space-xxl);
+        }
+        
+        .main-title {
+            font-family: var(--font-title);
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            color: var(--blood-red);
+            text-shadow: 3px 3px 0 var(--gold), 5px 5px 15px rgba(0,0,0,0.6);
+            letter-spacing: 0.1em;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .subtitle {
+            font-size: clamp(1rem, 3vw, 1.5rem);
+            color: var(--ink);
+            font-style: italic;
+            margin-bottom: var(--space-md);
+        }
+        
+        /* Selector de edición de D&D */
+        .edition-selector {
+            background: rgba(244, 233, 216, 0.9);
+            border: 2px solid var(--ink);
+            border-radius: 8px;
+            padding: var(--space-md);
+            margin: var(--space-lg) auto;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .edition-selector label {
+            display: block;
+            color: var(--ink);
+            font-weight: bold;
+            margin-bottom: var(--space-sm);
+        }
+        
+        .edition-selector select {
+            width: 100%;
+            padding: var(--space-sm);
+            font-family: var(--font-body);
+            font-size: 1rem;
+            border: 2px solid var(--ink);
+            border-radius: 4px;
+            background: var(--parchment);
+            color: var(--ink);
+        }
+        
+        /* Contenedor principal */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--space-lg);
+        }
+
+        /* Botón épico con efecto de brillo */
+        .btn-launch, .btn-back {
+            background: linear-gradient(135deg, var(--blood-red) 0%, #a00000 100%);
+            color: var(--gold);
+            border: 2px solid var(--gold);
+            padding: var(--space-md) var(--space-xl);
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: var(--space-sm); /* Agregado para espaciado en la vista del generador */
+            white-space: nowrap;
+        }
+        
+        .btn-launch:hover, .btn-back:hover {
+            background: linear-gradient(135deg, #a00000 0%, var(--blood-red) 100%);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        /* ----------------------------------------------------- */
+        /* ⚔️ Estilos de la Vista del Generador (NUEVO) */
+        /* ----------------------------------------------------- */
+
+        .generator-view {
+            padding: var(--space-xl) var(--space-lg);
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .generator-title {
+            font-family: var(--font-title);
+            font-size: 3rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+        }
+
+        /* Tarjeta de personaje (ficha) */
+        .character-sheet {
+            background: var(--parchment);
+            color: var(--ink);
+            border: 5px double var(--dark-brown);
+            border-radius: 12px;
+            padding: var(--space-xl);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin-top: var(--space-xxl);
+        }
+
+        .sheet-header {
+            border-bottom: 3px solid var(--blood-red);
+            padding-bottom: var(--space-md);
+            margin-bottom: var(--space-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .sheet-header h3 {
+            font-family: var(--font-title);
+            color: var(--blood-red);
+            font-size: 2.5rem;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .stat-item {
+            border: 2px solid var(--dark-brown);
+            border-radius: 8px;
+            padding: var(--space-md);
+            text-align: center;
+            background: var(--parchment-dark);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .stat-name {
+            font-family: var(--font-title);
+            font-size: 1.2rem;
+            color: var(--dark-brown);
+            margin-bottom: var(--space-xs);
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 900;
+            color: var(--blood-red);
+            line-height: 1;
+        }
+
+        .stat-modifier {
+            display: block;
+            font-size: 1.5rem;
+            color: var(--forest-green);
+            margin-top: var(--space-xs);
+        }
+
+        /* ----------------------------------------------------- */
+        /* ⚖️ Análisis de Equilibrio (NUEVO) */
+        /* ----------------------------------------------------- */
+
+        .balance-analysis {
+            margin-top: var(--space-xxl);
+            padding: var(--space-xl);
+            border: 3px dashed var(--gold);
+            border-radius: 12px;
+            background: rgba(26, 15, 8, 0.8);
+            color: var(--parchment);
+        }
+
+        .analysis-title {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: var(--space-lg);
+            text-transform: uppercase;
+        }
+
+        .analysis-result {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            padding: var(--space-md);
+            border-left: 5px solid var(--blood-red);
+            background: rgba(42, 26, 15, 0.5);
+            margin-bottom: var(--space-md);
+        }
+
+        .analysis-score {
+            text-align: center;
+            font-family: var(--font-title);
+            font-size: 3rem;
+            color: var(--forest-green);
+            text-shadow: 0 0 10px rgba(45, 80, 22, 0.7);
+        }
+
+        /* Responsividad para la vista del generador */
+        @media (max-width: 600px) {
+            .stat-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .sheet-header h3 {
+                font-size: 1.8rem;
+            }
+            .sheet-header span {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Estilos originales (footer, grid, etc.) */
+        .modes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-lg);
+            margin: var(--space-xxl) 0;
+        }
+        .mode-card {
+            background: linear-gradient(135deg, rgba(244, 233, 216, 0.95), rgba(232, 213, 183, 0.9));
+            border: 4px solid var(--ink);
+            border-radius: 12px;
+            padding: var(--space-xl);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+        .mode-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px var(--shadow);
+            border-color: var(--gold);
+        }
+        .mode-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(212, 175, 55, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .mode-card:hover::before {
+            opacity: 1;
+        }
+        .mode-icon {
+            font-size: 4rem;
+            margin-bottom: var(--space-md);
+            display: block;
+        }
+        .mode-title {
+            font-family: var(--font-title);
+            font-size: 1.8rem;
+            color: var(--blood-red);
+            margin-bottom: var(--space-sm);
+            text-transform: uppercase;
+        }
+        .mode-description {
+            color: var(--ink);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: var(--space-md);
+        }
+        .mode-features {
+            text-align: left;
+            padding-left: var(--space-lg);
+            margin-bottom: var(--space-md);
+        }
+        .mode-features li {
+            color: var(--ink);
+            margin-bottom: var(--space-xs);
+            font-size: 0.9rem;
+        }
+        .features-section {
+            background: rgba(244, 233, 216, 0.9);
+            border: 3px solid var(--ink);
+            border-radius: 12px;
+            padding: var(--space-xl);
+            margin: var(--space-xxl) 0;
+        }
+        .features-title {
+            font-family: var(--font-title);
+            font-size: 2rem;
+            color: var(--blood-red);
+            text-align: center;
+            margin-bottom: var(--space-xl);
+            text-transform: uppercase;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--space-lg);
+        }
+        .feature-item {
+            text-align: center;
+            padding: var(--space-md);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-sm);
+        }
+        .feature-name {
+            font-weight: bold;
+            color: var(--ink);
+            margin-bottom: var(--space-xs);
+        }
+        .feature-desc {
+            color: var(--ink);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .epic-footer {
+            background: rgba(244, 233, 216, 0.9);
+            border-top: 3px solid var(--gold);
+            padding: var(--space-xl);
+            margin-top: var(--space-xxl);
+            text-align: center;
+        }
+        .epic-footer p {
+            color: var(--ink);
+            margin-bottom: var(--space-sm);
+        }
+        .epic-footer a {
+            color: var(--blood-red);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .epic-footer a:hover {
+            color: var(--gold);
+        }
+        @media (max-width: 768px) {
+            .modes-grid {
+                grid-template-columns: 1fr;
+            }
+            .main-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header class="main-header">
-        <div class="header-decoration">⚔️</div>
-        <div class="header-content">
-            <h1 class="main-title">D&D Multiverse Forge</h1>
-            <p class="subtitle">Generador Épico de Personajes, Bestiario y Mapas</p>
-        </div>
-        <div class="header-decoration">🐉</div>
-    </header>
+    <!-- Header épico con título y selector de edición -->
+    <header class="epic-header">
+        <h1 class="main-title">⚔️ D&D CHARACTER FORGE ⚔️</h1>
+        <p class="subtitle">🎲 El Generador Definitivo de Personajes y Encuentros Épicos 🌌</p>
+        
+        <div class="edition-selector">
+            <label for="editionSelect">📖 Selecciona tu Edición de D&D:</label>
+            <select id="editionSelect">
+                <option value="5e">5ta Edición (2014) - La más popular</option>
+                <option value="3.5e">3.5 Edición (2003) - La clásica</option>
+                <option value="4e">4ta Edición (2008) - La táctica</option>
+            </select>
+        </div>
+    </header>
 
-    <div class="container">
-        
-        <div id="characterForge" class="section-panel parchment-box">
-            <h2 class="section-title">⚔️ Forja de Héroes del Multiverso</h2>
+    <div class="container">
+        <!-- ----------------------------------------------------- -->
+        <!-- 📜 VISTA DE ATERRIZAJE (LANDING PAGE) -->
+        <!-- ----------------------------------------------------- -->
+        <div id="landing-page">
+            <!-- Grid principal de modos de generación -->
+            <div class="modes-grid">
+                <!-- Modo Wizard - Paso a paso -->
+                <div class="mode-card" onclick="launchMode('wizard')">
+                    <span class="mode-icon">🧙</span>
+                    <h2 class="mode-title">Modo Wizard</h2>
+                    <p class="mode-description">
+                        Creación guiada paso a paso, perfecta para principiantes o cuando quieres control total sobre cada detalle.
+                    </p>
+                    <ul class="mode-features">
+                        <li>✨ Asistente paso a paso</li>
+                        <li>📊 Point Buy, Standard Array o 4d6</li>
+                        <li>🎨 Selección de equipo personalizada</li>
+                        <li>📜 Generación de trasfondo</li>
+                    </ul>
+                    <button class="btn-launch">Iniciar Wizard →</button>
+                </div>
 
-            <div class="multiverse-selector">
-                <label for="multiverseSelect">🌌 Selecciona el Universo:</label>
-                <select id="multiverseSelect" class="form-control"></select>
-            </div>
+                <!-- Modo Random - Equilibrado (Este es el que funciona ahora) -->
+                <div class="mode-card" onclick="launchMode('random')">
+                    <span class="mode-icon">🎲</span>
+                    <h2 class="mode-title">Modo Random</h2>
+                    <p class="mode-description">
+                        Generación rápida y equilibrada. Incluye **Análisis de Equilibrio** para asegurar sinergia.
+                    </p>
+                    <ul class="mode-features">
+                        <li>⚡ Generación en 3 segundos</li>
+                        <li>⚖️ Stats balanceados (4d6 drop lowest)</li>
+                        <li>🎯 Combinaciones coherentes</li>
+                        <li>📄 **¡Análisis de Equilibrio Incluido!**</li>
+                    </ul>
+                    <button class="btn-launch">Generar Random →</button>
+                </div>
 
-            <div class="custom-inputs">
-                <input type="text" id="customName" placeholder="Nombre del Héroe (Opcional)">
-                <select id="raceSelect" class="form-control" title="Raza"></select>
-                <select id="classSelect" class="form-control" title="Clase"></select>
-            </div>
+                <!-- Modo Chaos - Locura total -->
+                <div class="mode-card" onclick="launchMode('chaos')">
+                    <span class="mode-icon">🌀</span>
+                    <h2 class="mode-title">Modo Chaos</h2>
+                    <p class="mode-description">
+                        ¡Locura absoluta! Combinaciones imposibles, stats ridículos, y diversión caótica garantizada.
+                    </p>
+                    <ul class="mode-features">
+                        <li>🎪 Stats completamente aleatorios</li>
+                        <li>🃏 Combinaciones imposibles</li>
+                        <li>🎭 Mago con 18 FUE y 6 INT</li>
+                        <li>😂 Risas aseguradas</li>
+                    </ul>
+                    <button class="btn-launch">¡Activar Chaos! →</button>
+                </div>
 
-            <div class="controls-grid">
-                <button id="generateRandomBtn" class="btn btn-primary">
-                    🎲 Generar Random del Universo
-                </button>
-                <button id="generateCustomBtn" class="btn btn-secondary">
-                    ⚙️ Generar Custom
-                </button>
-                <button id="generateChaosBtn" class="btn btn-accent">
-                    🌀 Modo CHAOS (Mezcla de Universos)
-                </button>
-            </div>
-        </div>
-        
-        <div id="characterSheet" class="character-sheet parchment-box hidden">
-            <div class="sheet-header">
-                <h2 id="charName" class="char-name">Héroe Épico</h2>
-                <p id="charMeta" class="char-meta">Raza | Clase | Nivel 1</p>
-                <p class="char-universe">🌌 Universo: <span id="charUniverse"></span></p>
-                
-                                <div id="apiBonus" class="api-bonus-detail">
-                    </div>
+                <!-- Modo Multiverso - Crossovers épicos -->
+                <div class="mode-card" onclick="launchMode('multiverse')">
+                    <span class="mode-icon">🌌</span>
+                    <h2 class="mode-title">Modo Multiverso</h2>
+                    <p class="mode-description">
+                        Cruza universos: Magic The Gathering, Elden Ring, Stranger Things y más en tus partidas de D&D.
+                    </p>
+                    <ul class="mode-features">
+                        <li>🎴 Magic: The Gathering crossover</li>
+                        <li>🗡️ Elden Ring characters</li>
+                        <li>👾 Stranger Things elements</li>
+                        <li>🌈 APIs de múltiples universos</li>
+                    </ul>
+                    <button class="btn-launch">Abrir Portal →</button>
+                </div>
+            </div>
+
+            <!-- Sección de características del sistema (Original) -->
+            <section class="features-section">
+                <h2 class="features-title">🏆 Características Épicas del Sistema</h2>
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon">🐉</div>
+                        <div class="feature-name">Bestiario Completo</div>
+                        <div class="feature-desc">30+ criaturas con stats completos y modo CHAOS</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">⚔️</div>
+                        <div class="feature-name">Generador de Encuentros</div>
+                        <div class="feature-desc">Balanceados por CR o completamente caóticos</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🎨</div>
+                        <div class="feature-name">Sistema NFT</div>
+                        <div class="feature-desc">Rareza, valor y minteo en blockchain</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📄</div>
+                        <div class="feature-name">Export PDF Épico</div>
+                        <div class="feature-desc">Fichas profesionales listas para imprimir</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">💾</div>
+                        <div class="feature-name">Export JSON</div>
+                        <div class="feature-desc">Backup completo de tus personajes</div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🌐</div>
+                        <div class="feature-name">APIs Integradas</div>
+                        <div class="feature-desc">DnD5eAPI, Open5e, Lexica y más</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ----------------------------------------------------- -->
+        <!-- 🏰 VISTA DEL GENERADOR DE PERSONAJE -->
+        <!-- ----------------------------------------------------- -->
+        <div id="generator-view" class="generator-view" style="display:none;">
+            <!-- Contenido dinámico se renderizará aquí -->
+        </div>
+
+    </div>
+
+    <!-- Footer con atribución (Original) -->
+    <footer class="epic-footer">
+        <p>⚔️ D&D Character Forge v2.0 - Ultimate Edition</p>
+        <p>Creado con ❤️ por <a href="https://github.com/JCazorla90" target="_blank">José Cazorla</a></p>
+        <p>📜 Bajo licencia MIT | 🐉 Código abierto en <a href="https://github.com/JCazorla90/DnD-Character-Forge" target="_blank">GitHub</a></p>
+    </footer>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // 🎮 SISTEMA DE NAVEGACIÓN Y CONFIGURACIÓN
+        // ═══════════════════════════════════════════════════════════
+
+        // Definición de las variables globales de Firebase (deben ser definidas aunque no se usen en este ejemplo simple)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        // Elementos del DOM
+        const editionSelect = document.getElementById('editionSelect');
+        const landingPage = document.getElementById('landing-page');
+        const generatorView = document.getElementById('generator-view');
+
+        // Estado de la aplicación
+        let appState = {
+            mode: null,
+            edition: '5e',
+            character: null
+        };
+        
+        // Cargar edición guardada al iniciar
+        const savedEdition = localStorage.getItem('dnd_edition') || '5e';
+        editionSelect.value = savedEdition;
+        appState.edition = savedEdition;
+        
+        // Guardar cuando cambie
+        editionSelect.addEventListener('change', function() {
+            localStorage.setItem('dnd_edition', this.value);
+            appState.edition = this.value;
+            console.log(`📖 Edición cambiada a: ${this.value}`);
+        });
+        
+        /**
+         * Calcula el modificador D&D a partir de un valor de atributo.
+         * @param {number} score - Puntuación de atributo (ej. 15).
+         * @returns {number} - Modificador (ej. +2).
+         */
+        function calculateModifier(score) {
+            return Math.floor((score - 10) / 2);
+        }
+
+        /**
+         * Simula el lanzamiento de 4d6 y descarta el resultado más bajo (4d6 drop lowest).
+         * @returns {number} - La suma de los 3 dados más altos.
+         */
+        function roll4d6DropLowest() {
+            let rolls = [];
+            for (let i = 0; i < 4; i++) {
+                rolls.push(Math.floor(Math.random() * 6) + 1);
+            }
+            rolls.sort((a, b) => b - a); // Ordenar de mayor a menor
+            return rolls[0] + rolls[1] + rolls[2]; // Sumar los 3 más altos
+        }
+
+        /**
+         * Genera un conjunto completo de atributos (STR, DEX, CON, INT, WIS, CHA)
+         * usando el método 4d6 drop lowest y los asigna a un personaje.
+         * @returns {object} - Objeto con los atributos y sus modificadores.
+         */
+        function generateStats() {
+            const attributes = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'];
+            let scores = [];
+            for (let i = 0; i < 6; i++) {
+                scores.push(roll4d6DropLowest());
+            }
+
+            // Asignar en orden aleatorio (o el orden de la array)
+            const stats = {};
+            attributes.forEach((attr, index) => {
+                const score = scores[index];
+                stats[attr] = {
+                    score: score,
+                    mod: calculateModifier(score)
+                };
+            });
+            return stats;
+        }
+
+        /**
+         * Genera un personaje D&D 5e simple (Raza, Clase, Stats).
+         * @param {string} mode - Modo de generación ('random', 'chaos', etc.).
+         * @returns {object} - Objeto Character.
+         */
+        function generateCharacter(mode) {
+            const races = ['Humano', 'Elfo', 'Enano', 'Mediano', 'Tiefling', 'Dracónido', 'Semi-elfo', 'Semi-orco'];
+            const classes = [
+                { name: 'Guerrero', primaryStat: 'STR', secondaryStat: 'CON' },
+                { name: 'Mago', primaryStat: 'INT', secondaryStat: 'CON' },
+                { name: 'Pícaro', primaryStat: 'DEX', secondaryStat: 'CHA' },
+                { name: 'Clérigo', primaryStat: 'WIS', secondaryStat: 'CON' },
+                { name: 'Bárbaro', primaryStat: 'STR', secondaryStat: 'CON' },
+                { name: 'Hechicero', primaryStat: 'CHA', secondaryStat: 'CON' }
+            ];
+
+            const randomRace = races[Math.floor(Math.random() * races.length)];
+            const randomClass = classes[Math.floor(Math.random() * classes.length)];
+            const stats = generateStats();
+
+            // Simular ajustes raciales
+            // Para simplificar, solo aumentamos un stat
+            const primaryMod = randomClass.primaryStat;
+            stats[primaryMod].score += 1;
+            stats[primaryMod].mod = calculateModifier(stats[primaryMod].score);
+
+            return {
+                name: "Sir " + races[Math.floor(Math.random() * races.length)] + " de " + randomClass.name,
+                race: randomRace,
+                class: randomClass.name,
+                level: 1,
+                stats: stats,
+                primaryStat: randomClass.primaryStat,
+                secondaryStat: randomClass.secondaryStat,
+                mode: mode
+            };
+        }
+        
+        /**
+         * ⚖️ Realiza el Análisis de Equilibrio (Balance Analysis) del personaje.
+         * Se centra en la sinergia entre los atributos y la clase elegida.
+         * @param {object} char - El objeto personaje generado.
+         * @returns {object} - Resultado del análisis.
+         */
+        function performBalanceAnalysis(char) {
+            const pStat = char.primaryStat;
+            const sStat = char.secondaryStat;
+            const pMod = char.stats[pStat].mod;
+            const sMod = char.stats[sStat].mod;
+            let score = 0;
+            let feedback = [];
+            let status = 'Equilibrado';
+
+            // Puntuación 1: Atributo Principal (Importancia Máxima)
+            if (pMod >= 3) { // 16+
+                score += 5;
+                feedback.push(`✅ Sinergia Épica: Tu atributo principal (${pStat}) tiene un modificador de +${pMod}. ¡Estás listo para sobresalir en el combate/magia!`);
+            } else if (pMod >= 2) { // 14-15
+                score += 3;
+                feedback.push(`✔️ Sinergia Fuerte: Tu ${pStat} (+${pMod}) es sólido. Un gran comienzo para tu ${char.class}.`);
+            } else if (pMod >= 1) { // 12-13
+                score += 1;
+                feedback.push(`⚠️ Sinergia Media: El ${pStat} (+${pMod}) es funcional, pero considera mejorar este atributo con puntos futuros.`);
+            } else { // 10-11 o menos
+                score -= 3;
+                status = 'Desbalanceado';
+                feedback.push(`❌ Sinergia Baja: Tu ${pStat} es solo +${pMod}. Tu personaje podría tener dificultades significativas en su función principal.`);
+            }
+
+            // Puntuación 2: Atributo Secundario (Importancia Media)
+            if (sStat && sStat !== pStat) {
+                 if (sMod >= 1) {
+                    score += 1;
+                    feedback.push(`👍 Soporte Sólido: Tu atributo secundario (${sStat}) es +${sMod}. Esto te da buena resistencia o habilidades secundarias.`);
+                } else if (sMod < 0) {
+                    score -= 1;
+                    feedback.push(`👎 Debilidad Menor: Tu ${sStat} es +${sMod}. Ten cuidado con ${sStat === 'CON' ? 'tu salud' : 'habilidades secundarias'}.`);
+                }
+            }
+
+            // Puntuación 3: Atributos No Relevantes (Baja Puntuación es Buena)
+            const irrelevantStats = ['STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA'].filter(
+                stat => stat !== pStat && stat !== sStat
+            );
+            
+            let weakStatsCount = 0;
+            irrelevantStats.forEach(stat => {
+                if (char.stats[stat].mod <= -1) {
+                    weakStatsCount++;
+                }
+            });
+
+            if (weakStatsCount > 2) {
+                status = 'Arriesgado';
+                feedback.push(`🤔 Stats Dumped: Tienes ${weakStatsCount} atributos con penalización. Esto es eficiente, pero tu personaje es vulnerable fuera de su rol.`);
+            } else {
+                feedback.push(`✨ Distribución General: La distribución de tus otros atributos es razonable.`);
+            }
+
+            // Determinar Calificación Final
+            if (score >= 6) {
+                status = '¡Legendario!';
+            } else if (score >= 4) {
+                status = 'Épico';
+            } else if (score >= 1) {
+                status = 'Optimizado';
+            } else if (score >= -2) {
+                status = 'Equilibrado';
+            } else {
+                status = 'Desbalanceado (Rework Recomendado)';
+            }
+
+
+            return {
+                score: score,
+                status: status,
+                feedback: feedback
+            };
+        }
+
+        /**
+         * Renderiza la vista del generador de personaje.
+         * @param {object} char - El objeto personaje generado.
+         * @param {object} analysis - El resultado del análisis de equilibrio.
+         */
+        function renderGeneratorView(char, analysis) {
+            let statsHtml = '';
+            for (const stat in char.stats) {
+                const data = char.stats[stat];
+                const modText = data.mod >= 0 ? `+${data.mod}` : `${data.mod}`;
+                statsHtml += `
+                    <div class="stat-item ${stat === char.primaryStat ? 'border-blood-red' : ''}">
+                        <div class="stat-name">${stat}</div>
+                        <div class="stat-value">${data.score}</div>
+                        <div class="stat-modifier">${modText}</div>
+                    </div>
+                `;
+            }
+
+            let analysisFeedbackHtml = analysis.feedback.map(f => `<p>${f}</p>`).join('');
+            let analysisColor = 'var(--forest-green)';
+            if (analysis.status.includes('Desbalanceado')) analysisColor = 'var(--blood-red)';
+            else if (analysis.status.includes('Arriesgado')) analysisColor = 'var(--rarity-epic)';
+
+            generatorView.innerHTML = `
+                <h2 class="generator-title">${char.mode.toUpperCase()} MODE: GENERACIÓN COMPLETADA</h2>
+                <div style="text-align: center; margin-bottom: var(--space-lg);">
+                    <button class="btn-back" onclick="goBackToLanding()">← Volver al Menú Principal</button>
+                    <button class="btn-launch" onclick="launchMode('random')">Generar Otro (Random) →</button>
+                </div>
+
+                <div class="character-sheet">
+                    <div class="sheet-header">
+                        <h3>${char.name}</h3>
+                        <span style="color: var(--dark-brown); font-weight: bold;">
+                            ${char.race} / ${char.class} (Nivel ${char.level})
+                        </span>
+                    </div>
+
+                    <h4 style="font-family: var(--font-title); color: var(--blood-red); margin-bottom: var(--space-md);">Puntuaciones de Atributo</h4>
+                    <div class="stat-grid">
+                        ${statsHtml}
+                    </div>
+                    
+                    <hr style="border-top: 2px solid var(--parchment-dark); margin: var(--space-xl) 0;">
+
+                    <!-- ⚖️ ANÁLISIS DE EQUILIBRIO (NUEVO) -->
+                    <div class="balance-analysis">
+                        <h4 class="analysis-title">⚖️ ANÁLISIS DE EQUILIBRIO DE PERSONAJE ⚖️</h4>
+                        <div class="analysis-result">
+                            <p style="font-weight: bold;">Estadística Principal Clave:</p>
+                            <p>Tu clase (${char.class}) depende principalmente de <span style="color: ${analysisColor}; font-weight: bold;">${char.primaryStat}</span>.
+                            Tu puntuación es <span style="font-size: 1.2em; color: ${analysisColor}; font-weight: bold;">${char.stats[char.primaryStat].score} (${char.stats[char.primaryStat].mod >= 0 ? '+' : ''}${char.stats[char.primaryStat].mod})</span>.
+                            </p>
+                        </div>
+                        <div class="analysis-result">
+                            <p style="font-weight: bold;">Comentarios del Oráculo:</p>
+                            ${analysisFeedbackHtml}
+                        </div>
+                        <h4 style="text-align: center; margin-top: var(--space-lg); color: var(--gold);">CALIFICACIÓN DE EQUILIBRIO</h4>
+                        <div class="analysis-score" style="color: ${analysisColor}">${analysis.status}</div>
+                    </div>
+
+                    <div style="margin-top: var(--space-xl); text-align: center;">
+                        <button class="btn-launch">Exportar Ficha (Próximamente)</button>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        /**
+         * Función principal de navegación entre modos (Ahora SPA)
+         */
+        function launchMode(mode) {
+            appState.mode = mode;
+            const edition = appState.edition;
+            console.log(`🚀 Iniciando modo: ${mode} con edición ${edition}`);
+            
+            landingPage.style.display = 'none';
+            generatorView.style.display = 'block';
+
+            // Ejecutamos la lógica según el modo
+            if (mode === 'random' || mode === 'chaos') {
+                // 1. Generar personaje
+                const character = generateCharacter(mode);
                 
-                <div class="api-bonus-detail">
-                    <h3 class="section-subtitle">💍 Lore Multiversal (LOTR)</h3>
-                    <p id="displayLore">Cargando trasfondo épico...</p>
-                </div>
+                // 2. Realizar el análisis de equilibrio
+                const analysis = performBalanceAnalysis(character);
 
-                <div class="api-bonus-detail">
-                    <h3 class="section-subtitle">🪄 Tesoro Mágico (MTG)</h3>
-                    <p id="displayMagicItem">Cargando artefacto mágico...</p>
-                </div>
-                            </div>
+                // 3. Renderizar la vista
+                renderGeneratorView(character, analysis);
+            } else if (mode === 'wizard') {
+                generatorView.innerHTML = `<h2 class="generator-title">🧙 MODO WIZARD</h2><p style="color: white; text-align: center; font-size: 1.5rem;">El modo Wizard (paso a paso) se está cargando... (Funcionalidad por implementar)</p><div style="text-align: center; margin-top: var(--space-xl);"><button class="btn-back" onclick="goBackToLanding()">← Volver al Menú Principal</button></div>`;
+            } else if (mode === 'multiverse') {
+                 generatorView.innerHTML = `<h2 class="generator-title">🌌 MODO MULTIVERSO</h2><p style="color: white; text-align: center; font-size: 1.5rem;">El Portal se está abriendo... (Funcionalidad por implementar)</p><div style="text-align: center; margin-top: var(--space-xl);"><button class="btn-back" onclick="goBackToLanding()">← Volver al Menú Principal</button></div>`;
+            } else {
+                 generatorView.innerHTML = `<h2 class="generator-title">ERROR</h2><p style="color: ${errorColor}; text-align: center; font-size: 1.5rem;">Modo no reconocido.</p><div style="text-align: center; margin-top: var(--space-xl);"><button class="btn-back" onclick="goBackToLanding()">← Volver al Menú Principal</button></div>`;
+            }
+        }
 
-            <div class="grid-2 character-details-grid">
-                
-                <div style="text-align: center;">
-                    <div id="nftCard" class="nft-card border-common"> 
-                        <div class="portrait-frame">
-                            <img id="charImage" src="placeholder.png" alt="Retrato del Personaje IA"> 
-                        </div>
-                        <div class="nft-metadata">
-                            <span id="nftRarity" class="rarity-badge">COMÚN</span> 
-                            <p>Token ID: <span id="tokenId">0x...</span></p>
-                            <p>Valor Est.: <span id="nftValue">1,000</span> Gold Pieces</p>
-                        </div>
-                    </div>
-                    <button id="mintNFTBtn" class="btn btn-gold mint-btn">🔗 Acuñar NFT</button>
-                </div>
-                
-                <div>
-                    <h3 class="section-subtitle">📊 Estadísticas Base</h3>
-                    <div id="statsDisplay" class="stats-grid">
-                        </div>
-                    
-                    <h3 class="section-subtitle">🛡️ Defensas y Vitalidad</h3>
-                    <div class="stats-grid">
-                        <div class="stat-box">PV: <span id="displayHP">--</span></div>
-                        <div class="stat-box">CA: <span id="displayAC">--</span></div>
-                    </div>
-                    
-                    </div>
-            </div>
-
-            <div class="action-buttons">
-                <button id="downloadPDFBtn" class="btn btn-action">📄 Exportar PDF</button>
-                <button id="showHistoryBtn" class="btn btn-action">📚 Historial</button>
-            </div>
-        </div>
-        
-        <div id="mapArea" class="section-panel parchment-box">
-            <h2 class="section-title">Generador de Mazmorras 🗺️</h2>
-            <div class="map-controls controls-grid">
-                <button id="generateMapBtn" class="btn btn-secondary">Generar Mazmorra</button>
-                <button id="addTokensBtn" class="btn btn-secondary">Añadir Tokens</button>
-            </div>
-            <canvas id="mapCanvas"></canvas>
-        </div>
-
-        <div id="bestiarySection" class="section-panel parchment-box">
-            <h2 class="section-title">Bestiario y Generador de Criaturas</h2>
-            <div class="controls-grid">
-                <button id="generateCreatureBtn" class="btn btn-primary">
-                    👹 Criatura D&D Random
-                </button>
-                <button id="generateChaosBeastBtn" class="btn btn-accent">
-                    💥 Criatura CHAOS
-                </button>
-            </div>
-
-            <div id="creatureSheet" class="character-sheet creature-sheet parchment-box hidden">
-                <div class="sheet-header">
-                    <h2 id="creatureName" class="char-name">Criatura Epica</h2>
-                    <p id="creatureMeta" class="char-meta">Tamaño | Tipo | CR XP</p>
-                </div>
-
-                <div class="grid-2 creature-details-grid">
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">📊 Estadísticas</h3>
-                        <div id="creatureStatsDisplay" class="stats-grid"></div>
-                    </div>
-                    <div class="detail-panel">
-                        <h3 class="section-subtitle">🏃 Movimiento / Defensas</h3>
-                        <p><strong>CA:</strong> <span id="creatureAC">--</span> | <strong>PV:</strong> <span id="creatureHP">--</span></p>
-                        <p><strong>Velocidad:</strong> <span id="creatureSpeed">--</span></p>
-                        <p><strong>Ambiente:</strong> <span id="creatureEnvironment">--</span></p>
-                    </div>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">🔥 Rasgos Especiales</h3>
-                    <ul id="creatureTraits" class="trait-list"></ul>
-                </div>
-
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">⚔️ Acciones</h3>
-                    <ul id="creatureActions" class="trait-list"></ul>
-                </div>
-                
-                <div class="detail-panel">
-                    <h3 class="section-subtitle">👑 Acciones Legendarias</h3>
-                    <ul id="creatureLegendaryActions" class="trait-list"></ul>
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div id="historyModal" class="modal hidden">
-        <div class="modal-content">
-            <span class="close-modal">✖️</span>
-            <h2>📚 Historial de Personajes</h2>
-            <div id="historyList" class="history-list"></div>
-        </div>
-    </div>
-
-    <footer class="main-footer">
-        <p>⚔️ D&D Multiverse Forge © 2025 🐉</p>
-        <p>Creado con ❤️ para la comunidad de Dragones y Mazmorras</p>
-    </footer>
-
-    <script src="dnd-data.js"></script>
-    <script src="bestiary.js"></script>
-    <script src="dnd-apis.js"></script>
-    <script src="app.js"></script>
+        /**
+         * Vuelve a la vista de aterrizaje.
+         */
+        function goBackToLanding() {
+            generatorView.style.display = 'none';
+            landingPage.style.display = 'block';
+            generatorView.innerHTML = ''; // Limpiar la vista del generador
+            appState.mode = null;
+        }
+        
+        // Log de bienvenida épico en la consola
+        console.log(`
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║     🐉 D&D CHARACTER FORGE v2.0                           ║
+║     Ultimate Edition - Sistema Completo                   ║
+║                                                           ║
+║     ¡Refactorizado a SPA con Análisis de Equilibrio!      ║
+║     https://github.com/JCazorla90/DnD-Character-Forge     ║
+║                                                           ║
+║     📚 Edición activa: ${savedEdition.padEnd(33)}║
+║     ⚡ Sistema cargado y listo                             ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+        `);
+    </script>
 </body>
 </html>
